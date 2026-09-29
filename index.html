@@ -396,6 +396,8 @@ textarea.field-in { resize: vertical; min-height: 96px; }
   .inv .fa { opacity: 1; }
   .cannon { transition: none; }
 }
+.gt-stat { border: 0; background: none; padding: 4px 0; cursor: pointer; }
+.gt-stat.bad { color: var(--red); }
 .vault-btn b { font-weight: 500; color: var(--red); }
 @media (max-width: 719px) { .vault-btn .vl { display: none; } }
 .set-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
@@ -411,6 +413,7 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
     <div class="w-top">
       <span class="lbl" id="stamp">— / —</span>
       <span class="lbl" id="score">SCORE 0000</span>
+      <button class="lbl gt-stat" id="gt-stat" type="button" hidden>TASKS ✓</button>
       <div class="w-actions">
         <label class="search" for="q">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg>
@@ -518,7 +521,7 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
 (() => {
 'use strict';
 
-const APP_VERSION = 'v6';
+const APP_VERSION = 'v7';
 /* ---------- helpers ---------- */
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -578,6 +581,13 @@ function rel(ms) {
   if (days === 1) return 'yesterday';
   if (days < 7) return new Date(ms).toLocaleDateString('en-AU', { weekday: 'short' });
   return new Date(ms).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
+}
+function futureLabel(ds) {
+  const d = parseDay(ds);
+  const days = Math.round((d.getTime() - startOfDay(Date.now())) / 86400000);
+  if (days === 1) return 'tomorrow';
+  if (days > 1 && days < 7) return d.toLocaleDateString('en-AU', { weekday: 'short' });
+  return d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
 }
 function dayName(ds) {
   const d = parseDay(ds);
@@ -888,7 +898,8 @@ function sampleMsg(e) {
 function disableClaude(e) { /* keep features on; errors are shown per call */ }
 
 /* ---------- render ---------- */
-const inToday = it => !!it.today && (!it.done || (it.doneAt && dayStr(new Date(it.doneAt)) === TODAY));
+const isNow = it => !!it.today && it.today <= TODAY;
+const inToday = it => isNow(it) && (!it.done || (it.doneAt && dayStr(new Date(it.doneAt)) === TODAY));
 function todaySort(a, b) {
   if (!!a.done !== !!b.done) return a.done ? 1 : -1;
   if (a.today !== b.today) return a.today < b.today ? -1 : 1;
@@ -916,11 +927,12 @@ function laneRow(it) {
       h('span', { class: 'main' },
         h('span', { class: 'txt', text: it.text }),
         h('span', { class: 'meta' },
-          icon(it.source === 'scan' ? 'page' : 'pen', 1.8),
+          icon(it.source === 'scan' ? 'page' : it.source === 'gtasks' ? 'check' : 'pen', 1.8),
           h('span', { text: rel(it.createdAt) }),
           tagMeta(it),
           it.page ? h('span', { class: 'pg', text: '· ' + it.page }) : null,
           it.example ? h('span', { class: 'ex', text: 'Example' }) : null,
+          it.today && !isNow(it) ? h('span', { class: 'tg', text: 'due ' + futureLabel(it.today) }) : null,
           pending ? h('span', { class: 'sorting', text: 'sorting…' }) : null))),
     it.bucket === 'make'
       ? h('button', { class: 'to-today', type: 'button', onclick: () => sendToday(it.id) }, '+ TODAY') : null);
@@ -959,7 +971,7 @@ function render() {
   // lanes
   for (const b of BUCKETS) {
     const lane = $(`.lane[data-b="${b}"]`);
-    const list = items.filter(it => it.bucket === b && !it.today && !it.done).sort((x, y) => (y.createdAt || 0) - (x.createdAt || 0));
+    const list = items.filter(it => it.bucket === b && !isNow(it) && !it.done).sort((x, y) => (y.createdAt || 0) - (x.createdAt || 0));
     $('.lane-count', lane).textContent = pad2(list.length);
     $('.list', lane).replaceChildren(...list.map(laneRow));
     const empty = $('.empty', lane);
@@ -980,11 +992,11 @@ function drawField() {
   const done = state.items.filter(i => i.done).length;
   els.score.textContent = 'SCORE ' + String(done * 10).padStart(4, '0');
   const open = state.items.filter(i => !i.done && (i.today || i.bucket === 'make'))
-    .sort((a, b) => (!!b.today - !!a.today) || (a.today && b.today ? (a.today < b.today ? -1 : 1) : 0) || (b.createdAt || 0) - (a.createdAt || 0));
+    .sort((a, b) => (isNow(b) - isNow(a)) || (a.today && b.today ? (a.today < b.today ? -1 : 1) : 0) || (b.createdAt || 0) - (a.createdAt || 0));
   const cap = innerWidth < 720 ? 16 : 30;
   const shown = open.slice(0, cap);
   const nodes = shown.map(it => {
-    const b = h('button', { class: 'inv' + (it.today ? ' red' : ''), type: 'button', 'data-id': it.id, title: it.text, 'aria-label': (it.today ? 'Today: ' : 'Task: ') + it.text, onclick: () => openItem(it.id) });
+    const b = h('button', { class: 'inv' + (isNow(it) ? ' red' : ''), type: 'button', 'data-id': it.id, title: it.text, 'aria-label': (isNow(it) ? 'Today: ' : 'Task: ') + it.text, onclick: () => openItem(it.id) });
     b.innerHTML = INV_SVG;
     return b;
   });
@@ -1137,52 +1149,74 @@ async function loadObs() {
 }
 
 /* ---------- Google Tasks (two-way, through a small Apps Script in your own account) ---------- */
-const BRIDGE = "/* Kura <-> Google Tasks bridge. Setup steps are in Kura: Settings > Google Tasks. */\nvar SECRET = '__SECRET__';\n\nfunction doPost(e) {\n  var out;\n  try {\n    var req = JSON.parse(e.postData.contents);\n    if (req.secret !== SECRET) throw new Error('bad_secret');\n    out = handle_(req);\n  } catch (err) {\n    out = { ok: false, error: String((err && err.message) || err) };\n  }\n  return ContentService.createTextOutput(JSON.stringify(out)).setMimeType(ContentService.MimeType.JSON);\n}\n\nfunction doGet() {\n  return ContentService.createTextOutput('Kura bridge is running.');\n}\n\nfunction listId_(name) {\n  var lists = Tasks.Tasklists.list({ maxResults: 100 }).items || [];\n  for (var i = 0; i < lists.length; i++) if (lists[i].title === name) return lists[i].id;\n  return Tasks.Tasklists.insert({ title: name }).id;\n}\n\nfunction handle_(req) {\n  var list = listId_(req.list || 'Kura');\n  var created = {};\n  (req.upserts || []).forEach(function (u) {\n    var body = { title: u.title, notes: u.notes || '', status: u.completed ? 'completed' : 'needsAction' };\n    if (u.due) body.due = u.due + 'T00:00:00.000Z';\n    if (u.gid) {\n      if (!u.completed) body.completed = null;\n      try {\n        Tasks.Tasks.patch(body, list, u.gid);\n      } catch (err) {\n        var exists = true;\n        try { if (Tasks.Tasks.get(list, u.gid).deleted) exists = false; } catch (e2) { exists = false; }\n        created[u.kuraId] = exists ? { error: String((err && err.message) || err) } : { gone: true };\n      }\n    } else {\n      created[u.kuraId] = { gid: Tasks.Tasks.insert(body, list).id };\n    }\n  });\n  (req.deletes || []).forEach(function (gid) {\n    try { Tasks.Tasks.remove(list, gid); } catch (err) {}\n  });\n  var state = {};\n  var watch = req.watch || [];\n  if (watch.length) {\n    var seen = {};\n    var token = null;\n    do {\n      var opts = { showCompleted: true, showHidden: true, showDeleted: true, maxResults: 100 };\n      if (token) opts.pageToken = token;\n      var page = Tasks.Tasks.list(list, opts);\n      (page.items || []).forEach(function (t) { seen[t.id] = t; });\n      token = page.nextPageToken;\n    } while (token);\n    watch.forEach(function (gid) {\n      var t = seen[gid];\n      state[gid] = t && !t.deleted ? { completed: t.status === 'completed' } : { deleted: true };\n    });\n  }\n  return { ok: true, created: created, state: state };\n}\n";
-let gtSyncing = false, gtTimer = null, gtLastPull = 0, gtErrShown = false;
-const gtEligible = it => !!state.gt && !it.example && !it.gtaskGone && (!!it.today || (!!state.gt.includeMake && it.bucket === 'make'));
+const BRIDGE = "/* Kura <-> Google Tasks bridge v2. Setup steps are in Kura: Settings > Google Tasks. */\nvar SECRET = '__SECRET__';\nvar VERSION = 2;\n\nfunction doPost(e) {\n  var out;\n  try {\n    var req = JSON.parse(e.postData.contents);\n    if (req.secret !== SECRET) throw new Error('bad_secret');\n    out = handle_(req);\n  } catch (err) {\n    out = { ok: false, version: VERSION, error: String((err && err.message) || err) };\n  }\n  return ContentService.createTextOutput(JSON.stringify(out)).setMimeType(ContentService.MimeType.JSON);\n}\n\nfunction doGet() {\n  return ContentService.createTextOutput('Kura bridge v' + VERSION + ' is running.');\n}\n\nfunction listId_(name) {\n  var lists = Tasks.Tasklists.list({ maxResults: 100 }).items || [];\n  for (var i = 0; i < lists.length; i++) if (lists[i].title === name) return lists[i].id;\n  return Tasks.Tasklists.insert({ title: name }).id;\n}\n\nfunction allTasks_(list) {\n  var seen = {};\n  var token = null;\n  do {\n    var opts = { showCompleted: true, showHidden: true, showDeleted: true, maxResults: 100 };\n    if (token) opts.pageToken = token;\n    var page = Tasks.Tasks.list(list, opts);\n    (page.items || []).forEach(function (t) { seen[t.id] = t; });\n    token = page.nextPageToken;\n  } while (token);\n  return seen;\n}\n\nfunction kuraIdOf_(notes) {\n  var m = /kura:([A-Za-z0-9_-]+)/.exec(notes || '');\n  return m ? m[1] : null;\n}\n\nfunction handle_(req) {\n  var list = listId_(req.list || 'Kura');\n  var seen = allTasks_(list);\n  var byKura = {};\n  Object.keys(seen).forEach(function (id) {\n    var k = kuraIdOf_(seen[id].notes);\n    if (k && !seen[id].deleted) byKura[k] = id;\n  });\n  var created = {};\n  (req.upserts || []).forEach(function (u) {\n    var gid = u.gid || byKura[u.kuraId] || null;\n    var live = gid && seen[gid] && !seen[gid].deleted;\n    var body = { title: u.title, notes: u.notes || '', status: u.completed ? 'completed' : 'needsAction' };\n    if (u.due) body.due = u.due + 'T00:00:00.000Z';\n    try {\n      if (live) {\n        if (!u.due) body.due = null;\n        if (!u.completed) body.completed = null;\n        seen[gid] = Tasks.Tasks.patch(body, list, gid);\n        created[u.kuraId] = { gid: gid };\n      } else if (u.gid) {\n        created[u.kuraId] = { gone: true };\n      } else {\n        var t = Tasks.Tasks.insert(body, list);\n        seen[t.id] = t;\n        created[u.kuraId] = { gid: t.id };\n      }\n    } catch (err) {\n      created[u.kuraId] = { error: String((err && err.message) || err) };\n    }\n  });\n  (req.deletes || []).forEach(function (gid) {\n    try { Tasks.Tasks.remove(list, gid); } catch (err) {}\n    if (seen[gid]) seen[gid].deleted = true;\n  });\n  var tasks = Object.keys(seen).map(function (id) {\n    var t = seen[id];\n    return {\n      id: t.id, title: t.title || '', notes: t.notes || '', due: t.due ? String(t.due).slice(0, 10) : null,\n      completed: t.status === 'completed', deleted: !!t.deleted, parent: t.parent || null,\n    };\n  });\n  var state = {};\n  (req.watch || []).forEach(function (gid) {\n    var t = seen[gid];\n    state[gid] = t && !t.deleted ? { completed: t.status === 'completed' } : { deleted: true };\n  });\n  return { ok: true, version: VERSION, created: created, state: state, tasks: tasks };\n}\n";
+let gtSyncing = false, gtAgain = false, gtTimer = null, gtLastPull = 0, gtErrShown = false;
+const gtEligible = it => !!state.gt && !it.example && !it.gtaskGone
+  && (!!it.today || !!it.fromGoogle || (!!state.gt.includeMake && it.bucket === 'make'));
 function gtFields(it) {
   const lines = String(it.text || '').trim().split(/\r?\n/);
   const tags = knownTags(it).map(id => symById(id).mark + ' ' + symById(id).name);
-  const notes = [lines.slice(1).join('\n').trim(), tags.join(' · '), it.page ? 'Page: ' + it.page : '', 'From Kura · ' + (LABEL[it.bucket] || '')]
-    .filter(Boolean).join('\n');
+  const notes = [lines.slice(1).join('\n').trim(), tags.join(' · '), it.page ? 'Page: ' + it.page : '',
+    'From Kura · ' + (LABEL[it.bucket] || '') + ' · kura:' + it.id].filter(Boolean).join('\n');
   return { title: lines[0].slice(0, 1000), notes, due: it.today || null, completed: !!it.done };
 }
 const gtSig = it => JSON.stringify(gtFields(it));
+const parseSig = sig => { try { return JSON.parse(sig) || {}; } catch (e) { return {}; } };
 async function gtCall(cfg, payload) {
   let r;
   try { r = await fetch(cfg.url, { method: 'POST', body: JSON.stringify({ ...payload, secret: cfg.secret, list: cfg.list || 'Kura' }) }); }
   catch (e) { throw { code: 'network' }; }
+  const text = await r.text().catch(() => '');
   let j = null;
-  try { j = await r.json(); } catch (e) { throw { code: 'bad_reply', message: 'HTTP ' + r.status }; }
+  try { j = JSON.parse(text); } catch (e) {
+    const signin = /accounts\.google\.com|ServiceLogin|Sign in/i.test(text);
+    const nofn = /Script function not found: doPost/i.test(text);
+    throw { code: signin ? 'signin' : nofn ? 'no_dopost' : 'bad_reply', message: 'HTTP ' + r.status };
+  }
   if (!j || !j.ok) throw { code: j && j.error === 'bad_secret' ? 'bad_secret' : 'bridge', message: (j && j.error) || 'unknown error' };
   return j;
 }
 function gtMsg(e) {
   switch (e && e.code) {
-    case 'network': return "Couldn't reach your Google Tasks bridge. Check your connection.";
+    case 'network': return "Couldn't reach the bridge. If you're online, check the URL ends in /exec (not /dev) and that Who has access is set to Anyone (not 'Anyone with Google account').";
+    case 'signin': return "The bridge asked for a Google sign-in. In Apps Script, set Who has access to Anyone, then deploy a new version.";
+    case 'no_dopost': return 'The deployed script is missing doPost. Paste the bridge script again and deploy a new version.';
     case 'bad_secret': return "The bridge rejected Kura's secret. Copy the bridge script again, paste it over the old one and deploy a new version.";
-    case 'bad_reply': return "That URL didn't answer like Kura's bridge. Use the Web app URL ending in /exec, with access set to Anyone.";
+    case 'bad_reply': return "That URL didn't answer like Kura's bridge (" + ((e && e.message) || '') + '). Use the Web app URL ending in /exec.';
     default: return 'Google Tasks said: ' + ((e && e.message) || 'unknown error');
   }
 }
 async function saveGtMeta(p) {
   state.gtMeta = { ...(state.gtMeta || {}), ...p };
   if (store.kvSet) await store.kvSet('gtmeta', state.gtMeta).catch(() => {});
+  drawGtStat();
+}
+function drawGtStat() {
+  const el = document.getElementById('gt-stat');
+  if (!el) return;
+  el.hidden = !state.gt;
+  if (!state.gt) return;
+  const err = state.gtMeta && state.gtMeta.lastError;
+  el.textContent = gtSyncing ? 'TASKS ↻' : err ? 'TASKS !' : 'TASKS ✓';
+  el.classList.toggle('bad', !!err && !gtSyncing);
+  el.setAttribute('aria-label', gtSyncing ? 'Syncing with Google Tasks' : err ? 'Google Tasks sync problem: ' + err : 'Google Tasks in sync');
 }
 function scheduleGtSync(delay) {
   if (!state.gt) return;
   clearTimeout(gtTimer);
-  gtTimer = setTimeout(() => { gtSync().catch(() => {}); }, delay == null ? 4000 : delay);
+  gtTimer = setTimeout(() => { gtSync().catch(() => {}); }, delay == null ? 1500 : delay);
 }
 async function gtSync(opts = {}) {
   const cfg = state.gt;
-  if (!cfg || !cfg.url || gtSyncing) return;
+  if (!cfg || !cfg.url) return;
+  if (gtSyncing) { gtAgain = true; return; }
   const items = state.items;
   const dirty = items.filter(it => gtEligible(it) && (!it.gtask || it.gSig !== gtSig(it)));
   const orphans = items.filter(it => it.gtask && !gtEligible(it));
   const queued = (store.kvGet ? await store.kvGet('gdeletes').catch(() => null) : null) || [];
   if (!opts.force && !dirty.length && !orphans.length && !queued.length && Date.now() - gtLastPull < 60000) return;
   gtSyncing = true;
+  drawGtStat();
   const sigs = {};
   dirty.forEach(it => { sigs[it.id] = gtSig(it); });
   const dirtyIds = new Set(dirty.map(it => it.id));
@@ -1196,35 +1230,79 @@ async function gtSync(opts = {}) {
     });
     gtLastPull = Date.now();
     const created = res.created || {};
+    const createdGids = new Set();
+    const itemErrors = [];
     for (const it of dirty) {
       const c = created[it.id];
       if (c && c.gone) await store.update(it.id, { gtask: null, gSig: null, gtaskGone: true }).catch(() => {});
-      else if (c && c.error) continue;
-      else await store.update(it.id, { gtask: (c && c.gid) || it.gtask, gSig: sigs[it.id] }).catch(() => {});
+      else if (c && c.error) itemErrors.push(c.error);
+      else {
+        const gid = (c && c.gid) || it.gtask;
+        if (gid) createdGids.add(gid);
+        await store.update(it.id, { gtask: gid, gSig: sigs[it.id] }).catch(() => {});
+      }
     }
     for (const it of orphans) await store.update(it.id, { gtask: null, gSig: null }).catch(() => {});
     if (queued.length && store.kvSet) await store.kvSet('gdeletes', []).catch(() => {});
-    let pulled = 0;
+
+    // changes made in Google Tasks
+    const remote = Array.isArray(res.tasks) ? new Map(res.tasks.map(t => [t.id, t])) : null;
+    let pulled = 0, added = 0;
     for (const it of watched) {
-      const r = (res.state || {})[it.gtask];
       const cur = byId(it.id);
-      if (!r || !cur || cur.gSig !== gtSig(cur)) continue;
-      if (r.deleted) { await store.update(it.id, { gtask: null, gSig: null, gtaskGone: true }).catch(() => {}); continue; }
-      if (!!r.completed !== !!cur.done) {
-        const next = { ...cur, done: !!r.completed, doneAt: r.completed ? Date.now() : null };
-        await store.update(it.id, { done: next.done, doneAt: next.doneAt, gSig: gtSig(next), updatedAt: Date.now() }).catch(() => {});
+      if (!cur || !cur.gtask || cur.gSig !== gtSig(cur)) continue;
+      let r;
+      if (remote) { const t = remote.get(cur.gtask); r = !t || t.deleted ? { deleted: true } : t; }
+      else r = (res.state || {})[cur.gtask];
+      if (!r) continue;
+      if (r.deleted) { await store.update(cur.id, { gtask: null, gSig: null, gtaskGone: true }).catch(() => {}); continue; }
+      const last = parseSig(cur.gSig);
+      const p = {};
+      if (remote && r.title && r.title !== last.title) p.text = [r.title, ...String(cur.text || '').split(/\r?\n/).slice(1)].join('\n');
+      if (remote && (r.due || null) !== (last.due || null)) p.today = r.due || null;
+      if (!!r.completed !== !!last.completed) { p.done = !!r.completed; p.doneAt = r.completed ? Date.now() : null; }
+      if (Object.keys(p).length) {
+        await store.update(cur.id, { ...p, gSig: gtSig({ ...cur, ...p }), updatedAt: Date.now() }).catch(() => {});
         pulled++;
       }
     }
-    if (pulled) toast(`${pulled} task${pulled === 1 ? '' : 's'} updated from Google Tasks`);
+    // tasks added in Google Tasks
+    if (remote) {
+      const known = new Set(state.items.map(i => i.gtask).filter(Boolean));
+      const localIds = new Set(state.items.map(i => i.id));
+      for (const t of res.tasks) {
+        const title = String(t.title || '').trim();
+        if (t.deleted || t.completed || !title || known.has(t.id) || createdGids.has(t.id)) continue;
+        const m = /kura:([A-Za-z0-9_-]+)/.exec(t.notes || '');
+        if (m && localIds.has(m[1])) continue;
+        const notes = String(t.notes || '').split(/\r?\n/).filter(l => !/^From Kura\b/.test(l) && !/kura:[A-Za-z0-9_-]+/.test(l)).join('\n').trim();
+        const now = Date.now();
+        const item = {
+          text: title + (notes ? '\n' + notes : ''), tags: [], bucket: 'make', today: t.due || null,
+          done: false, doneAt: null, createdAt: now, updatedAt: now, source: 'gtasks', photo: null, page: null,
+          pending: false, gtask: t.id, fromGoogle: true,
+        };
+        const id = m ? m[1] : store.newId();
+        item.gSig = gtSig({ ...item, id });
+        await store.set(id, item).catch(() => {});
+        added++;
+      }
+    }
+    const bits = [];
+    if (added) bits.push(`${added} new`);
+    if (pulled) bits.push(`${pulled} updated`);
+    if (bits.length) toast(bits.join(', ') + ' from Google Tasks');
     gtErrShown = false;
-    await saveGtMeta({ lastSync: Date.now(), lastError: '' });
+    await saveGtMeta({ lastSync: Date.now(), bridgeVersion: res.version || 1,
+      lastError: itemErrors.length ? 'Google Tasks refused a task: ' + itemErrors[0] : '' });
   } catch (e) {
     await saveGtMeta({ lastError: gtMsg(e) });
     if (opts.manual || !gtErrShown) { toast(gtMsg(e)); gtErrShown = true; }
     if (opts.manual) throw e;
   } finally {
     gtSyncing = false;
+    drawGtStat();
+    if (gtAgain) { gtAgain = false; scheduleGtSync(800); }
   }
 }
 async function loadGt() {
@@ -1240,6 +1318,7 @@ async function loadGt() {
   const cfg = await store.kvGet('gtasks').catch(() => null);
   state.gt = cfg && cfg.url ? { list: 'Kura', includeMake: false, ...cfg, secret } : null;
   state.gtMeta = (await store.kvGet('gtmeta').catch(() => null)) || {};
+  drawGtStat();
 }
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') scheduleGtSync(600); });
 setInterval(() => { if (document.visibilityState === 'visible') gtSync().catch(() => {}); }, 5 * 60000);
@@ -1509,16 +1588,16 @@ function drawItem() {
   field.addEventListener('input', () => { s.text = field.value; });
 
   const todayBtn = h('button', {
-    class: 'tog', type: 'button', 'aria-pressed': String(!!it.today),
+    class: 'tog', type: 'button', 'aria-pressed': String(isNow(it)),
     onclick: () => {
       const cur = byId(s.id);
       if (!cur) return;
-      const on = !cur.today;
+      const on = !isNow(cur);
       patch(s.id, on ? { today: TODAY, done: false, doneAt: null, pending: false, gtaskGone: false } : { today: null, done: false, doneAt: null });
       todayBtn.setAttribute('aria-pressed', String(on));
       todayBtn.textContent = on ? 'In TODAY ✓' : '+ TODAY';
     },
-  }, it.today ? 'In TODAY ✓' : '+ TODAY');
+  }, isNow(it) ? 'In TODAY ✓' : it.today ? '+ TODAY (due ' + futureLabel(it.today) + ')' : '+ TODAY');
 
   const src = it.photo ? h('div', { class: 'src' },
     h('span', { class: 'lbl', text: 'From your notebook' + (it.page ? ' · ' + it.page : '') }),
@@ -2055,13 +2134,15 @@ function drawSettings() {
   const disconnectGt = async () => {
     if (store.kvDel) await store.kvDel('gtasks').catch(() => {});
     state.gt = null;
+    drawGtStat();
     s.gstatus = 'Disconnected. Tasks already in Google Tasks stay there.';
     drawSettings();
   };
   const meta = state.gtMeta || {};
   const gtSection = [
     h('span', { class: 'lbl', text: 'Google Tasks' }),
-    h('p', { class: 'muted', text: 'Kura keeps a list in Google Tasks in step with TODAY. Tasks you plan in Kura appear there with a due date, and ticking one off on either side ticks it off on the other. It works through a small script that runs in your own Google account.' }),
+    h('p', { class: 'muted', text: 'Kura and one list in Google Tasks stay in step. Tasks you plan in TODAY appear there with a due date. Tasks you add to that list in Google Tasks appear in Kura: in TODAY when due today, otherwise in MAKE. Ticking one off on either side ticks it off on the other. It works through a small script in your own Google account.' }),
+    state.gt && (state.gtMeta || {}).bridgeVersion && state.gtMeta.bridgeVersion < 2 ? h('p', { class: 'err', text: 'Your bridge script is out of date, so tasks added in Google Tasks won\'t come into Kura. Copy the bridge script, paste it over the old code in Apps Script, then Deploy → Manage deployments → ✎ → Version: New version → Deploy. The URL stays the same.' }) : null,
     state.gt
       ? h('p', { class: 'muted ok', text: (meta.lastError ? meta.lastError : (meta.lastSync ? 'Last synced ' + rel(meta.lastSync) + ' ago.' : 'Connected.')).replace('now ago', 'just now') })
       : h('ol', { class: 'muted', style: 'margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px' },
@@ -2128,6 +2209,12 @@ function drawSettings() {
   body.scrollTop = scroll;
 }
 $('#btn-settings').addEventListener('click', () => openSettings());
+$('#gt-stat').addEventListener('click', () => {
+  openSettings();
+  const el = document.getElementById('gt-url');
+  if (el) el.scrollIntoView({ block: 'center' });
+  if (state.gt && !gtSyncing) gtSync({ force: true }).catch(() => {});
+});
 
 function exportBackup() {
   const data = { app: 'kura', version: 1, exportedAt: new Date().toISOString(), symbols: state.symbols, obsidian: state.obs || null, items: state.items };
