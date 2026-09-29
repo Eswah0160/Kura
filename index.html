@@ -522,7 +522,7 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
 (() => {
 'use strict';
 
-const APP_VERSION = 'v9';
+const APP_VERSION = 'v10';
 /* ---------- helpers ---------- */
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -1284,7 +1284,7 @@ async function loadObs() {
 }
 
 /* ---------- Google Tasks (two-way, through a small Apps Script in your own account) ---------- */
-const BRIDGE = "/* Kura <-> Google Tasks bridge v2. Setup steps are in Kura: Settings > Google Tasks. */\nvar SECRET = '__SECRET__';\nvar VERSION = 2;\n\nfunction doPost(e) {\n  var out;\n  try {\n    var req = JSON.parse(e.postData.contents);\n    if (req.secret !== SECRET) throw new Error('bad_secret');\n    out = handle_(req);\n  } catch (err) {\n    out = { ok: false, version: VERSION, error: String((err && err.message) || err) };\n  }\n  return ContentService.createTextOutput(JSON.stringify(out)).setMimeType(ContentService.MimeType.JSON);\n}\n\nfunction doGet() {\n  return ContentService.createTextOutput('Kura bridge v' + VERSION + ' is running.');\n}\n\nfunction listId_(name) {\n  var lists = Tasks.Tasklists.list({ maxResults: 100 }).items || [];\n  for (var i = 0; i < lists.length; i++) if (lists[i].title === name) return lists[i].id;\n  return Tasks.Tasklists.insert({ title: name }).id;\n}\n\nfunction allTasks_(list) {\n  var seen = {};\n  var token = null;\n  do {\n    var opts = { showCompleted: true, showHidden: true, showDeleted: true, maxResults: 100 };\n    if (token) opts.pageToken = token;\n    var page = Tasks.Tasks.list(list, opts);\n    (page.items || []).forEach(function (t) { seen[t.id] = t; });\n    token = page.nextPageToken;\n  } while (token);\n  return seen;\n}\n\nfunction kuraIdOf_(notes) {\n  var m = /kura:([A-Za-z0-9_-]+)/.exec(notes || '');\n  return m ? m[1] : null;\n}\n\nfunction handle_(req) {\n  var list = listId_(req.list || 'Kura');\n  var seen = allTasks_(list);\n  var byKura = {};\n  Object.keys(seen).forEach(function (id) {\n    var k = kuraIdOf_(seen[id].notes);\n    if (k && !seen[id].deleted) byKura[k] = id;\n  });\n  var created = {};\n  (req.upserts || []).forEach(function (u) {\n    var gid = u.gid || byKura[u.kuraId] || null;\n    var live = gid && seen[gid] && !seen[gid].deleted;\n    var body = { title: u.title, notes: u.notes || '', status: u.completed ? 'completed' : 'needsAction' };\n    if (u.due) body.due = u.due + 'T00:00:00.000Z';\n    try {\n      if (live) {\n        if (!u.due) body.due = null;\n        if (!u.completed) body.completed = null;\n        seen[gid] = Tasks.Tasks.patch(body, list, gid);\n        created[u.kuraId] = { gid: gid };\n      } else if (u.gid) {\n        created[u.kuraId] = { gone: true };\n      } else {\n        var t = Tasks.Tasks.insert(body, list);\n        seen[t.id] = t;\n        created[u.kuraId] = { gid: t.id };\n      }\n    } catch (err) {\n      created[u.kuraId] = { error: String((err && err.message) || err) };\n    }\n  });\n  (req.deletes || []).forEach(function (gid) {\n    try { Tasks.Tasks.remove(list, gid); } catch (err) {}\n    if (seen[gid]) seen[gid].deleted = true;\n  });\n  var tasks = Object.keys(seen).map(function (id) {\n    var t = seen[id];\n    return {\n      id: t.id, title: t.title || '', notes: t.notes || '', due: t.due ? String(t.due).slice(0, 10) : null,\n      completed: t.status === 'completed', deleted: !!t.deleted, parent: t.parent || null,\n    };\n  });\n  var state = {};\n  (req.watch || []).forEach(function (gid) {\n    var t = seen[gid];\n    state[gid] = t && !t.deleted ? { completed: t.status === 'completed' } : { deleted: true };\n  });\n  return { ok: true, version: VERSION, created: created, state: state, tasks: tasks };\n}\n";
+const BRIDGE = "/* Kura <-> Google Tasks bridge v3. Setup steps are in Kura: Settings > Google Tasks. */\nvar SECRET = '__SECRET__';\nvar VERSION = 3;\n\nfunction doPost(e) {\n  return respond_(e && e.postData ? e.postData.contents : '');\n}\n\nfunction doGet(e) {\n  // Kura falls back to GET (?p=...) when Google turns its POST into a page visit.\n  if (e && e.parameter && e.parameter.p) return respond_(e.parameter.p);\n  return ContentService.createTextOutput('Kura bridge v' + VERSION + ' is running.');\n}\n\nfunction respond_(raw) {\n  var out;\n  try {\n    var req = JSON.parse(raw);\n    if (req.secret !== SECRET) throw new Error('bad_secret');\n    out = handle_(req);\n  } catch (err) {\n    out = { ok: false, version: VERSION, error: String((err && err.message) || err) };\n  }\n  return ContentService.createTextOutput(JSON.stringify(out)).setMimeType(ContentService.MimeType.JSON);\n}\n\nfunction listId_(name) {\n  var lists = Tasks.Tasklists.list({ maxResults: 100 }).items || [];\n  for (var i = 0; i < lists.length; i++) if (lists[i].title === name) return lists[i].id;\n  return Tasks.Tasklists.insert({ title: name }).id;\n}\n\nfunction allTasks_(list) {\n  var seen = {};\n  var token = null;\n  do {\n    var opts = { showCompleted: true, showHidden: true, showDeleted: true, maxResults: 100 };\n    if (token) opts.pageToken = token;\n    var page = Tasks.Tasks.list(list, opts);\n    (page.items || []).forEach(function (t) { seen[t.id] = t; });\n    token = page.nextPageToken;\n  } while (token);\n  return seen;\n}\n\nfunction kuraIdOf_(notes) {\n  var m = /kura:([A-Za-z0-9_-]+)/.exec(notes || '');\n  return m ? m[1] : null;\n}\n\nfunction handle_(req) {\n  var list = listId_(req.list || 'Kura');\n  var seen = allTasks_(list);\n  var byKura = {};\n  Object.keys(seen).forEach(function (id) {\n    var k = kuraIdOf_(seen[id].notes);\n    if (k && !seen[id].deleted) byKura[k] = id;\n  });\n  var created = {};\n  (req.upserts || []).forEach(function (u) {\n    var gid = u.gid || byKura[u.kuraId] || null;\n    var live = gid && seen[gid] && !seen[gid].deleted;\n    var body = { title: u.title, notes: u.notes || '', status: u.completed ? 'completed' : 'needsAction' };\n    if (u.due) body.due = u.due + 'T00:00:00.000Z';\n    try {\n      if (live) {\n        if (!u.due) body.due = null;\n        if (!u.completed) body.completed = null;\n        seen[gid] = Tasks.Tasks.patch(body, list, gid);\n        created[u.kuraId] = { gid: gid };\n      } else if (u.gid) {\n        created[u.kuraId] = { gone: true };\n      } else {\n        var t = Tasks.Tasks.insert(body, list);\n        seen[t.id] = t;\n        created[u.kuraId] = { gid: t.id };\n      }\n    } catch (err) {\n      created[u.kuraId] = { error: String((err && err.message) || err) };\n    }\n  });\n  (req.deletes || []).forEach(function (gid) {\n    try { Tasks.Tasks.remove(list, gid); } catch (err) {}\n    if (seen[gid]) seen[gid].deleted = true;\n  });\n  var tasks = Object.keys(seen).map(function (id) {\n    var t = seen[id];\n    return {\n      id: t.id, title: t.title || '', notes: t.notes || '', due: t.due ? String(t.due).slice(0, 10) : null,\n      completed: t.status === 'completed', deleted: !!t.deleted, parent: t.parent || null,\n    };\n  });\n  var state = {};\n  (req.watch || []).forEach(function (gid) {\n    var t = seen[gid];\n    state[gid] = t && !t.deleted ? { completed: t.status === 'completed' } : { deleted: true };\n  });\n  return { ok: true, version: VERSION, created: created, state: state, tasks: tasks };\n}\n";
 let gtSyncing = false, gtAgain = false, gtTimer = null, gtLastPull = 0, gtErrShown = false;
 const gtEligible = it => !!state.gt && !it.example && !it.gtaskGone
   && (!!it.today || !!it.fromGoogle || (!!state.gt.includeMake && it.bucket === 'make'));
@@ -1297,19 +1297,45 @@ function gtFields(it) {
 }
 const gtSig = it => JSON.stringify(gtFields(it));
 const parseSig = sig => { try { return JSON.parse(sig) || {}; } catch (e) { return {}; } };
-async function gtCall(cfg, payload) {
+const normGtUrl = u => String(u || '').trim().replace(/[?#].*$/, '').replace(/\/macros\/u\/\d+\/s\//, '/macros/s/');
+async function gtFetch(url, init) {
   let r;
-  try { r = await fetch(cfg.url, { method: 'POST', body: JSON.stringify({ ...payload, secret: cfg.secret, list: cfg.list || 'Kura' }) }); }
+  try { r = await fetch(url, init); }
   catch (e) { throw { code: 'network', message: String((e && e.message) || e) }; }
   const text = await r.text().catch(() => '');
   let j = null;
   try { j = JSON.parse(text); } catch (e) {
+    if (/Kura bridge( v\d+)? is running/i.test(text)) throw { code: 'banner', message: 'HTTP ' + r.status + ' · ' + text.trim().slice(0, 60) };
     const signin = /accounts\.google\.com|ServiceLogin|Sign in/i.test(text);
-    const nofn = /Script function not found: doPost/i.test(text);
+    const nofn = /Script function not found: do(Post|Get)/i.test(text);
     const snippet = text.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160);
     throw { code: signin ? 'signin' : nofn ? 'no_dopost' : 'bad_reply', message: 'HTTP ' + r.status + (snippet ? ' · ' + snippet : '') };
   }
   if (!j || !j.ok) throw { code: j && j.error === 'bad_secret' ? 'bad_secret' : 'bridge', message: (j && j.error) || 'unknown error' };
+  return j;
+}
+const GT_MAX_URL = 7000;
+async function gtCall(cfg, payload) {
+  const url = normGtUrl(cfg.url);
+  const full = JSON.stringify({ ...payload, secret: cfg.secret, list: cfg.list || 'Kura' });
+  if (!cfg.useGet) {
+    try { return await gtFetch(url, { method: 'POST', body: full }); }
+    catch (e) { if (e.code !== 'banner') throw e; }
+  }
+  // Google answered the POST like a page visit: send the same request as ?p=… instead (bridge v3+)
+  const q = url + '?p=' + encodeURIComponent(full);
+  if (q.length > GT_MAX_URL) throw { code: 'too_big' };
+  let j;
+  try { j = await gtFetch(q, { method: 'GET' }); }
+  catch (e) { throw e.code === 'banner' ? { code: 'old_bridge_get', message: e.message } : e; }
+  if (!cfg.useGet) {
+    cfg.useGet = true;
+    if (store.kvGet && state.gt && normGtUrl(state.gt.url) === url) {
+      state.gt.useGet = true;
+      const c = await store.kvGet('gtasks').catch(() => null);
+      if (c) await store.kvSet('gtasks', { ...c, useGet: true }).catch(() => {});
+    }
+  }
   return j;
 }
 function gtMsg(e) {
@@ -1318,6 +1344,9 @@ function gtMsg(e) {
     case 'signin': return "The bridge asked for a Google sign-in. In Apps Script, set Who has access to Anyone, then deploy a new version.";
     case 'no_dopost': return 'The deployed script is missing doPost. Paste the bridge script again and deploy a new version.';
     case 'bad_secret': return "The bridge rejected Kura's secret. Copy the bridge script again, paste it over the old one and deploy a new version.";
+    case 'banner':
+    case 'old_bridge_get': return "Your bridge is reachable, but Google turned Kura's request into a plain page visit. Copy the bridge script again (the new one handles this), paste it over the old code, then Deploy → Manage deployments → ✎ → Version: New version → Deploy. Then tap Save and test.";
+    case 'too_big': return 'Too many changes to send at once. Kura will send them in smaller batches.';
     case 'bad_reply': return "That URL didn't answer like Kura's bridge (" + ((e && e.message) || '') + '). Use the Web app URL ending in /exec.';
     default: return 'Google Tasks said: ' + ((e && e.message) || 'unknown error');
   }
@@ -1347,7 +1376,18 @@ async function gtSync(opts = {}) {
   if (!cfg || !cfg.url) return;
   if (gtSyncing) { gtAgain = true; return; }
   const items = state.items;
-  const dirty = items.filter(it => gtEligible(it) && (!it.gtask || it.gSig !== gtSig(it)));
+  let dirty = items.filter(it => gtEligible(it) && (!it.gtask || it.gSig !== gtSig(it)));
+  if (cfg.useGet) {
+    const budget = 4500;
+    let used = 0;
+    const fit = [];
+    for (const it of dirty) {
+      const n = encodeURIComponent(JSON.stringify(gtFields(it))).length + 80;
+      if (fit.length && used + n > budget) { gtAgain = true; break; }
+      fit.push(it); used += n;
+    }
+    dirty = fit;
+  }
   const orphans = items.filter(it => it.gtask && !gtEligible(it));
   const queued = (store.kvGet ? await store.kvGet('gdeletes').catch(() => null) : null) || [];
   if (!opts.force && !dirty.length && !orphans.length && !queued.length && Date.now() - gtLastPull < 60000) return;
@@ -1362,7 +1402,7 @@ async function gtSync(opts = {}) {
       action: 'sync',
       upserts: dirty.map(it => ({ kuraId: it.id, gid: it.gtask || null, ...gtFields(it) })),
       deletes: [...queued, ...orphans.map(it => it.gtask)],
-      watch: watched.map(it => it.gtask),
+      watch: ((state.gtMeta || {}).bridgeVersion || 1) >= 2 ? [] : watched.map(it => it.gtask),
     });
     gtLastPull = Date.now();
     const created = res.created || {};
@@ -1452,7 +1492,7 @@ async function loadGt() {
   }
   state.gsecret = secret;
   const cfg = await store.kvGet('gtasks').catch(() => null);
-  state.gt = cfg && cfg.url ? { list: 'Kura', includeMake: false, ...cfg, secret } : null;
+  state.gt = cfg && cfg.url ? { list: 'Kura', includeMake: false, ...cfg, url: normGtUrl(cfg.url), secret } : null;
   state.gtMeta = (await store.kvGet('gtmeta').catch(() => null)) || {};
   drawGtStat();
 }
@@ -1527,8 +1567,8 @@ async function runDiag() {
     drawDiag();
   };
   const installed = !!(navigator.serviceWorker && navigator.serviceWorker.controller);
-  add('Auto sort rules', ruleSort('Email the lab manager').bucket === 'make', 'On-phone sorting is available as a free fallback.');
   add('App', true, `Kura ${APP_VERSION} · ${navigator.onLine ? 'online' : 'offline'} · ${installed ? 'offline copy ready' : 'no offline copy yet'} · ${state.items.length} notes`);
+  add('Auto sort rules', ruleSort('Email the lab manager').bucket === 'make', 'On-phone sorting is available as a free fallback.');
 
   // Claude
   if (!state.api) {
@@ -2422,13 +2462,14 @@ function drawSettings() {
     try { await navigator.share({ title: 'Kura bridge script', text: bridgeText() }); } catch (e) {}
   };
   const saveGt = async () => {
-    const url = String(s.gurl || '').trim();
+    const url = normGtUrl(s.gurl);
+    s.gurl = url;
     if (!/^https:\/\/script\.google\.com\/.+\/exec$/.test(url)) { s.gstatus = 'Paste the Web app URL from Apps Script. It starts with https://script.google.com/ and ends in /exec.'; drawSettings(); return; }
     const cfg = { url, secret: state.gsecret, list: String(s.glist || '').trim() || 'Kura', includeMake: !!s.gmake };
     s.gbusy = true; s.gstatus = 'Testing the bridge…'; drawSettings();
     try {
       await gtCall(cfg, { action: 'sync', upserts: [], deletes: [], watch: [] });
-      if (store.kvSet) await store.kvSet('gtasks', { url: cfg.url, list: cfg.list, includeMake: cfg.includeMake });
+      if (store.kvSet) await store.kvSet('gtasks', { url: cfg.url, list: cfg.list, includeMake: cfg.includeMake, useGet: !!cfg.useGet });
       state.gt = cfg;
       s.gstatus = `Connected. Kura keeps the "${cfg.list}" list in Google Tasks in step with TODAY${cfg.includeMake ? ' and MAKE' : ''}.`;
       gtSync({ force: true }).catch(() => {});
