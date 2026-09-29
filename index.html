@@ -413,6 +413,7 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
     <div class="w-top">
       <span class="lbl" id="stamp">— / —</span>
       <span class="lbl" id="score">SCORE 0000</span>
+      <button class="lbl gt-stat" id="ai-stat" type="button" hidden>AI ✓</button>
       <button class="lbl gt-stat" id="gt-stat" type="button" hidden>TASKS ✓</button>
       <div class="w-actions">
         <label class="search" for="q">
@@ -521,7 +522,7 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
 (() => {
 'use strict';
 
-const APP_VERSION = 'v7';
+const APP_VERSION = 'v8';
 /* ---------- helpers ---------- */
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -779,13 +780,7 @@ function parseLooseJson(text) {
   return undefined;
 }
 function makeSample(cfg) {
-  async function call(prompt, opts = {}) {
-    const content = [];
-    for (const b of opts.images || []) {
-      content.push({ type: 'image', source: { type: 'base64', media_type: b.type || 'image/jpeg', data: await blobToB64(b) } });
-    }
-    content.push({ type: 'text', text: prompt });
-    const model = opts.modelTier === 'quick' ? (cfg.sort || cfg.scan) : (cfg.scan || cfg.sort);
+  async function callModel(model, content, opts) {
     let r;
     try {
       r = await fetch(API + '/messages', {
@@ -794,15 +789,34 @@ function makeSample(cfg) {
       });
     } catch (e) {
       if (opts.signal && opts.signal.aborted) throw { code: 'cancelled' };
-      throw { code: 'network', message: String(e) };
+      throw { code: 'network', message: String((e && e.message) || e) };
     }
-    if (!r.ok) throw await apiError(r);
+    if (!r.ok) { const err = await apiError(r); err.status = r.status; err.model = model; throw err; }
     let j;
     try { j = await r.json(); } catch (e) { if (opts.signal && opts.signal.aborted) throw { code: 'cancelled' }; throw { code: 'upstream_error' }; }
     if (j.stop_reason === 'refusal') throw { code: 'refused' };
     const text = (j.content || []).filter(c => c.type === 'text').map(c => c.text).join('');
     if (!text.trim()) throw { code: 'empty_completion' };
-    return { text, truncated: j.stop_reason === 'max_tokens' };
+    return { text, truncated: j.stop_reason === 'max_tokens', model };
+  }
+  async function call(prompt, opts = {}) {
+    const content = [];
+    for (const b of opts.images || []) {
+      content.push({ type: 'image', source: { type: 'base64', media_type: b.type || 'image/jpeg', data: await blobToB64(b) } });
+    }
+    content.push({ type: 'text', text: prompt });
+    const primary = opts.modelTier === 'quick' ? (cfg.sort || cfg.scan) : (cfg.scan || cfg.sort);
+    const models = [primary, cfg.scan, cfg.sort].filter((m, i, a) => m && a.indexOf(m) === i);
+    let last;
+    for (const model of models) {
+      try { return await callModel(model, content, opts); }
+      catch (e) {
+        last = e;
+        const modelProblem = e && (e.status === 404 || (e.code === 'invalid_request' && /model/i.test(e.message || '')));
+        if (!modelProblem) throw e;
+      }
+    }
+    throw last;
   }
   const sample = (p, o) => call(p, o);
   sample.json = async (p, o) => {
@@ -1165,13 +1179,14 @@ const parseSig = sig => { try { return JSON.parse(sig) || {}; } catch (e) { retu
 async function gtCall(cfg, payload) {
   let r;
   try { r = await fetch(cfg.url, { method: 'POST', body: JSON.stringify({ ...payload, secret: cfg.secret, list: cfg.list || 'Kura' }) }); }
-  catch (e) { throw { code: 'network' }; }
+  catch (e) { throw { code: 'network', message: String((e && e.message) || e) }; }
   const text = await r.text().catch(() => '');
   let j = null;
   try { j = JSON.parse(text); } catch (e) {
     const signin = /accounts\.google\.com|ServiceLogin|Sign in/i.test(text);
     const nofn = /Script function not found: doPost/i.test(text);
-    throw { code: signin ? 'signin' : nofn ? 'no_dopost' : 'bad_reply', message: 'HTTP ' + r.status };
+    const snippet = text.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 160);
+    throw { code: signin ? 'signin' : nofn ? 'no_dopost' : 'bad_reply', message: 'HTTP ' + r.status + (snippet ? ' · ' + snippet : '') };
   }
   if (!j || !j.ok) throw { code: j && j.error === 'bad_secret' ? 'bad_secret' : 'bridge', message: (j && j.error) || 'unknown error' };
   return j;
@@ -1323,6 +1338,134 @@ async function loadGt() {
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') scheduleGtSync(600); });
 setInterval(() => { if (document.visibilityState === 'visible') gtSync().catch(() => {}); }, 5 * 60000);
 
+/* ---------- diagnostics ---------- */
+function setAiStatus(err) {
+  state.aiErr = err || null;
+  const el = document.getElementById('ai-stat');
+  if (!el) return;
+  el.hidden = !state.sample;
+  el.textContent = state.aiErr ? 'AI !' : 'AI ✓';
+  el.classList.toggle('bad', !!state.aiErr);
+  el.setAttribute('aria-label', state.aiErr ? 'Claude problem: ' + state.aiErr : 'Claude connected');
+}
+const redactUrl = u => String(u || '').replace(/(\/s\/)([A-Za-z0-9_-]{6})[A-Za-z0-9_-]*([A-Za-z0-9_-]{4})(\/)/, '$1$2…$3$4');
+const errDetail = e => {
+  if (!e) return '';
+  const bits = [e.code, e.status ? 'HTTP ' + e.status : '', e.model || '', e.message || ''].filter(Boolean);
+  return bits.length ? ' [' + bits.join(' · ') + ']' : '';
+};
+function openDiag() {
+  state.sheet = { kind: 'diag', rows: [], running: true };
+  drawDiag();
+  runDiag().catch(err => {
+    const d = state.sheet;
+    if (d && d.kind === 'diag') { d.rows.push({ area: 'Check', ok: false, text: 'The check itself failed: ' + String((err && err.message) || err) }); d.running = false; drawDiag(); }
+  });
+}
+async function runDiag() {
+  const d = state.sheet;
+  const add = (area, ok, text, fix) => {
+    if (state.sheet !== d) return;
+    d.rows.push({ area, ok, text, fix });
+    drawDiag();
+  };
+  const installed = !!(navigator.serviceWorker && navigator.serviceWorker.controller);
+  add('App', true, `Kura ${APP_VERSION} · ${navigator.onLine ? 'online' : 'offline'} · ${installed ? 'offline copy ready' : 'no offline copy yet'} · ${state.items.length} notes`);
+
+  // Claude
+  if (!state.api) {
+    add('Claude', false, 'No Anthropic API key saved, so Auto sort and Brain Camera are off.', 'Settings → Anthropic API key → paste your key → Save and test.');
+  } else {
+    let ids = null;
+    try {
+      ids = await listModels(state.api.key);
+      add('Claude key', true, `Key accepted (…${state.api.key.slice(-4)}). Reading pages with ${state.api.scan}; sorting with ${state.api.sort}.`);
+    } catch (e) {
+      add('Claude key', false, sampleMsg(e) + errDetail(e), e && e.code === 'bad_key' ? 'Create a new key in the Anthropic Console and paste it in Settings.' : 'Check your connection, then try again.');
+    }
+    if (ids) {
+      const gone = [state.api.scan, state.api.sort].filter(m => m && !ids.includes(m));
+      if (gone.length) add('Claude models', false, 'Saved model no longer available: ' + gone.join(', '), 'Settings → Anthropic API key → Save and test to pick current models.');
+      try {
+        const r = await makeSample(state.api)('Reply with the single word OK.', { modelTier: 'quick' });
+        add('Auto sort', true, `${r.model} answered "${r.text.trim().slice(0, 20)}".`);
+        setAiStatus(null);
+      } catch (e) {
+        setAiStatus(sampleMsg(e));
+        add('Auto sort', false, sampleMsg(e) + errDetail(e),
+          /credit|balance|billing/i.test((e && e.message) || '') ? 'Add credit in the Anthropic Console (Billing), then try again.' : 'Settings → Anthropic API key → Save and test.');
+      }
+    }
+  }
+
+  // Google Tasks
+  const today = state.items.filter(it => isNow(it) && !it.done);
+  const ex = today.filter(it => it.example).length;
+  if (!state.gt) {
+    add('Google Tasks', false, 'Not connected. Nothing is sent to Google Tasks until Save and test succeeds.', 'Settings → Google Tasks → paste the Web app URL ending in /exec → Save and test.');
+  } else {
+    const url = state.gt.url;
+    if (!/\/exec$/.test(url)) add('Google Tasks URL', false, 'The saved URL does not end in /exec: ' + redactUrl(url), 'In Apps Script use Deploy → Manage deployments and copy the Web app URL.');
+    try {
+      const t0 = Date.now();
+      const res = await gtCall(state.gt, { action: 'sync', upserts: [], deletes: [], watch: [] });
+      const v = res.version || 1;
+      add('Google Tasks bridge', true, `Reached your bridge in ${((Date.now() - t0) / 1000).toFixed(1)} s. Bridge v${v}. The "${state.gt.list}" list has ${Array.isArray(res.tasks) ? res.tasks.filter(t => !t.deleted).length : '?'} tasks.`);
+      if (v < 2) add('Bridge script', false, 'Your bridge script is the old version, so tasks added in Google Tasks will not come into Kura.', 'Copy bridge script → paste over the old code → Deploy → Manage deployments → ✎ → New version → Deploy.');
+      await gtSync({ force: true, manual: true }).catch(() => {});
+      const eligible = state.items.filter(gtEligible);
+      const waiting = eligible.filter(it => !it.gtask).length;
+      add('Kura → Google', waiting === 0, waiting === 0
+        ? `${eligible.length} Kura task${eligible.length === 1 ? '' : 's'} linked to Google Tasks.`
+        : `${waiting} Kura task${waiting === 1 ? '' : 's'} could not be sent. ${(state.gtMeta && state.gtMeta.lastError) || ''}`,
+        waiting ? 'Copy the report and send it to Claude.' : '');
+    } catch (e) {
+      add('Google Tasks bridge', false, gtMsg(e) + errDetail(e), 'Check Deploy settings: Execute as Me, Who has access Anyone, and use the /exec URL.');
+    }
+  }
+  if (ex) add('Examples', true, `${ex} of your TODAY tasks ${ex === 1 ? 'is an example note' : 'are example notes'}. Examples never go to Google Tasks or Obsidian. Clear them from the banner.`);
+
+  // Obsidian
+  add('Obsidian', !!state.obs, state.obs ? `Sending to ${state.obs.target === 'daily' ? "today's daily note" : state.obs.note + '.md'} in "${state.obs.vault}". Use Send a test line in Settings to check it opens.` : 'Not set up.', state.obs ? '' : 'Settings → Obsidian vault.');
+
+  if (state.sheet === d) { d.running = false; drawDiag(); }
+}
+function diagReport() {
+  const d = state.sheet;
+  const lines = [`Kura check · ${new Date().toLocaleString('en-AU')}`];
+  for (const r of d.rows) lines.push(`${r.ok ? '✓' : '✗'} ${r.area}: ${r.text}` + (r.fix ? `\n   → ${r.fix}` : ''));
+  if (state.gt) lines.push('Bridge URL: ' + redactUrl(state.gt.url));
+  return lines.join('\n');
+}
+function drawDiag() {
+  const d = state.sheet;
+  if (!d || d.kind !== 'diag') return;
+  const body = h('div', { class: 'sheet-body' });
+  for (const r of d.rows) {
+    body.append(h('div', { class: 'log-row', style: 'text-decoration:none' },
+      h('span', { class: 'ico' + (r.ok ? '' : ' imp'), text: r.ok ? '✓' : '!' }),
+      h('div', { class: 'main' },
+        h('span', { class: 'lbl', text: r.area }),
+        h('span', { style: 'font-size:14px;line-height:1.45;overflow-wrap:anywhere', text: r.text }),
+        r.fix ? h('span', { class: 'muted', text: 'Fix: ' + r.fix }) : null)));
+  }
+  if (d.running) body.append(h('div', { class: 'status' }, h('span', { class: 'scanline', 'aria-hidden': 'true' }), h('span', { text: 'Checking…' })));
+  const copy = h('button', { class: 'btn primary', type: 'button', disabled: d.running, onclick: async () => {
+    const text = diagReport();
+    try { await navigator.clipboard.writeText(text); toast('Report copied. Paste it to Claude.'); }
+    catch (e) { d.showReport = true; drawDiag(); }
+  } }, 'Copy report');
+  if (d.showReport) body.append(h('textarea', { class: 'field-in', readonly: true, style: 'min-height:140px;font-size:12px' }, diagReport()));
+  body.append(h('p', { class: 'muted', text: 'The Claude test sends one tiny message, which uses a fraction of a cent of API credit.' }));
+  const prev = $('.sheet-body', els.sheet);
+  const scroll = prev ? prev.scrollTop : 0;
+  showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Check connections' },
+    head('CHECK CONNECTIONS', 'KURA ' + APP_VERSION), body,
+    h('div', { class: 'sheet-foot' }, h('span', { class: 'grow' }),
+      h('button', { class: 'btn', type: 'button', disabled: d.running, onclick: () => openDiag() }, 'Run again'), copy)));
+  body.scrollTop = scroll;
+}
+
 /* ---------- actions ---------- */
 function patch(id, p) { return store.update(id, { ...p, updatedAt: Date.now() }).catch(onWriteError); }
 function sendToday(id) { patch(id, { today: TODAY, done: false, doneAt: null, pending: false, gtaskGone: false }); toast('Sent to TODAY'); }
@@ -1462,6 +1605,7 @@ Reply with only JSON: {"bucket": "drop" | "stock" | "make", "tags": []}`;
   try {
     const r = await state.sample.json(prompt, { modelTier: 'quick' });
     bucket = r && BUCKETS.includes(r.bucket) ? r.bucket : 'stock';
+    setAiStatus(null);
     const extra = r && Array.isArray(r.tags) ? r.tags.map(String).filter(t => symById(t)) : [];
     newTags = [...new Set([...tags, ...extra])];
   } catch (e) { err = e; }
@@ -1474,7 +1618,8 @@ Reply with only JSON: {"bucket": "drop" | "stock" | "make", "tags": []}`;
     toast(`Sorted to ${LABEL[bucket]}`);
     if (innerWidth < 720) setTab(bucket);
   } else {
-    toast('Auto-sort failed, so it went to STOCK.' + (err && err.code === 'rate_limited' ? ' Claude is busy.' : ''));
+    setAiStatus(sampleMsg(err));
+    toast('Auto sort failed, so it went to STOCK. ' + sampleMsg(err));
     disableClaude(err);
   }
 }
@@ -1823,11 +1968,13 @@ async function readScan(scan) {
       return { text: String((r && r.text) || '').trim(), bucket, tags, today: !!(r && r.today) && bucket === 'make', keep: true };
     }).filter(r => r.text);
     scan.status = 'review';
+    setAiStatus(null);
   } catch (e) {
     if (state.scan !== scan) return;
     if (e && e.code === 'cancelled') { closeSheet(); return; }
     scan.status = 'error';
     scan.error = sampleMsg(e);
+    if (e && e.code !== 'cancelled') setAiStatus(sampleMsg(e));
     disableClaude(e);
   }
   drawScan();
@@ -1981,6 +2128,7 @@ async function loadApi() {
   state.api = cfg && cfg.key ? cfg : null;
   state.sample = state.api ? makeSample(state.api) : null;
   state.canImages = !!state.sample;
+  setAiStatus(state.aiErr);
   if (state.sample && !routeTouched) setRoute('auto');
   syncClaudeUI();
   drawBanner();
@@ -2167,13 +2315,16 @@ function drawSettings() {
   ];
 
   const body = h('div', { class: 'sheet-body' },
+    h('div', { class: 'row' }, h('button', { class: 'btn primary', id: 'btn-diag', type: 'button', onclick: () => openDiag() }, 'Check connections'),
+      h('span', { class: 'muted', text: 'Tests Claude, Google Tasks and Obsidian and tells you what to fix.' })),
+    h('hr', { class: 'rule' }),
     obsSection,
     gtSection,
     h('span', { class: 'lbl', text: 'Anthropic API key' }),
     h('p', { class: 'muted', text: 'Brain Camera and Auto sort call Claude with your own API key. It is stored only on this phone and sent only to api.anthropic.com. Usage is billed to your Anthropic API account, separately from a Claude subscription.' }),
     h('div', { class: 'set-row' }, key),
     h('div', { class: 'row' },
-      h('button', { class: 'btn primary', type: 'button', disabled: s.busy, onclick: saveKey }, s.busy ? 'Checking…' : 'Save and test'),
+      h('button', { class: 'btn primary', id: 'api-save', type: 'button', disabled: s.busy, onclick: saveKey }, s.busy ? 'Checking…' : 'Save and test'),
       state.api ? h('button', { class: 'btn danger', type: 'button', onclick: removeKey }, 'Remove key') : null),
     s.status ? h('p', { class: 'muted ok', text: s.status }) : null,
     h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'Model for Brain Camera' }), scan),
@@ -2209,12 +2360,8 @@ function drawSettings() {
   body.scrollTop = scroll;
 }
 $('#btn-settings').addEventListener('click', () => openSettings());
-$('#gt-stat').addEventListener('click', () => {
-  openSettings();
-  const el = document.getElementById('gt-url');
-  if (el) el.scrollIntoView({ block: 'center' });
-  if (state.gt && !gtSyncing) gtSync({ force: true }).catch(() => {});
-});
+$('#gt-stat').addEventListener('click', () => openDiag());
+$('#ai-stat').addEventListener('click', () => openDiag());
 
 function exportBackup() {
   const data = { app: 'kura', version: 1, exportedAt: new Date().toISOString(), symbols: state.symbols, obsidian: state.obs || null, items: state.items };
