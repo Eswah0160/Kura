@@ -346,6 +346,56 @@ textarea.field-in { resize: vertical; min-height: 96px; }
   font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.08em; max-width: calc(100% - 32px); text-align: center; box-shadow: var(--shadow);
 }
 
+/* notebook */
+.nb { z-index: 15; background: var(--paper); }
+.nb-in { height: 100%; max-width: 1240px; margin: 0 auto; padding: 10px 16px 12px; display: flex; flex-direction: column; gap: 10px; }
+.nb-top { flex: none; display: flex; align-items: center; gap: 10px; }
+.nb-top h2 { margin: 0; font-family: var(--f-mono); font-weight: 500; font-size: 12px; letter-spacing: 0.18em; }
+.nb-top .grow { flex: 1; }
+.nb-top .btn[aria-pressed="true"] { background: var(--ink); color: var(--sheet); border-color: var(--ink); }
+.nb-body { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(220px, 300px) minmax(0, 1fr); gap: 10px; }
+.nb-list { display: flex; flex-direction: column; min-height: 0; }
+.nb-list .search-in { margin: 10px 12px 6px; width: auto; font-size: 14px; padding: 7px 10px; }
+.nb-main { min-height: 0; display: flex; flex-direction: column; }
+.nb-scroll { flex: 1; min-height: 0; overflow: auto; padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
+.nb-foot { flex: none; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding: 10px 12px; border-top: 1px solid var(--rule); }
+.nb-foot .grow { flex: 1; }
+.nb-row { width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--rule); background: none; padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; }
+.nb-row[aria-current="true"] { background: color-mix(in srgb, var(--ink) 8%, var(--sheet)); }
+.nb-row .t { font-size: 14px; font-weight: 700; line-height: 1.35; overflow-wrap: anywhere; }
+.nb-editor {
+  width: 100%; min-height: 220px; flex: 1; resize: vertical; border: 1px solid var(--rule); border-radius: 6px; outline: none; color: var(--ink);
+  background-color: var(--paper); background-image: radial-gradient(circle, var(--dot) 1px, transparent 1.4px); background-size: 22px 22px; background-attachment: local;
+  font-size: 16px; line-height: 22px; padding: 10px 12px;
+}
+.nb-editor:focus { border-color: var(--ink-2); }
+.nb-title { font-size: 22px; font-weight: 700; line-height: 1.3; margin: 0; overflow-wrap: anywhere; }
+.nb-title-in { font-size: 18px; font-weight: 700; }
+.nb-sum { margin: 0; font-size: 15px; line-height: 1.55; color: var(--ink); border-left: 3px solid var(--rule); padding-left: 12px; }
+.nb-sec { display: flex; flex-direction: column; gap: 6px; }
+.nb-md { font-size: 15px; line-height: 1.6; overflow-wrap: anywhere; }
+.nb-md p { margin: 0 0 8px; }
+.nb-md ul { margin: 0 0 8px; padding-left: 20px; }
+.nb-md h4 { margin: 10px 0 4px; font-size: 15px; }
+.nb-md code { font-family: var(--f-mono); font-size: 0.9em; background: var(--paper); padding: 0 4px; border-radius: 3px; }
+.nb-ctx { border: 1px dashed var(--ink-2); border-radius: 6px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+.nb-ctx p { margin: 0; font-size: 14px; line-height: 1.5; }
+.nb-pick { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; line-height: 1.45; }
+.nb-pick input { width: 18px; height: 18px; margin-top: 1px; accent-color: var(--ink); flex: none; }
+.nb-pick span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.nb-chips { display: flex; gap: 6px; flex-wrap: wrap; }
+.nb-chip { border: 1px solid var(--rule); border-radius: 999px; padding: 3px 9px; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.06em; color: var(--ink-2); background: transparent; }
+button.nb-chip { cursor: pointer; color: var(--ink); }
+.nb-q { font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2); }
+.nb-a { font-size: 15px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+.nb-ask-in { display: flex; gap: 8px; }
+.nb-ask-in .field-in { flex: 1; min-width: 0; }
+details summary { cursor: pointer; }
+@media (max-width: 719px) {
+  .nb-body { grid-template-columns: minmax(0, 1fr); }
+  .nb[data-pane="list"] .nb-main, .nb[data-pane="main"] .nb-list { display: none; }
+}
+
 /* short screens: keyboard up on the Fold leaves roughly a 4:3 area */
 .short .field, .short .wordmark, .short .tags-lbl { display: none; }
 .short .widget { padding-block: 4px; }
@@ -398,6 +448,7 @@ textarea.field-in { resize: vertical; min-height: 96px; }
 }
 .gt-stat { border: 0; background: none; padding: 4px 0; cursor: pointer; }
 .gt-stat.bad { color: var(--red); }
+@media (max-width: 719px) { .nb-btn .vl { display: none; } }
 .vault-btn b { font-weight: 500; color: var(--red); }
 @media (max-width: 719px) { .vault-btn .vl { display: none; } }
 .set-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
@@ -423,6 +474,10 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
         <button class="ghost" id="btn-search" type="button" aria-label="Search">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg>
         </button>
+        <button class="ghost nb-btn" id="btn-nb" type="button" aria-label="Open notebook">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/><path d="M9 8h6"/></svg>
+          <span class="vl">Notebook</span>
+        </button>
         <button class="ghost vault-btn" id="btn-vault" type="button" aria-label="Send new notes to Obsidian">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18v3H3z"/><path d="M4.5 8v11h15V8"/><path d="M12 10.5v5.5M9.5 13.5L12 16l2.5-2.5"/></svg>
           <span class="vl">Vault</span><b id="vault-n"></b>
@@ -440,7 +495,7 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
       <div class="inv-grid" id="inv-grid"></div>
       <span class="cannon" id="cannon" aria-hidden="true"></span>
     </div>
-    <button class="wordmark" id="wordmark" type="button" aria-label="Write a note">
+    <button class="wordmark" id="wordmark" type="button" aria-label="Open notebook">
       <span>K</span><span>U</span><span>R</span><span>A</span><span class="arr">→</span>
     </button>
   </section>
@@ -515,6 +570,7 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
   </main>
 </div>
 
+<div class="nb fit" id="nb" hidden></div>
 <div class="sheet-wrap fit" id="sheet" hidden></div>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
@@ -522,7 +578,7 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
 (() => {
 'use strict';
 
-const APP_VERSION = 'v10';
+const APP_VERSION = 'v11';
 /* ---------- helpers ---------- */
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -672,18 +728,23 @@ function memoryStore() {
     async set(id, data) { map.set(id, { ...data, id }); emit(); },
     async update(id, p) { const cur = map.get(id); if (!cur) return; map.set(id, { ...cur, ...p }); emit(); },
     async remove(id) { map.delete(id); emit(); },
+    _notes: new Map(),
+    async listNotes() { return [...this._notes.values()]; },
+    async putNote(n) { this._notes.set(n.id, n); },
+    async deleteNote(id) { this._notes.delete(id); },
     all() { return [...map.values()]; },
   };
 }
 /* on-phone storage (IndexedDB) */
 function openDb() {
   return new Promise((resolve, reject) => {
-    const r = indexedDB.open('keitan', 1);
+    const r = indexedDB.open('keitan', 2);
     r.onupgradeneeded = () => {
       const db = r.result;
       if (!db.objectStoreNames.contains('items')) db.createObjectStore('items', { keyPath: 'id' });
       if (!db.objectStoreNames.contains('photos')) db.createObjectStore('photos');
       if (!db.objectStoreNames.contains('kv')) db.createObjectStore('kv');
+      if (!db.objectStoreNames.contains('notes')) db.createObjectStore('notes', { keyPath: 'id' });
     };
     r.onsuccess = () => resolve(r.result);
     r.onerror = () => reject(r.error);
@@ -728,6 +789,9 @@ async function localStore() {
     kvGet(k) { return idbReq(db, 'kv', 'readonly', st => st.get(k)); },
     kvSet(k, v) { return idbReq(db, 'kv', 'readwrite', st => st.put(v, k)); },
     kvDel(k) { return idbReq(db, 'kv', 'readwrite', st => st.delete(k)); },
+    async listNotes() { return (await idbReq(db, 'notes', 'readonly', st => st.getAll())) || []; },
+    putNote(n) { return idbReq(db, 'notes', 'readwrite', st => st.put(n)); },
+    deleteNote(id) { return idbReq(db, 'notes', 'readwrite', st => st.delete(id)); },
     all() { return [...map.values()]; },
   };
 }
@@ -1194,7 +1258,7 @@ function drawBanner() {
 }
 
 /* ---------- Obsidian ---------- */
-const DEFAULT_OBS = { vault: '', target: 'daily', note: 'Kura/Inbox', tasksDates: true, includeDrop: false };
+const DEFAULT_OBS = { vault: '', target: 'daily', note: 'Kura/Inbox', tasksDates: true, includeDrop: false, notesFolder: 'Kura/Notes' };
 const tagSlug = t => String(t).toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\p{L}\p{N}_\-/]/gu, '');
 function mdLine(it, cfg) {
   const isTask = it.bucket === 'make' || !!it.today;
@@ -1737,7 +1801,7 @@ els.route.addEventListener('click', e => {
   setRoute(c.dataset.r);
   if (padHadFocus) els.input.focus({ preventScroll: true });
 });
-$('#wordmark').addEventListener('click', () => els.input.focus());
+$('#wordmark').addEventListener('click', () => openNotebook());
 
 let shiftDown = false;
 els.input.addEventListener('keydown', e => {
@@ -1855,12 +1919,15 @@ function showSheet(node) {
   }
   els.sheet.hidden = false;
 }
+let ignorePop = 0;
+function histBack() { ignorePop++; try { history.back(); } catch (e) { ignorePop--; } }
 window.addEventListener('popstate', () => {
-  sheetHist = false;
-  if (state.sheet || !els.sheet.hidden) closeSheet(true);
+  if (ignorePop > 0) { ignorePop--; return; }
+  if (state.sheet || !els.sheet.hidden) { sheetHist = false; closeSheet(true); return; }
+  if (state.nb && state.nb.open) { nbHist = false; closeNotebook(true); }
 });
 function closeSheet(fromPop) {
-  if (fromPop !== true && sheetHist) { sheetHist = false; try { history.back(); } catch (e) {} }
+  if (fromPop !== true && sheetHist) { sheetHist = false; histBack(); }
   const s = state.sheet;
   if (s && s.kind === 'item') commitItemText();
   if (s && s.kind === 'scan' && state.scan) {
@@ -2302,6 +2369,473 @@ async function commitScan(btn) {
   if (saved && sendObs) setTimeout(() => sendToObsidian(savedIds.map(byId).filter(it => it && (state.obs.includeDrop || it.bucket !== 'drop')), true), 200);
 }
 
+/* ---------- notebook: write freely, Kura comprehends it into a clean note ---------- */
+let nbHist = false;
+const nbEl = () => document.getElementById('nb');
+const noteById = id => (state.notes || []).find(n => n.id === id);
+const newNoteId = () => 'nt' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const NB_STOP = new Set('the a an and or of to in on for with at by from is are was were be been it this that these those what which who how why when where do does did i my we our you your me not no yes can could should would will about into than then there their its as if so but'.split(' '));
+const nbWords = t => String(t || '').toLowerCase().match(/[a-z0-9µ°%.+-]{2,}/g) || [];
+const nbSorted = () => (state.notes || []).slice().sort((a, b) => (b.updated || 0) - (a.updated || 0));
+
+function openNotebook(noteId) {
+  const el = nbEl();
+  const has = (state.notes || []).length > 0;
+  state.nb = { open: true, sel: noteId || null, mode: noteId || has ? 'view' : 'edit', q: '', draft: null, chat: [], busy: '', pane: noteId ? 'main' : 'list' };
+  if (!state.nb.sel && state.nb.mode === 'view') { const first = nbSorted()[0]; state.nb.sel = first ? first.id : null; }
+  if (state.nb.mode === 'edit') { state.nb.draft = { id: null, title: '', raw: '', result: null }; state.nb.pane = 'main'; }
+  if (el.hidden) { try { history.pushState({ kuraNb: true }, ''); nbHist = true; } catch (e) {} }
+  el.hidden = false;
+  drawNotebook();
+}
+function closeNotebook(fromPop) {
+  if (fromPop !== true && nbHist) { nbHist = false; histBack(); }
+  if (state.nb && state.nb.ctl) state.nb.ctl.abort();
+  state.nb = null;
+  const el = nbEl();
+  el.hidden = true;
+  el.replaceChildren();
+}
+$('#btn-nb').addEventListener('click', () => openNotebook());
+
+// tiny, safe Markdown renderer: headings, bullets, **bold**, `code`, paragraphs
+function mdInline(text) {
+  const out = [];
+  String(text).split(/(\*\*[^*]+\*\*|`[^`]+`)/g).forEach(part => {
+    if (!part) return;
+    if (/^\*\*[^*]+\*\*$/.test(part)) out.push(h('strong', { text: part.slice(2, -2) }));
+    else if (/^`[^`]+`$/.test(part)) out.push(h('code', { text: part.slice(1, -1) }));
+    else out.push(document.createTextNode(part));
+  });
+  return out;
+}
+function mdNodes(md) {
+  const box = h('div', { class: 'nb-md' });
+  let list = null, para = [];
+  const flush = () => { if (para.length) { box.append(h('p', {}, mdInline(para.join(' ')))); para = []; } };
+  for (const raw of String(md || '').split('\n')) {
+    const line = raw.trimEnd();
+    const bullet = /^\s*(?:[-*•]|\d+[.)])\s+(.*)$/.exec(line);
+    const headm = /^#{1,6}\s+(.*)$/.exec(line);
+    if (bullet) { flush(); if (!list) { list = h('ul'); box.append(list); } list.append(h('li', {}, mdInline(bullet[1]))); continue; }
+    list = null;
+    if (headm) { flush(); box.append(h('h4', {}, mdInline(headm[1]))); continue; }
+    if (!line.trim()) { flush(); continue; }
+    para.push(line.trim());
+  }
+  flush();
+  return box;
+}
+
+function comprehendPrompt(raw) {
+  const field = state.field ? `The writer's field: ${state.field}.` : 'The writer works in engineering and science.';
+  return `You are the note-taking assistant inside Kura, a researcher's notebook app. ${field} Today is ${TODAY}.
+Turn the rough notebook entry below into a clean note.
+
+Rules:
+- Keep the writer's meaning, facts and numbers exactly. Never invent results, measurements, citations, names or conclusions.
+- Fix spelling, expand obvious shorthand, and use correct technical terms and SI units. If something is unclear, keep it as written and add a question about it.
+- "context": up to 5 short explanations of technical concepts, equations or units the entry touches on, from well-established textbook knowledge only. No citations, no speculation, nothing about the writer's own results.
+- "tasks": things the writer needs to do, as short imperative lines. Lines marked with a box, [] or -> are tasks.
+- "questions": open questions the writer raised or left unresolved. Lines marked with ? are questions.
+- "tags": 1 to 5 short lowercase topic tags, hyphenated.
+- "note": the full cleaned-up entry in Markdown (short paragraphs and "- " bullets), with the same content as the original.
+
+Reply with only this JSON:
+{"title": "...", "summary": "1-2 sentences", "points": ["..."], "note": "...", "context": [{"term": "...", "explain": "..."}], "tasks": ["..."], "questions": ["..."], "tags": ["..."]}
+
+Entry:
+"""
+${String(raw).slice(0, 20000)}
+"""`;
+}
+function cleanResult(r, raw) {
+  const arr = (v, n) => (Array.isArray(v) ? v.map(x => String(x || '').trim()).filter(Boolean).slice(0, n) : []);
+  const ctx = Array.isArray(r && r.context)
+    ? r.context.map(c => ({ term: String((c && c.term) || '').trim().slice(0, 80), explain: String((c && c.explain) || '').trim().slice(0, 600) })).filter(c => c.term && c.explain).slice(0, 5)
+    : [];
+  return {
+    title: String((r && r.title) || '').trim().slice(0, 120) || String(raw).trim().split('\n')[0].slice(0, 80) || 'Untitled note',
+    summary: String((r && r.summary) || '').trim().slice(0, 600),
+    points: arr(r && r.points, 12),
+    note: String((r && r.note) || '').trim() || String(raw).trim(),
+    context: ctx,
+    tasks: arr(r && r.tasks, 20).map(t => ({ text: t, keep: true, today: false })),
+    questions: arr(r && r.questions, 20).map(t => ({ text: t, keep: true })),
+    tags: arr(r && r.tags, 5).map(t => t.toLowerCase().replace(/\s+/g, '-').replace(/[^\p{L}\p{N}_\-/]/gu, '')).filter(Boolean),
+    ai: true,
+  };
+}
+function offlineResult(raw, title) {
+  const lines = splitPasted(raw);
+  const tasks = lines.filter(l => l.bucket === 'make').map(l => ({ text: l.text, keep: true, today: false }));
+  const questions = lines.filter(l => l.bucket !== 'make' && l.tags.includes('unr')).map(l => ({ text: l.text, keep: true }));
+  const first = String(raw).trim().split('\n')[0].replace(/^[!?\s]+/, '').slice(0, 80);
+  return { title: (title || '').trim() || first || 'Untitled note', summary: '', points: [], note: String(raw).trim(), context: [], tasks, questions, tags: [], ai: false };
+}
+
+async function nbComprehend() {
+  const nb = state.nb, d = nb && nb.draft;
+  if (!d || !d.raw.trim()) { toast('Write something first.'); return; }
+  if (!state.sample) {
+    d.result = offlineResult(d.raw, d.title);
+    drawNotebook();
+    toast('No AI key: kept as written, with tasks and questions found by rules.');
+    return;
+  }
+  nb.busy = 'Reading your note…';
+  nb.ctl = new AbortController();
+  drawNotebook();
+  try {
+    const r = await state.sample.json(comprehendPrompt(d.raw), { signal: nb.ctl.signal });
+    if (state.nb !== nb) return;
+    d.result = cleanResult(r, d.raw);
+    if (d.title.trim()) d.result.title = d.title.trim();
+    setAiStatus(null);
+  } catch (e) {
+    if (state.nb !== nb) return;
+    if (e && e.code === 'cancelled') { nb.busy = ''; drawNotebook(); return; }
+    setAiStatus(sampleMsg(e));
+    d.result = offlineResult(d.raw, d.title);
+    toast('AI unavailable, so the note was kept as written: ' + sampleMsg(e));
+  }
+  nb.busy = '';
+  drawNotebook();
+}
+
+async function nbTranscribe(file) {
+  const nb = state.nb, d = nb && nb.draft;
+  if (!d || !state.sample) return;
+  nb.busy = 'Transcribing your page…';
+  nb.ctl = new AbortController();
+  drawNotebook();
+  try {
+    const blob = await downscale(file, 1600, 0.85);
+    const r = await state.sample('Transcribe all the handwriting in this photo of a notebook page, line by line, exactly as written. Keep symbols such as ! ? [] and arrows at the start of lines. Write [?] for words you cannot read. Reply with the transcription only.',
+      { images: [blob], signal: nb.ctl.signal });
+    if (state.nb !== nb) return;
+    d.raw = (d.raw.trim() ? d.raw.trim() + '\n\n' : '') + r.text.trim();
+  } catch (e) {
+    if (state.nb === nb && !(e && e.code === 'cancelled')) toast("Couldn't transcribe: " + sampleMsg(e));
+  }
+  if (state.nb === nb) { nb.busy = ''; drawNotebook(); }
+}
+
+function noteMarkdown(n) {
+  const lines = ['---', `created: ${dayStr(new Date(n.created || Date.now()))}`, 'source: kura', `tags: [${['kura/note', ...(n.tags || [])].join(', ')}]`, '---', '', `# ${n.title}`, ''];
+  if (n.summary) lines.push(`> ${n.summary}`, '');
+  if ((n.points || []).length) lines.push('## Key points', ...n.points.map(p => `- ${p}`), '');
+  lines.push('## Notes', n.note || n.raw || '', '');
+  if ((n.context || []).length) lines.push('## Technical context', '_Added by AI from general knowledge. Check before relying on it._', ...n.context.map(c => `- **${c.term}**: ${c.explain}`), '');
+  if ((n.tasks || []).length) lines.push('## Tasks', ...n.tasks.map(t => `- [ ] ${t} #kura/make`), '');
+  if ((n.questions || []).length) lines.push('## Open questions', ...n.questions.map(q => `- ${q}`), '');
+  if (n.raw && n.raw.trim() !== (n.note || '').trim()) lines.push('## Original', '```', n.raw.trim(), '```', '');
+  return lines.join('\n');
+}
+function noteFilePath(n, cfg) {
+  const folder = (cfg.notesFolder || DEFAULT_OBS.notesFolder).replace(/^\/+|\/+$/g, '');
+  const name = `${dayStr(new Date(n.created || Date.now()))} ${n.title}`.replace(/[\\/:*?"<>|#^[\]]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 100);
+  return folder + '/' + name;
+}
+function sendNoteToObsidian(n) {
+  const cfg = state.obs;
+  if (!cfg || !cfg.vault) { toast('Connect your Obsidian vault in Settings first.'); openSettings('obsidian'); return; }
+  const enc = encodeURIComponent;
+  const uri = `obsidian://new?vault=${enc(cfg.vault)}&file=${enc(noteFilePath(n, cfg))}&content=${enc(noteMarkdown(n))}&overwrite=true&silent=true`;
+  launchObsidian(uri, async () => {
+    n.sentAt = Date.now();
+    await store.putNote(n).catch(() => {});
+    toast('Note sent to Obsidian');
+    drawNotebook();
+  });
+}
+
+async function nbSave(sendObs) {
+  const nb = state.nb, d = nb && nb.draft;
+  if (!d) return;
+  if (!d.result) d.result = offlineResult(d.raw, d.title);
+  const r = d.result;
+  const now = Date.now();
+  const prev = d.id ? noteById(d.id) : null;
+  const n = {
+    id: d.id || newNoteId(), created: prev ? prev.created : now, updated: now,
+    title: (d.title.trim() || r.title).slice(0, 120), raw: d.raw, summary: r.summary, points: r.points, note: r.note,
+    context: r.context, tags: r.tags, ai: r.ai,
+    tasks: r.tasks.filter(t => t.keep).map(t => t.text), questions: r.questions.filter(q => q.keep).map(q => q.text),
+    itemIds: prev ? (prev.itemIds || []).slice() : [], sentAt: prev ? prev.sentAt : null,
+  };
+  // tasks → MAKE (or TODAY), questions → STOCK with ? Unresolved; skip ones this note already created
+  const existing = new Set(state.items.filter(it => it.noteId === n.id).map(it => String(it.text).trim().toLowerCase()));
+  let made = 0;
+  for (const t of r.tasks.filter(x => x.keep && !existing.has(x.text.trim().toLowerCase()))) {
+    const id = store.newId();
+    await store.set(id, { text: t.text, tags: symById('task') ? ['task'] : [], bucket: 'make', today: t.today ? TODAY : null, done: false, doneAt: null,
+      createdAt: now - made, updatedAt: now, source: 'note', photo: null, page: n.title, pending: false, noteId: n.id }).catch(onWriteError);
+    n.itemIds.push(id);
+    made++;
+  }
+  for (const q of r.questions.filter(x => x.keep && !existing.has(x.text.trim().toLowerCase()))) {
+    const id = store.newId();
+    await store.set(id, { text: q.text, tags: symById('unr') ? ['unr'] : [], bucket: 'stock', today: null, done: false, doneAt: null,
+      createdAt: now - made, updatedAt: now, source: 'note', photo: null, page: n.title, pending: false, noteId: n.id }).catch(onWriteError);
+    n.itemIds.push(id);
+    made++;
+  }
+  await store.putNote(n).catch(onWriteError);
+  state.notes = (state.notes || []).filter(x => x.id !== n.id).concat(n);
+  nb.sel = n.id;
+  nb.mode = 'view';
+  nb.draft = null;
+  drawNotebook();
+  toast(made ? `Note saved · ${made} task${made === 1 ? '' : 's'}/question${made === 1 ? '' : 's'} added` : 'Note saved');
+  if (sendObs && state.obs) setTimeout(() => sendNoteToObsidian(n), 150);
+}
+
+async function nbAsk(question) {
+  const nb = state.nb;
+  const q = String(question || '').trim();
+  if (!q || !nb) return;
+  const qw = nbWords(q).filter(w => !NB_STOP.has(w));
+  const docs = [
+    ...(state.notes || []).map(n => ({ ref: n.id, kind: 'note', title: n.title, date: dayStr(new Date(n.created || 0)),
+      body: [n.summary, (n.points || []).join('; '), n.note || n.raw, (n.tags || []).join(' ')].filter(Boolean).join('\n') })),
+    ...state.items.filter(it => !it.example).map(it => ({ ref: it.id, kind: 'item', title: String(it.text).split('\n')[0].slice(0, 80), date: dayStr(new Date(it.createdAt || 0)),
+      body: `${it.text}${it.page ? ' (page: ' + it.page + ')' : ''} [${LABEL[it.bucket] || ''}${it.done ? ', done' : ''}]` })),
+  ];
+  const score = d => {
+    const t = nbWords(d.title), b = nbWords(d.body);
+    let sc = 0;
+    for (const w of qw) sc += 3 * t.filter(x => x.startsWith(w)).length + b.filter(x => x.startsWith(w)).length;
+    return sc;
+  };
+  let ranked = docs.map(d => ({ d, s: score(d) })).filter(x => x.s > 0).sort((a, b) => b.s - a.s).map(x => x.d);
+  if (!ranked.length) ranked = docs.filter(d => d.kind === 'note').slice(0, 5);
+  const picked = [];
+  let budget = 24000;
+  for (const d of ranked) {
+    const len = d.body.length + d.title.length + 40;
+    if (len > budget) continue;
+    picked.push(d);
+    budget -= len;
+    if (picked.length >= 12) break;
+  }
+  const turn = { q, a: '', refs: picked.map(d => d.ref), busy: true };
+  nb.chat.push(turn);
+  drawNotebook();
+  if (!state.sample) {
+    turn.busy = false;
+    turn.onlyRefs = true;
+    turn.a = picked.length ? 'No AI key, so here are the notes that match your question best:' : 'Nothing in your notebook matches that yet.';
+    drawNotebook();
+    return;
+  }
+  const field = state.field ? `The user's field: ${state.field}.` : '';
+  const history = nb.chat.slice(-4, -1).filter(t => t.a).map(t => `Q: ${t.q}\nA: ${t.a}`).join('\n\n');
+  const prompt = `You answer questions about the user's own research notebook. ${field}
+Use the NOTES below as your main source. After each sentence that uses a note, cite it by its id in square brackets, like [${picked[0] ? picked[0].ref : 'id'}].
+If the notes don't answer the question, say so plainly. You may then add general technical knowledge, starting that part with "General knowledge:". Never invent the user's own results, measurements or data.
+Keep the answer short and practical. Plain text, no Markdown headings.
+${history ? '\nEarlier in this conversation:\n' + history + '\n' : ''}
+NOTES:
+${picked.map(d => `[${d.ref}] ${d.title} (${d.kind === 'note' ? 'note' : 'quick note'}, ${d.date})\n${d.body}`).join('\n\n') || '(no notes yet)'}
+
+Question: ${q}`;
+  try {
+    const r = await state.sample(prompt, {});
+    turn.a = r.text.trim();
+    setAiStatus(null);
+  } catch (e) {
+    turn.onlyRefs = true;
+    turn.a = "Couldn't ask the AI (" + sampleMsg(e) + '). Here are the notes that match best:';
+  }
+  turn.busy = false;
+  if (state.nb === nb) drawNotebook();
+}
+
+function refChip(ref, label) {
+  const n = noteById(ref);
+  if (n) return h('button', { class: 'nb-chip', type: 'button', onclick: () => { state.nb.sel = n.id; state.nb.mode = 'view'; state.nb.pane = 'main'; drawNotebook(); } }, (label || '') + n.title);
+  const it = byId(ref);
+  if (it) return h('button', { class: 'nb-chip', type: 'button', onclick: () => openItem(it.id) }, (label || '') + String(it.text).split('\n')[0].slice(0, 40));
+  return null;
+}
+function answerNodes(turn) {
+  const box = h('p', { class: 'nb-a' });
+  const used = [];
+  String(turn.a || '').split(/(\[[A-Za-z0-9_-]+\])/g).forEach(part => {
+    const m = /^\[([A-Za-z0-9_-]+)\]$/.exec(part);
+    if (m && (noteById(m[1]) || byId(m[1]))) {
+      if (!used.includes(m[1])) used.push(m[1]);
+      box.append(h('sup', { style: 'color:var(--red);font-family:var(--f-mono);font-size:10px' }, `[${used.indexOf(m[1]) + 1}]`));
+    } else box.append(document.createTextNode(part));
+  });
+  const refs = turn.onlyRefs ? turn.refs.slice(0, 6) : used;
+  return [box, refs.length ? h('div', { class: 'nb-chips' }, refs.map((r, i) => refChip(r, turn.onlyRefs ? '' : `${i + 1} · `))) : null];
+}
+
+function drawNotebook() {
+  const nb = state.nb, el = nbEl();
+  if (!nb || !el) return;
+  el.dataset.pane = nb.pane;
+  const notes = nbSorted();
+  const q = String(nb.q || '').toLowerCase();
+  const shown = q ? notes.filter(n => [n.title, n.summary, n.note, n.raw, (n.tags || []).join(' ')].join(' ').toLowerCase().includes(q)) : notes;
+
+  // list column
+  const search = h('input', { class: 'field-in search-in', id: 'nb-search', type: 'search', placeholder: 'Search notes', 'aria-label': 'Search notebook' });
+  search.value = nb.q;
+  search.addEventListener('input', () => {
+    nb.q = search.value;
+    drawNotebook();
+    const s2 = document.getElementById('nb-search');
+    if (s2) { s2.focus(); s2.setSelectionRange(s2.value.length, s2.value.length); }
+  });
+  const list = h('div', { class: 'list', style: 'padding:0' },
+    shown.map(n => h('button', {
+      class: 'nb-row', type: 'button', 'aria-current': String(nb.sel === n.id && nb.mode === 'view'),
+      onclick: () => { nb.sel = n.id; nb.mode = 'view'; nb.pane = 'main'; drawNotebook(); },
+    },
+      h('span', { class: 't', text: n.title }),
+      h('span', { class: 'meta' }, h('span', { text: rel(n.updated || n.created) }), n.ai ? h('span', { text: '· AI' }) : null,
+        (n.tags || []).slice(0, 2).map(t => h('span', { class: 'tg', text: '#' + t }))))),
+    shown.length ? null : h('p', { class: 'empty', text: q ? 'No matches.' : 'No notes yet. Tap + New and write freely.' }));
+  const listCol = h('aside', { class: 'nb-list card-box' }, search, list);
+
+  // main column
+  const main = h('section', { class: 'nb-main card-box' });
+  const scroll = h('div', { class: 'nb-scroll' });
+  const foot = h('div', { class: 'nb-foot' });
+  const busyRow = nb.busy ? h('div', { class: 'status' }, h('span', { class: 'scanline', 'aria-hidden': 'true' }), h('span', { text: nb.busy }),
+    h('button', { class: 'btn', type: 'button', onclick: () => { if (nb.ctl) nb.ctl.abort(); } }, icon('stop'), 'Stop')) : null;
+
+  if (nb.mode === 'edit' && nb.draft) {
+    const d = nb.draft;
+    if (!d.result) {
+      const title = h('input', { class: 'field-in nb-title-in', id: 'nb-title', type: 'text', placeholder: 'Title (optional, the AI can write one)', 'aria-label': 'Note title' });
+      title.value = d.title;
+      title.addEventListener('input', () => { d.title = title.value; });
+      const ta = h('textarea', { class: 'nb-editor', id: 'nb-raw', placeholder: 'Write freely. Shorthand, half-sentences and symbols (! ? [] ->) are fine. Tap Comprehend when you are done.', 'aria-label': 'Notebook entry' });
+      ta.value = d.raw;
+      ta.addEventListener('input', () => { d.raw = ta.value; });
+      scroll.append(title, ta, busyRow);
+      const photo = h('input', { type: 'file', accept: 'image/*', hidden: true });
+      photo.addEventListener('change', () => { const f = photo.files && photo.files[0]; photo.value = ''; if (f) nbTranscribe(f); });
+      foot.append(
+        state.sample ? h('button', { class: 'btn', type: 'button', disabled: !!nb.busy, onclick: () => photo.click() }, 'Transcribe a page') : null, photo,
+        h('span', { class: 'grow' }),
+        h('button', { class: 'btn', type: 'button', disabled: !!nb.busy, onclick: () => { nb.mode = 'view'; nb.draft = null; nb.pane = nb.sel ? 'main' : 'list'; drawNotebook(); } }, 'Cancel'),
+        h('button', { class: 'btn', type: 'button', disabled: !!nb.busy, onclick: () => { if (!d.raw.trim()) { toast('Write something first.'); return; } d.result = offlineResult(d.raw, d.title); nbSave(false); } }, 'Save as written'),
+        h('button', { class: 'btn primary', id: 'nb-comprehend', type: 'button', disabled: !!nb.busy, onclick: nbComprehend }, state.sample ? 'Comprehend' : 'Tidy (no AI)'));
+    } else {
+      const r = d.result;
+      const title = h('input', { class: 'field-in nb-title-in', id: 'nb-title', type: 'text', 'aria-label': 'Note title' });
+      title.value = d.title || r.title;
+      title.addEventListener('input', () => { d.title = title.value; });
+      scroll.append(h('span', { class: 'lbl', text: r.ai ? 'Review what Kura understood' : 'Kept as written (no AI)' }), title);
+      if (r.summary) scroll.append(h('p', { class: 'nb-sum', text: r.summary }));
+      if (r.points.length) scroll.append(h('div', { class: 'nb-sec' }, h('span', { class: 'lbl', text: 'Key points' }), mdNodes(r.points.map(p => '- ' + p).join('\n'))));
+      scroll.append(h('div', { class: 'nb-sec' }, h('span', { class: 'lbl', text: 'Note' }), mdNodes(r.note)));
+      if (r.context.length) {
+        scroll.append(h('div', { class: 'nb-ctx' }, h('span', { class: 'lbl', text: 'Technical context · added by AI, check before relying on it' }),
+          r.context.map(c => h('p', {}, h('strong', { text: c.term + ': ' }), c.explain))));
+      }
+      if (r.tasks.length) {
+        scroll.append(h('div', { class: 'nb-sec' }, h('span', { class: 'lbl', text: 'Tasks → MAKE' }),
+          r.tasks.map((t, i) => {
+            const cb = h('input', { type: 'checkbox', 'aria-label': 'Add task ' + (i + 1) });
+            cb.checked = t.keep;
+            cb.addEventListener('change', () => { t.keep = cb.checked; });
+            const tog = h('button', { class: 'tog', type: 'button', 'aria-pressed': String(t.today), onclick: e => { e.preventDefault(); t.today = !t.today; tog.setAttribute('aria-pressed', String(t.today)); } }, 'Today');
+            return h('div', { class: 'nb-pick' }, cb, h('span', { text: t.text }), tog);
+          })));
+      }
+      if (r.questions.length) {
+        scroll.append(h('div', { class: 'nb-sec' }, h('span', { class: 'lbl', text: 'Open questions → STOCK · ? Unresolved' }),
+          r.questions.map((q2, i) => {
+            const cb = h('input', { type: 'checkbox', 'aria-label': 'Add question ' + (i + 1) });
+            cb.checked = q2.keep;
+            cb.addEventListener('change', () => { q2.keep = cb.checked; });
+            return h('div', { class: 'nb-pick' }, cb, h('span', { text: q2.text }));
+          })));
+      }
+      if (r.tags.length) scroll.append(h('div', { class: 'nb-chips' }, r.tags.map(t => h('span', { class: 'nb-chip', text: '#' + t }))));
+      let sendBox = null;
+      if (state.obs) {
+        const c = h('input', { type: 'checkbox', id: 'nb-send' });
+        c.checked = d.sendObs !== false;
+        c.addEventListener('change', () => { d.sendObs = c.checked; });
+        sendBox = h('label', { class: 'keep', for: 'nb-send' }, c, 'Send to Obsidian');
+      }
+      foot.append(sendBox, h('span', { class: 'grow' }),
+        h('button', { class: 'btn', type: 'button', onclick: () => { d.result = null; drawNotebook(); } }, 'Back to editing'),
+        h('button', { class: 'btn primary', id: 'nb-save', type: 'button', onclick: () => nbSave(!!state.obs && d.sendObs !== false) }, 'Save note'));
+    }
+  } else if (nb.mode === 'ask') {
+    scroll.append(h('p', { class: 'muted', text: state.sample
+      ? 'Ask anything about your notebook. Answers come from your notes, with sources listed; general knowledge is labelled as such.'
+      : 'No AI key, so Ask shows the notes that best match your question. Add a free Gemini key in Settings for written answers.' }));
+    for (const t of nb.chat) {
+      scroll.append(h('div', { class: 'nb-sec' }, h('span', { class: 'nb-q', text: 'Q · ' + t.q }),
+        t.busy ? h('div', { class: 'status' }, h('span', { class: 'scanline' }), h('span', { text: 'Thinking…' })) : answerNodes(t)));
+    }
+    const inp = h('input', { class: 'field-in', id: 'nb-ask', type: 'text', placeholder: 'e.g. what did I find about impedance?', 'aria-label': 'Question', enterkeyhint: 'send' });
+    const go = () => { const v = inp.value; inp.value = ''; nbAsk(v); };
+    inp.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); go(); } });
+    foot.append(h('div', { class: 'nb-ask-in', style: 'flex:1' }, inp, h('button', { class: 'btn primary', id: 'nb-ask-go', type: 'button', onclick: go }, 'Ask')));
+  } else {
+    const n = nb.sel && noteById(nb.sel);
+    if (!n) {
+      scroll.append(h('p', { class: 'empty', text: 'Pick a note, or tap + New to write one.' }));
+    } else {
+      const linked = state.items.filter(it => it.noteId === n.id);
+      scroll.append(
+        h('span', { class: 'lbl', text: `${new Date(n.created).toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}${n.ai ? ' · comprehended' : ''}${n.sentAt ? ' · in Obsidian' : ''}` }),
+        h('h3', { class: 'nb-title', text: n.title }),
+        n.summary ? h('p', { class: 'nb-sum', text: n.summary }) : null,
+        (n.points || []).length ? h('div', { class: 'nb-sec' }, h('span', { class: 'lbl', text: 'Key points' }), mdNodes(n.points.map(p => '- ' + p).join('\n'))) : null,
+        h('div', { class: 'nb-sec' }, h('span', { class: 'lbl', text: 'Note' }), mdNodes(n.note || n.raw)),
+        (n.context || []).length ? h('div', { class: 'nb-ctx' }, h('span', { class: 'lbl', text: 'Technical context · added by AI, check before relying on it' }),
+          n.context.map(c => h('p', {}, h('strong', { text: c.term + ': ' }), c.explain))) : null,
+        linked.length ? h('div', { class: 'nb-sec' }, h('span', { class: 'lbl', text: 'Tasks & questions from this note' }),
+          h('div', { class: 'nb-chips' }, linked.map(it => h('button', { class: 'nb-chip', type: 'button', onclick: () => openItem(it.id) }, (it.done ? '✓ ' : '') + String(it.text).slice(0, 50))))) : null,
+        (n.tags || []).length ? h('div', { class: 'nb-chips' }, n.tags.map(t => h('span', { class: 'nb-chip', text: '#' + t }))) : null,
+        n.raw && n.raw.trim() !== (n.note || '').trim() ? h('details', {}, h('summary', { class: 'lbl', text: 'Your original words' }), h('p', { class: 'nb-a', text: n.raw })) : null);
+      const del = h('button', { class: 'btn danger', type: 'button', onclick: async () => {
+        if (!nb.confirmDel) { nb.confirmDel = true; del.textContent = 'Tap again to delete'; return; }
+        nb.confirmDel = false;
+        await store.deleteNote(n.id).catch(onWriteError);
+        state.notes = state.notes.filter(x => x.id !== n.id);
+        const next = nbSorted()[0];
+        nb.sel = next ? next.id : null;
+        nb.pane = 'list';
+        drawNotebook();
+        toast('Note deleted (its tasks stay in Kura)');
+      } }, 'Delete');
+      foot.append(del, h('span', { class: 'grow' }),
+        state.obs ? h('button', { class: 'btn', type: 'button', onclick: () => sendNoteToObsidian(n) }, n.sentAt ? 'Send again' : 'Send to Obsidian') : null,
+        h('button', { class: 'btn', type: 'button', onclick: () => { nb.draft = { id: n.id, title: n.title, raw: n.raw || n.note, result: null }; nb.mode = 'edit'; drawNotebook(); } }, 'Edit'),
+        h('button', { class: 'btn primary', type: 'button', onclick: () => { nb.draft = { id: n.id, title: '', raw: n.raw || n.note, result: null }; nb.mode = 'edit'; nbComprehend(); } }, state.sample ? 'Re-comprehend' : 'Re-tidy'));
+    }
+  }
+  main.append(scroll, foot);
+
+  const top = h('div', { class: 'nb-top' },
+    h('button', { class: 'ghost', type: 'button', 'aria-label': 'Back', onclick: () => { if (nb.pane === 'main' && innerWidth < 720) { nb.pane = 'list'; drawNotebook(); } else closeNotebook(); } }, '←'),
+    h('h2', { text: `NOTEBOOK / ${pad2(notes.length)}` }),
+    h('span', { class: 'grow' }),
+    h('button', { class: 'btn', id: 'nb-ask-tab', type: 'button', 'aria-pressed': String(nb.mode === 'ask'), onclick: () => { nb.mode = 'ask'; nb.pane = 'main'; drawNotebook(); } }, 'Ask'),
+    h('button', { class: 'btn primary', id: 'nb-new', type: 'button', onclick: () => {
+      nb.draft = { id: null, title: '', raw: '', result: null }; nb.mode = 'edit'; nb.pane = 'main'; drawNotebook();
+      const t = document.getElementById('nb-raw'); if (t) t.focus();
+    } }, '+ New'),
+    h('button', { class: 'ghost', type: 'button', 'aria-label': 'Close notebook', onclick: () => closeNotebook() }, icon('close')));
+  const prevScroll = el.querySelector('.nb-scroll');
+  const keep = prevScroll && nb.mode !== 'ask' ? prevScroll.scrollTop : 0;
+  el.replaceChildren(h('div', { class: 'nb-in' }, top, h('div', { class: 'nb-body' }, listCol, main)));
+  if (keep) scroll.scrollTop = keep;
+  if (nb.mode === 'ask') scroll.scrollTop = scroll.scrollHeight;
+}
+
 /* ---------- capabilities ---------- */
 function syncClaudeUI() {
   $('.chip[data-r="auto"]', els.route).hidden = false;   // on-phone rules always work
@@ -2342,7 +2876,8 @@ function openSettings(section) {
   const o = state.obs || DEFAULT_OBS;
   state.sheet = {
     kind: 'settings', provider: a.provider || 'gemini', key: a.key || '', scan: a.scan || '', sort: a.sort || '', status: '', busy: false, confirmImport: null,
-    vault: o.vault, target: o.target, note: o.note, tasksDates: o.tasksDates, includeDrop: o.includeDrop, obsStatus: '',
+    vault: o.vault, target: o.target, note: o.note, tasksDates: o.tasksDates, includeDrop: o.includeDrop, notesFolder: o.notesFolder || DEFAULT_OBS.notesFolder, obsStatus: '',
+    field: state.field || '',
     gurl: (state.gt && state.gt.url) || '', glist: (state.gt && state.gt.list) || 'Kura', gmake: !!(state.gt && state.gt.includeMake), gstatus: '', gbusy: false, showScript: false,
   };
   drawSettings();
@@ -2355,7 +2890,7 @@ async function saveObs(s, quiet) {
     else if (!quiet) s.obsStatus = 'Type your vault name first.';
     return null;
   }
-  const cfg = { vault, target: s.target === 'note' ? 'note' : 'daily', note: String(s.note || '').trim().replace(/\.md$/i, '') || DEFAULT_OBS.note, tasksDates: !!s.tasksDates, includeDrop: !!s.includeDrop };
+  const cfg = { vault, target: s.target === 'note' ? 'note' : 'daily', note: String(s.note || '').trim().replace(/\.md$/i, '') || DEFAULT_OBS.note, tasksDates: !!s.tasksDates, includeDrop: !!s.includeDrop , notesFolder: String(s.notesFolder || '').trim().replace(/^\/+|\/+$/g, '') || DEFAULT_OBS.notesFolder };
   if (store.kvSet) await store.kvSet('obsidian', cfg).catch(() => {});
   await loadObs();
   if (!quiet) s.obsStatus = cfg.target === 'daily' ? `Saved. New notes go to today's daily note in "${vault}".` : `Saved. New notes go to ${cfg.note}.md in "${vault}".`;
@@ -2429,6 +2964,12 @@ function drawSettings() {
     vault,
     h('div', { class: 'row' }, h('div', { class: 'seg', role: 'group', 'aria-label': 'Where notes go' }, tBtn('daily', 'DAILY NOTE'), tBtn('note', 'ONE NOTE'))),
     note,
+    (() => {
+      const f = h('input', { class: 'field-in', id: 'obs-notes', type: 'text', autocomplete: 'off', placeholder: 'Kura/Notes', 'aria-label': 'Notebook folder in your vault' });
+      f.value = s.notesFolder;
+      f.addEventListener('input', () => { s.notesFolder = f.value; });
+      return h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'Folder for notebook notes (one file per note)' }), f);
+    })(),
     h('p', { class: 'muted', text: 'Daily note needs the Daily notes core plugin turned on in Obsidian.' }),
     chk('obs-dates', 'tasksDates', 'Add Tasks plugin dates (📅 due, ✅ done) to tasks'),
     chk('obs-drop', 'includeDrop', 'Also send DROP notes'),
@@ -2545,6 +3086,13 @@ function drawSettings() {
       h('button', { class: 'btn primary', id: 'api-save', type: 'button', disabled: s.busy, onclick: saveKey }, s.busy ? 'Checking…' : 'Save and test'),
       state.api && state.api.provider === s.provider ? h('button', { class: 'btn danger', type: 'button', onclick: removeKey }, 'Remove key') : null),
     s.status ? h('p', { class: 'muted ok', text: s.status }) : null,
+    (() => {
+      const f = h('input', { class: 'field-in', id: 'ai-field', type: 'text', autocomplete: 'off', placeholder: 'e.g. biomedical engineering', 'aria-label': 'Your field' });
+      f.value = s.field;
+      f.addEventListener('input', () => { s.field = f.value; });
+      f.addEventListener('change', async () => { state.field = f.value.trim().slice(0, 200); if (store.kvSet) await store.kvSet('field', state.field).catch(() => {}); });
+      return h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'Your field (helps the notebook understand technical notes)' }), f);
+    })(),
     h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'Model for Brain Camera' }), scan),
     h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'Model for Auto sort' }), sort),
     h('p', { class: 'muted', text: s.provider === 'gemini' ? 'Leave the model boxes as they are. Kura picks the newest Gemini Flash for reading pages and Flash-Lite for sorting when you save the key.' : 'Leave the model boxes as they are. Kura picks the newest Sonnet for reading pages and the newest Haiku for sorting when you save the key.' }),
@@ -2567,7 +3115,7 @@ function drawSettings() {
     h('div', { class: 'sheet-foot' }, h('span', { class: 'grow' }),
       h('button', { class: 'btn', type: 'button', onclick: async () => {
         const o = state.obs || DEFAULT_OBS;
-        if (String(s.vault || '').trim() !== (o.vault || '') || s.target !== o.target || s.note !== o.note || !!s.tasksDates !== !!o.tasksDates || !!s.includeDrop !== !!o.includeDrop) await saveObs(s, true);
+        if (String(s.vault || '').trim() !== (o.vault || '') || s.target !== o.target || s.note !== o.note || !!s.tasksDates !== !!o.tasksDates || !!s.includeDrop !== !!o.includeDrop || (s.notesFolder || '') !== (o.notesFolder || DEFAULT_OBS.notesFolder)) await saveObs(s, true);
         if (state.api && (s.scan !== state.api.scan || s.sort !== state.api.sort) && s.scan) {
           const cfg = { ...state.api, scan: s.scan, sort: s.sort || s.scan };
           await store.kvSet('api', cfg).catch(() => {});
@@ -2582,7 +3130,7 @@ $('#gt-stat').addEventListener('click', () => openDiag());
 $('#ai-stat').addEventListener('click', () => openDiag());
 
 function exportBackup() {
-  const data = { app: 'kura', version: 1, exportedAt: new Date().toISOString(), symbols: state.symbols, obsidian: state.obs || null, items: state.items };
+  const data = { app: 'kura', version: 1, exportedAt: new Date().toISOString(), symbols: state.symbols, obsidian: state.obs || null, items: state.items, notes: state.notes || [] };
   const blob = new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = h('a', { href: url, download: `kura-backup-${dayStr()}.json` });
@@ -2613,6 +3161,7 @@ async function doImport(data) {
   }
   const syms = cleanSymbols(data.symbols);
   if (syms) await store.setSettings({ symbols: syms, updatedAt: Date.now() }).catch(() => {});
+  if (Array.isArray(data.notes) && store.putNote) { for (const nt of data.notes) if (nt && typeof nt.id === 'string') await store.putNote(nt).catch(() => {}); state.notes = await store.listNotes(); }
   if (!state.obs && data.obsidian && data.obsidian.vault && store.kvSet) { await store.kvSet('obsidian', { ...DEFAULT_OBS, ...data.obsidian }).catch(() => {}); await loadObs(); }
   if (state.sheet && state.sheet.kind === 'settings') { state.sheet.confirmImport = null; state.sheet.status = `Imported ${n} notes.`; drawSettings(); }
 }
@@ -2654,6 +3203,8 @@ async function boot() {
     return rawRemove(id);
   };
   await loadObs();
+  state.notes = store.listNotes ? await store.listNotes().catch(() => []) : [];
+  state.field = store.kvGet ? ((await store.kvGet('field').catch(() => '')) || '') : '';
   await loadApi();
   scheduleGtSync(1500);
   try { els.input.focus({ preventScroll: true }); } catch (e) {}
