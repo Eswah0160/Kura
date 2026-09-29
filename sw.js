@@ -1,5 +1,5 @@
-/* Keitan service worker: keeps the app working offline. Never touches api.anthropic.com. */
-const CACHE = 'keitan-v1';
+/* Kura service worker: keeps the app working offline. Never touches api.anthropic.com. */
+const CACHE = 'kura-v2';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png'];
 
 self.addEventListener('install', e => {

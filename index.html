@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
-<title>Keitan</title>
-<meta name="description" content="Keitan: a notebook home for paper notes and AI. Write instantly, scan handwritten pages, sort into DROP, STOCK, MAKE and TODAY.">
+<title>Kura</title>
+<meta name="description" content="Kura: a notebook home for paper notes and AI. Write instantly, scan handwritten pages, sort into DROP, STOCK, MAKE and TODAY.">
 <meta name="theme-color" content="#E7E7E4" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#111110" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.webmanifest">
@@ -378,6 +378,8 @@ textarea.field-in { resize: vertical; min-height: 96px; }
   .inv .fa { opacity: 1; }
   .cannon { transition: none; }
 }
+.vault-btn b { font-weight: 500; color: var(--red); }
+@media (max-width: 719px) { .vault-btn .vl { display: none; } }
 .set-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .set-row .field-in { flex: 1; min-width: 0; }
 .ok { color: var(--ink); }
@@ -399,6 +401,10 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
         <button class="ghost" id="btn-search" type="button" aria-label="Search">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg>
         </button>
+        <button class="ghost vault-btn" id="btn-vault" type="button" aria-label="Send new notes to Obsidian">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18v3H3z"/><path d="M4.5 8v11h15V8"/><path d="M12 10.5v5.5M9.5 13.5L12 16l2.5-2.5"/></svg>
+          <span class="vl">Vault</span><b id="vault-n"></b>
+        </button>
         <button class="ghost" id="btn-settings" type="button" aria-label="Settings">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg>
         </button>
@@ -413,7 +419,7 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
       <span class="cannon" id="cannon" aria-hidden="true"></span>
     </div>
     <button class="wordmark" id="wordmark" type="button" aria-label="Write a note">
-      <span>K</span><span>E</span><span>I</span><span>T</span><span>A</span><span>N</span><span class="arr">→</span>
+      <span>K</span><span>U</span><span>R</span><span>A</span><span class="arr">→</span>
     </button>
   </section>
 
@@ -853,7 +859,7 @@ function sampleMsg(e) {
     case 'rate_limited': return 'Anthropic rate limit reached. Wait a minute and try again.';
     case 'network': return "Couldn't reach Anthropic. Check your connection and try again.";
     case 'refused': return "Claude couldn't read this page. Try another photo.";
-    case 'invalid_json': case 'empty_completion': return "The page came back in a form Keitan couldn't read. Try again.";
+    case 'invalid_json': case 'empty_completion': return "The page came back in a form Kura couldn't read. Try again.";
     case 'invalid_request': return 'Anthropic said: ' + ((e && e.message) || 'the request was invalid.') + ' Check the model names and credit balance in Settings.';
     case 'no_key': return 'Add your Anthropic API key in Settings to use Brain Camera.';
     default: return 'Anthropic had a problem (' + ((e && e.message) || 'unknown error') + '). Try again.';
@@ -946,6 +952,7 @@ function render() {
   els.no.textContent = String(state.items.length + 1).padStart(3, '0');
   drawField();
   drawTiles();
+  drawVault();
   drawBanner();
 }
 
@@ -1004,9 +1011,10 @@ let bannerMsg = null;
 function drawBanner() {
   const nodes = [];
   if (bannerMsg) nodes.push(h('span', { text: bannerMsg }));
-  if (!state.sample && !state.keyDismissed) {
-    nodes.push(h('span', { text: 'Add your Anthropic API key to turn on Brain Camera and Auto sort.' }),
-      h('button', { type: 'button', onclick: openSettings }, 'Open settings'),
+  const missing = [!state.obs && 'your Obsidian vault', !state.sample && 'an Anthropic API key'].filter(Boolean);
+  if (missing.length && !state.keyDismissed) {
+    nodes.push(h('span', { text: `Finish setup: add ${missing.join(' and ')} in Settings.` }),
+      h('button', { type: 'button', onclick: () => openSettings() }, 'Open settings'),
       h('button', { type: 'button', onclick: () => { state.keyDismissed = true; drawBanner(); } }, 'Later'));
   }
   const ex = state.items.filter(i => i.example);
@@ -1016,6 +1024,96 @@ function drawBanner() {
   }
   els.banner.replaceChildren(...nodes);
   els.banner.hidden = nodes.length === 0;
+}
+
+/* ---------- Obsidian ---------- */
+const DEFAULT_OBS = { vault: '', target: 'daily', note: 'Kura/Inbox', tasksDates: true, includeDrop: false };
+const tagSlug = t => String(t).toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\p{L}\p{N}_\-/]/gu, '');
+function mdLine(it, cfg) {
+  const isTask = it.bucket === 'make' || !!it.today;
+  const text = String(it.text || '').trim().replace(/\r?\n/g, '\n  ');
+  const tags = ['#kura/' + it.bucket];
+  for (const id of knownTags(it)) {
+    const t = tagSlug(symById(id).name);
+    if (t && /[^\d]/.test(t)) tags.push('#' + t);
+  }
+  let line = (isTask ? (it.done ? '- [x] ' : '- [ ] ') : '- ') + text;
+  if (it.page) line += ` (page: ${it.page})`;
+  line += ' ' + tags.join(' ');
+  if (isTask && cfg.tasksDates && it.today) line += ' 📅 ' + it.today;
+  if (isTask && cfg.tasksDates && it.done && it.doneAt) line += ' ✅ ' + dayStr(new Date(it.doneAt));
+  return line;
+}
+function unsent() {
+  const cfg = state.obs;
+  if (!cfg) return [];
+  return state.items
+    .filter(it => !it.sentAt && !it.example && !(it.pending && Date.now() - (it.createdAt || 0) < 120000) && (cfg.includeDrop || it.bucket !== 'drop'))
+    .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+}
+function obsUri(cfg, content) {
+  const enc = encodeURIComponent;
+  const common = `vault=${enc(cfg.vault)}&content=${enc(content)}&append=true&silent=true`;
+  return cfg.target === 'note'
+    ? `obsidian://new?${common}&file=${enc(cfg.note || DEFAULT_OBS.note)}`
+    : `obsidian://daily?${common}`;
+}
+const openExternal = uri => (window.__kuraOpen || (u => { location.href = u; }))(uri);
+let sendWatch = null;
+function launchObsidian(uri, onOpened) {
+  if (sendWatch) sendWatch(false);
+  let settled = false;
+  const onLeave = () => { if (document.visibilityState === 'hidden' || !document.hasFocus()) finish(true); };
+  const finish = ok => {
+    if (settled) return;
+    settled = true;
+    sendWatch = null;
+    document.removeEventListener('visibilitychange', onLeave);
+    window.removeEventListener('blur', onLeave);
+    window.removeEventListener('pagehide', onLeave);
+    clearTimeout(t1); clearTimeout(t2);
+    if (ok && onOpened) onOpened();
+  };
+  document.addEventListener('visibilitychange', onLeave);
+  window.addEventListener('blur', onLeave);
+  window.addEventListener('pagehide', onLeave);
+  const t1 = setTimeout(() => { if (!settled) toast("If Obsidian didn't open, check it's installed and the vault name in Settings."); }, 3000);
+  const t2 = setTimeout(() => finish(false), 15000);
+  sendWatch = finish;
+  openExternal(uri);
+}
+function sendToObsidian(items, force) {
+  const cfg = state.obs;
+  if (!cfg || !cfg.vault) { toast('Connect your Obsidian vault in Settings first.'); openSettings('obsidian'); return; }
+  const list = force ? items.filter(Boolean) : items;
+  if (!list.length) { toast('Nothing new to send to Obsidian.'); return; }
+  const MAX = 6000;
+  const batch = [];
+  let len = 0;
+  for (const it of list) {
+    const l = mdLine(it, cfg);
+    if (batch.length && len + l.length + 1 > MAX) break;
+    batch.push({ id: it.id, l });
+    len += l.length + 1;
+  }
+  const rest = list.length - batch.length;
+  const ids = batch.map(b => b.id);
+  launchObsidian(obsUri(cfg, '\n' + batch.map(b => b.l).join('\n')), async () => {
+    const now = Date.now();
+    for (const id of ids) await store.update(id, { sentAt: now }).catch(() => {});
+    toast(rest ? `Sent ${ids.length}. Tap Vault again to send the other ${rest}.` : `Sent ${ids.length} to Obsidian`);
+  });
+}
+function drawVault() {
+  const n = state.obs ? unsent().length : 0;
+  $('#vault-n').textContent = n ? pad2(n) : '';
+  $('#btn-vault').setAttribute('aria-label', state.obs ? `Send ${n} new notes to Obsidian` : 'Connect Obsidian');
+}
+$('#btn-vault').addEventListener('click', () => sendToObsidian(unsent()));
+async function loadObs() {
+  const cfg = store.kvGet ? await store.kvGet('obsidian').catch(() => null) : null;
+  state.obs = cfg && cfg.vault ? { ...DEFAULT_OBS, ...cfg } : null;
+  render();
 }
 
 /* ---------- actions ---------- */
@@ -1318,6 +1416,10 @@ function drawItem() {
         todayBtn),
       h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'Symbols' }),
         tagChips(knownTags(it), tags => patch(s.id, { tags }))),
+      state.obs ? h('div', { class: 'row' },
+        h('button', { class: 'btn', type: 'button', onclick: () => { commitItemText(); sendToObsidian([byId(s.id)], true); } },
+          it.sentAt ? 'Send to Obsidian again' : 'Send to Obsidian'),
+        it.sentAt ? h('span', { class: 'lbl', text: 'In Obsidian · sent ' + rel(it.sentAt) }) : null) : null,
       it.example ? h('p', { class: 'muted', text: 'This is an example note. Delete it, or clear all examples from the banner.' }) : null,
       src),
     h('div', { class: 'sheet-foot' }, del, h('span', { class: 'grow' }),
@@ -1446,7 +1548,7 @@ async function downscale(file, max, quality) {
 function ocrPrompt() {
   const wd = new Date().toLocaleDateString('en-AU', { weekday: 'long' });
   const legend = state.symbols.map(s => `   - id "${s.id}": ${s.mark}${s.draw ? ` (${s.draw})` : ''} = ${s.name}`).join('\n');
-  return `You are Brain Camera, the reading-and-sorting step of Keitan, a notebook app that links paper notes to a digital task list.
+  return `You are Brain Camera, the reading-and-sorting step of Kura, a notebook app that links paper notes to a digital task list.
 The image is a phone photo of one page (or a two-page spread) of the user's handwritten notebook. Today is ${wd} ${TODAY}.
 
 1. Read all the handwriting. Ignore ruled lines, dot grids, page numbers, printed notebook branding and anything outside the page.
@@ -1589,6 +1691,12 @@ function drawScan() {
       k.addEventListener('change', () => { scan.keepPhoto = k.checked; });
       foot.append(h('label', { class: 'keep', for: 'keep-photo' }, k, 'Keep the photo'));
     }
+    if (state.obs) {
+      const o = h('input', { type: 'checkbox', id: 'send-obs' });
+      o.checked = scan.sendObs !== false;
+      o.addEventListener('change', () => { scan.sendObs = o.checked; });
+      foot.append(h('label', { class: 'keep', for: 'send-obs' }, o, 'Send to Obsidian'));
+    }
     foot.append(h('span', { class: 'grow' }),
       h('button', { class: 'btn', type: 'button', onclick: closeSheet, disabled: scan.status === 'saving' }, 'Cancel'),
       addBtn);
@@ -1616,6 +1724,8 @@ async function commitScan(btn) {
   const now = Date.now();
   const page = scan.title.trim().slice(0, 80) || null;
   let saved = 0;
+  const savedIds = [];
+  const sendObs = !!state.obs && scan.sendObs !== false;
   for (let i = 0; i < chosen.length; i++) {
     const r = chosen[i];
     const id = store.newId();
@@ -1626,10 +1736,12 @@ async function commitScan(btn) {
         source: 'scan', photo, page, pending: false,
       });
       saved++;
+      savedIds.push(id);
     } catch (e) { onWriteError(e); break; }
   }
   closeSheet();
   if (saved) toast(`Added ${saved} note${saved === 1 ? '' : 's'} from your page`);
+  if (saved && sendObs) setTimeout(() => sendToObsidian(savedIds.map(byId).filter(it => it && (state.obs.includeDrop || it.bucket !== 'drop')), true), 200);
 }
 
 /* ---------- capabilities ---------- */
@@ -1667,10 +1779,28 @@ async function loadApi() {
 }
 
 /* ---------- settings ---------- */
-function openSettings() {
+function openSettings(section) {
   const a = state.api || {};
-  state.sheet = { kind: 'settings', key: a.key || '', scan: a.scan || '', sort: a.sort || '', status: '', busy: false, confirmImport: null };
+  const o = state.obs || DEFAULT_OBS;
+  state.sheet = {
+    kind: 'settings', key: a.key || '', scan: a.scan || '', sort: a.sort || '', status: '', busy: false, confirmImport: null,
+    vault: o.vault, target: o.target, note: o.note, tasksDates: o.tasksDates, includeDrop: o.includeDrop, obsStatus: '',
+  };
   drawSettings();
+  if (section === 'obsidian') { const v = $('#obs-vault'); if (v) v.focus(); }
+}
+async function saveObs(s, quiet) {
+  const vault = String(s.vault || '').trim();
+  if (!vault) {
+    if (state.obs) { await store.kvDel('obsidian').catch(() => {}); await loadObs(); if (!quiet) s.obsStatus = 'Obsidian disconnected.'; }
+    else if (!quiet) s.obsStatus = 'Type your vault name first.';
+    return null;
+  }
+  const cfg = { vault, target: s.target === 'note' ? 'note' : 'daily', note: String(s.note || '').trim().replace(/\.md$/i, '') || DEFAULT_OBS.note, tasksDates: !!s.tasksDates, includeDrop: !!s.includeDrop };
+  if (store.kvSet) await store.kvSet('obsidian', cfg).catch(() => {});
+  await loadObs();
+  if (!quiet) s.obsStatus = cfg.target === 'daily' ? `Saved. New notes go to today's daily note in "${vault}".` : `Saved. New notes go to ${cfg.note}.md in "${vault}".`;
+  return cfg;
 }
 function drawSettings() {
   const s = state.sheet;
@@ -1687,7 +1817,7 @@ function drawSettings() {
 
   const saveKey = async () => {
     if (!s.key) { s.status = 'Paste your API key first.'; drawSettings(); return; }
-    if (!store.kvSet) { s.status = "This browser won't let Keitan save settings."; drawSettings(); return; }
+    if (!store.kvSet) { s.status = "This browser won't let Kura save settings."; drawSettings(); return; }
     s.busy = true; s.status = 'Checking your key…'; drawSettings();
     try {
       const ids = await listModels(s.key);
@@ -1713,7 +1843,48 @@ function drawSettings() {
     drawSettings();
   };
 
+  const vault = h('input', { class: 'field-in', id: 'obs-vault', type: 'text', autocomplete: 'off', placeholder: 'Vault name, exactly as shown in Obsidian', 'aria-label': 'Obsidian vault name' });
+  vault.value = s.vault;
+  vault.addEventListener('input', () => { s.vault = vault.value; });
+  const note = h('input', { class: 'field-in', id: 'obs-note', type: 'text', autocomplete: 'off', placeholder: 'Kura/Inbox', 'aria-label': 'Note path in your vault', hidden: s.target !== 'note' });
+  note.value = s.note;
+  note.addEventListener('input', () => { s.note = note.value; });
+  const tBtn = (val, label) => h('button', {
+    type: 'button', style: '--c: var(--ink)', 'aria-pressed': String(s.target === val),
+    onclick: e => {
+      s.target = val;
+      $$('button', e.currentTarget.parentNode).forEach(b => b.setAttribute('aria-pressed', String(b === e.currentTarget)));
+      note.hidden = val !== 'note';
+    },
+  }, label);
+  const chk = (id, key, label) => {
+    const c = h('input', { type: 'checkbox', id });
+    c.checked = !!s[key];
+    c.addEventListener('change', () => { s[key] = c.checked; });
+    return h('label', { class: 'keep', for: id }, c, label);
+  };
+  const obsSection = [
+    h('span', { class: 'lbl', text: 'Obsidian vault' }),
+    h('p', { class: 'muted', text: 'Kura sends notes into your vault as Markdown lines, with tags like #kura/make and #important. Obsidian must be installed on this phone with your vault open in it. Each send opens Obsidian for a moment.' }),
+    vault,
+    h('div', { class: 'row' }, h('div', { class: 'seg', role: 'group', 'aria-label': 'Where notes go' }, tBtn('daily', 'DAILY NOTE'), tBtn('note', 'ONE NOTE'))),
+    note,
+    h('p', { class: 'muted', text: 'Daily note needs the Daily notes core plugin turned on in Obsidian.' }),
+    chk('obs-dates', 'tasksDates', 'Add Tasks plugin dates (📅 due, ✅ done) to tasks'),
+    chk('obs-drop', 'includeDrop', 'Also send DROP notes'),
+    h('div', { class: 'row' },
+      h('button', { class: 'btn primary', type: 'button', onclick: async () => { await saveObs(s); drawSettings(); } }, 'Save'),
+      h('button', { class: 'btn', type: 'button', onclick: async () => {
+        const cfg = await saveObs(s);
+        drawSettings();
+        if (cfg) launchObsidian(obsUri(cfg, `\n- Kura is connected ✓ (${new Date().toLocaleString('en-AU')})`), () => {});
+      } }, 'Send a test line')),
+    s.obsStatus ? h('p', { class: 'muted ok', text: s.obsStatus }) : null,
+    h('hr', { class: 'rule' }),
+  ];
+
   const body = h('div', { class: 'sheet-body' },
+    obsSection,
     h('span', { class: 'lbl', text: 'Anthropic API key' }),
     h('p', { class: 'muted', text: 'Brain Camera and Auto sort call Claude with your own API key. It is stored only on this phone and sent only to api.anthropic.com. Usage is billed to your Anthropic API account, separately from a Claude subscription.' }),
     h('div', { class: 'set-row' }, key),
@@ -1723,7 +1894,7 @@ function drawSettings() {
     s.status ? h('p', { class: 'muted ok', text: s.status }) : null,
     h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'Model for Brain Camera' }), scan),
     h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'Model for Auto sort' }), sort),
-    h('p', { class: 'muted', text: 'Leave the model boxes as they are. Keitan picks the newest Sonnet for reading pages and the newest Haiku for sorting when you save the key.' }),
+    h('p', { class: 'muted', text: 'Leave the model boxes as they are. Kura picks the newest Sonnet for reading pages and the newest Haiku for sorting when you save the key.' }),
     h('hr', { class: 'rule' }),
     h('span', { class: 'lbl', text: 'Backup' }),
     h('p', { class: 'muted', text: `Your ${state.items.length} notes are stored on this phone only. Export a backup now and then. Photos are not included.` }),
@@ -1742,6 +1913,8 @@ function drawSettings() {
     head('SETTINGS', ''), body,
     h('div', { class: 'sheet-foot' }, h('span', { class: 'grow' }),
       h('button', { class: 'btn', type: 'button', onclick: async () => {
+        const o = state.obs || DEFAULT_OBS;
+        if (String(s.vault || '').trim() !== (o.vault || '') || s.target !== o.target || s.note !== o.note || !!s.tasksDates !== !!o.tasksDates || !!s.includeDrop !== !!o.includeDrop) await saveObs(s, true);
         if (state.api && (s.scan !== state.api.scan || s.sort !== state.api.sort) && s.scan) {
           const cfg = { ...state.api, scan: s.scan, sort: s.sort || s.scan };
           await store.kvSet('api', cfg).catch(() => {});
@@ -1751,13 +1924,13 @@ function drawSettings() {
       } }, 'Done'))));
   body.scrollTop = scroll;
 }
-$('#btn-settings').addEventListener('click', openSettings);
+$('#btn-settings').addEventListener('click', () => openSettings());
 
 function exportBackup() {
-  const data = { app: 'keitan', version: 1, exportedAt: new Date().toISOString(), symbols: state.symbols, items: state.items };
+  const data = { app: 'kura', version: 1, exportedAt: new Date().toISOString(), symbols: state.symbols, obsidian: state.obs || null, items: state.items };
   const blob = new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
-  const a = h('a', { href: url, download: `keitan-backup-${dayStr()}.json` });
+  const a = h('a', { href: url, download: `kura-backup-${dayStr()}.json` });
   document.body.append(a);
   a.click();
   a.remove();
@@ -1770,11 +1943,11 @@ $('#file-import').addEventListener('change', async e => {
   if (!f) return;
   try {
     const data = JSON.parse(await f.text());
-    if (!data || data.app !== 'keitan' || !Array.isArray(data.items)) throw new Error('not a backup');
+    if (!data || !['kura', 'keitan'].includes(data.app) || !Array.isArray(data.items)) throw new Error('not a backup');
     if (!state.sheet || state.sheet.kind !== 'settings') openSettings();
     state.sheet.confirmImport = data;
     drawSettings();
-  } catch (err) { toast("That file isn't a Keitan backup."); }
+  } catch (err) { toast("That file isn't a Kura backup."); }
 });
 async function doImport(data) {
   let n = 0;
@@ -1785,6 +1958,7 @@ async function doImport(data) {
   }
   const syms = cleanSymbols(data.symbols);
   if (syms) await store.setSettings({ symbols: syms, updatedAt: Date.now() }).catch(() => {});
+  if (!state.obs && data.obsidian && data.obsidian.vault && store.kvSet) { await store.kvSet('obsidian', { ...DEFAULT_OBS, ...data.obsidian }).catch(() => {}); await loadObs(); }
   if (state.sheet && state.sheet.kind === 'settings') { state.sheet.confirmImport = null; state.sheet.status = `Imported ${n} notes.`; drawSettings(); }
 }
 
@@ -1794,7 +1968,7 @@ async function boot() {
     store = await localStore();
   } catch (e) {
     store = memoryStore();
-    bannerMsg = "This browser won't let Keitan save notes, so anything written now disappears when you close it.";
+    bannerMsg = "This browser won't let Kura save notes, so anything written now disappears when you close it.";
   }
   if (store.kvGet) {
     const seeded = await store.kvGet('seeded').catch(() => true);
@@ -1813,6 +1987,7 @@ async function boot() {
   }
   unsub = store.subscribe(onItems);
   unsubS = store.subscribeSettings(onSettings);
+  await loadObs();
   await loadApi();
   try { els.input.focus({ preventScroll: true }); } catch (e) {}
   if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
