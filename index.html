@@ -522,7 +522,7 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
 (() => {
 'use strict';
 
-const APP_VERSION = 'v8';
+const APP_VERSION = 'v9';
 /* ---------- helpers ---------- */
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -829,6 +829,126 @@ function makeSample(cfg) {
   return sample;
 }
 
+/* Google Gemini (has a free tier) */
+const GEMINI = 'https://generativelanguage.googleapis.com/v1beta';
+async function geminiError(r) {
+  let msg = '', st = '';
+  try { const j = await r.json(); msg = (j && j.error && j.error.message) || ''; st = (j && j.error && j.error.status) || ''; } catch (e) {}
+  const code = (r.status === 400 && /api key/i.test(msg)) || r.status === 401 || r.status === 403 ? 'bad_key'
+    : r.status === 429 ? 'quota'
+    : r.status === 400 || r.status === 404 ? 'invalid_request'
+    : 'upstream_error';
+  return { code, message: msg || st || ('HTTP ' + r.status), status: r.status };
+}
+async function listGeminiModels(key) {
+  const out = [];
+  let token = '';
+  for (let i = 0; i < 5; i++) {
+    let r;
+    try { r = await fetch(`${GEMINI}/models?pageSize=1000${token ? '&pageToken=' + encodeURIComponent(token) : ''}`, { headers: { 'x-goog-api-key': key } }); }
+    catch (e) { throw { code: 'network', message: String((e && e.message) || e) }; }
+    if (!r.ok) throw await geminiError(r);
+    const j = await r.json();
+    for (const m of j.models || []) {
+      if ((m.supportedGenerationMethods || []).includes('generateContent')) out.push(String(m.name || '').replace(/^models\//, ''));
+    }
+    token = j.nextPageToken || '';
+    if (!token) break;
+  }
+  return out;
+}
+function pickGeminiModels(ids) {
+  const usable = ids.filter(id => /^gemini-/.test(id) && !/(live|tts|audio|image|transcribe|embedding|robotics|computer|native|learnlm)/i.test(id));
+  const ver = id => { const m = /^gemini-(\d+(?:\.\d+)?)/.exec(id); return m ? parseFloat(m[1]) : 0; };
+  const rank = list => list.sort((a, b) => (ver(b) - ver(a)) || (/preview|exp/.test(a) - /preview|exp/.test(b)) || a.length - b.length);
+  const flash = rank(usable.filter(id => /-flash(?!-lite)/.test(id)));
+  const lite = rank(usable.filter(id => /-flash-lite/.test(id)));
+  const scan = flash[0] || lite[0] || usable[0] || '';
+  return { scan, sort: lite[0] || scan };
+}
+function makeGemini(cfg) {
+  async function callModel(model, parts, opts) {
+    const body = { contents: [{ role: 'user', parts }] };
+    if (opts.json) body.generationConfig = { responseMimeType: 'application/json' };
+    let r;
+    try {
+      r = await fetch(`${GEMINI}/models/${encodeURIComponent(model)}:generateContent`, {
+        method: 'POST', signal: opts.signal,
+        headers: { 'x-goog-api-key': cfg.key, 'content-type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+    } catch (e) {
+      if (opts.signal && opts.signal.aborted) throw { code: 'cancelled' };
+      throw { code: 'network', message: String((e && e.message) || e) };
+    }
+    if (!r.ok) { const err = await geminiError(r); err.model = model; throw err; }
+    let j;
+    try { j = await r.json(); } catch (e) { if (opts.signal && opts.signal.aborted) throw { code: 'cancelled' }; throw { code: 'upstream_error' }; }
+    if (j.promptFeedback && j.promptFeedback.blockReason) throw { code: 'refused' };
+    const cand = (j.candidates || [])[0] || {};
+    if (/SAFETY|PROHIBITED|BLOCKLIST/.test(cand.finishReason || '')) throw { code: 'refused' };
+    const text = ((cand.content && cand.content.parts) || []).filter(p => typeof p.text === 'string' && !p.thought).map(p => p.text).join('');
+    if (!text.trim()) throw { code: 'empty_completion' };
+    return { text, truncated: cand.finishReason === 'MAX_TOKENS', model };
+  }
+  async function call(prompt, opts = {}) {
+    const parts = [];
+    for (const b of opts.images || []) parts.push({ inline_data: { mime_type: b.type || 'image/jpeg', data: await blobToB64(b) } });
+    parts.push({ text: prompt });
+    const primary = opts.modelTier === 'quick' ? (cfg.sort || cfg.scan) : (cfg.scan || cfg.sort);
+    const models = [primary, cfg.scan, cfg.sort].filter((m, i, a) => m && a.indexOf(m) === i);
+    let last;
+    for (const model of models) {
+      try { return await callModel(model, parts, opts); }
+      catch (e) {
+        last = e;
+        if (!(e && (e.status === 404 || e.code === 'quota'))) throw e;   // try the other model if this one is missing or out of free quota
+      }
+    }
+    throw last;
+  }
+  const sample = (p, o) => call(p, o);
+  sample.json = async (p, o = {}) => {
+    const res = await call(p, { ...o, json: true });
+    const v = parseLooseJson(res.text);
+    if (v === undefined) throw { code: 'invalid_json', text: res.text };
+    return v;
+  };
+  sample.limits = async () => ({ images: { maxCount: 5 } });
+  return sample;
+}
+const makeSampleFor = cfg => (cfg.provider === 'gemini' ? makeGemini(cfg) : makeSample(cfg));
+const listModelsFor = (provider, key) => (provider === 'gemini' ? listGeminiModels(key) : listModels(key));
+const pickModelsFor = (provider, ids) => (provider === 'gemini' ? pickGeminiModels(ids) : pickModels(ids));
+const providerName = p => (p === 'gemini' ? 'Gemini' : 'Claude');
+
+/* on-phone sorting rules: free, offline, used when no AI is set up or it is unavailable */
+const RX_ACTION = /^(please\s+)?(call|phone|ring|email|e-mail|text|message|reply|book|buy|order|pay|send|write|draft|finish|fix|make|prepare|prep|submit|review|check|ask|remind|schedule|plan|clean|pick up|collect|return|renew|update|print|read|follow up|chase|organi[sz]e|set up|setup|install|cancel|confirm|arrange|register|apply|meet|visit|go to|get|do|try|test|run|measure|calibrate|analy[sz]e|upload|download|share|post|practi[sc]e|study|learn|research|find|look up|sort out|tidy|charge|refill|move|file|email)\b/i;
+const RX_TODO = /\b(to-?do|need to|needs to|must|have to|has to|don'?t forget|remember to|deadline|due (on|by)|by (mon|tue|wed|thu|fri|sat|sun|tomorrow|tonight|next week)|by \d{1,2}(st|nd|rd|th)?\b)/i;
+const RX_QUESTION = /\?\s*$|^(why|how|what|when|where|which|who|should|could|would|is|are|does|can)\b/i;
+const RX_FLEETING = /\b(moved to|rescheduled|cancel+ed|on my way|running late|eta|parking|wi-?fi|password|door code|room \d+|table \d+|gate \d+)\b/i;
+const RX_IMPORTANT = /\b(important|crucial|critical|key point|urgent|asap)\b|!!/i;
+function ruleSort(text, tags = []) {
+  const t = String(text || '').trim();
+  const out = new Set(tags);
+  if (RX_IMPORTANT.test(t) && symById('imp')) out.add('imp');
+  let bucket = 'stock';
+  if (tags.some(x => x === 'task' || x === 'fup') || RX_ACTION.test(t) || RX_TODO.test(t)) bucket = 'make';
+  else if (RX_FLEETING.test(t)) bucket = 'drop';
+  if (bucket !== 'make' && RX_QUESTION.test(t) && symById('unr')) out.add('unr');
+  return { bucket, tags: [...out] };
+}
+function splitPasted(text) {
+  return String(text || '').replace(/\r/g, '').split('\n')
+    .map(l => l.replace(/^\s*(?:[*•·▪◦‣]|-(?!>)|\d{1,2}[.)])\s+/, '').trim())
+    .filter(Boolean)
+    .map(l => {
+      const { text: t, tags } = parseMarks(l);
+      const r = ruleSort(t, tags);
+      return { text: t, bucket: r.bucket, tags: r.tags, today: false, keep: true };
+    });
+}
+
 let store = memoryStore();
 let unsub = null, unsubS = null;
 
@@ -899,14 +1019,15 @@ function dbMsg(e) {
 const onWriteError = e => toast(dbMsg(e));
 function sampleMsg(e) {
   switch (e && e.code) {
-    case 'bad_key': return 'Your Anthropic API key was rejected. Check it in Settings.';
-    case 'rate_limited': return 'Anthropic rate limit reached. Wait a minute and try again.';
-    case 'network': return "Couldn't reach Anthropic. Check your connection and try again.";
+    case 'bad_key': return 'Your API key was rejected. Check it in Settings.';
+    case 'quota': return 'The free Gemini limit is used up for now. It resets over time (daily limits reset each day).';
+    case 'rate_limited': return 'Rate limit reached. Wait a minute and try again.';
+    case 'network': return "Couldn't reach the AI service. Check your connection and try again.";
     case 'refused': return "Claude couldn't read this page. Try another photo.";
     case 'invalid_json': case 'empty_completion': return "The page came back in a form Kura couldn't read. Try again.";
-    case 'invalid_request': return 'Anthropic said: ' + ((e && e.message) || 'the request was invalid.') + ' Check the model names and credit balance in Settings.';
-    case 'no_key': return 'Add your Anthropic API key in Settings to use Brain Camera.';
-    default: return 'Anthropic had a problem (' + ((e && e.message) || 'unknown error') + '). Try again.';
+    case 'invalid_request': return 'The AI service said: ' + ((e && e.message) || 'the request was invalid.') + ' Check the model names and credit balance in Settings.';
+    case 'no_key': return 'Add a free Gemini key in Settings to read photos, or paste the text instead.';
+    default: return 'The AI service had a problem (' + ((e && e.message) || 'unknown error') + '). Try again.';
   }
 }
 function disableClaude(e) { /* keep features on; errors are shown per call */ }
@@ -1057,7 +1178,7 @@ let bannerMsg = null;
 function drawBanner() {
   const nodes = [];
   if (bannerMsg) nodes.push(h('span', { text: bannerMsg }));
-  const missing = [!state.obs && 'your Obsidian vault', !state.sample && 'an Anthropic API key'].filter(Boolean);
+  const missing = [!state.obs && 'your Obsidian vault', !state.sample && 'a free Gemini key (optional)'].filter(Boolean);
   if (missing.length && !state.keyDismissed) {
     nodes.push(h('span', { text: `Finish setup: add ${missing.join(' and ')} in Settings.` }),
       h('button', { type: 'button', onclick: () => openSettings() }, 'Open settings'),
@@ -1338,6 +1459,42 @@ async function loadGt() {
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') scheduleGtSync(600); });
 setInterval(() => { if (document.visibilityState === 'visible') gtSync().catch(() => {}); }, 5 * 60000);
 
+/* ---------- paste a page (free: Google Lens → copy → paste) ---------- */
+function openPaste(reason) {
+  if (state.scan && state.scan.url) URL.revokeObjectURL(state.scan.url);
+  state.scan = null;
+  state.sheet = { kind: 'paste', text: '', reason: typeof reason === 'string' ? reason : '' };
+  drawPaste();
+}
+function drawPaste() {
+  const s = state.sheet;
+  if (!s || s.kind !== 'paste') return;
+  const ta = h('textarea', { class: 'field-in', id: 'paste-text', placeholder: 'Paste the page text here', 'aria-label': 'Text from your notebook page', style: 'min-height:180px' });
+  ta.value = s.text;
+  ta.addEventListener('input', () => { s.text = ta.value; });
+  const body = h('div', { class: 'sheet-body' },
+    s.reason ? h('p', { class: 'err', text: s.reason }) : null,
+    h('p', { class: 'muted', text: 'Free and on your phone: open Google Lens (or the Camera app), point it at the page, tap Text, then Select all and Copy. Paste it here. Each line becomes a note, and a symbol at the start of a line (! ? [] ->) becomes a tag.' }),
+    ta);
+  showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Paste a page' },
+    head('PASTE A PAGE', 'free'), body,
+    h('div', { class: 'sheet-foot' },
+      navigator.clipboard && navigator.clipboard.readText
+        ? h('button', { class: 'btn', type: 'button', onclick: async () => {
+            try { s.text = await navigator.clipboard.readText(); drawPaste(); }
+            catch (e) { toast('Long-press the box and choose Paste.'); }
+          } }, 'Paste from clipboard') : null,
+      h('span', { class: 'grow' }),
+      h('button', { class: 'btn', type: 'button', onclick: closeSheet }, 'Cancel'),
+      h('button', { class: 'btn primary', id: 'paste-split', type: 'button', onclick: () => {
+        const items = splitPasted(s.text);
+        if (!items.length) { toast('Paste some text first.'); return; }
+        state.scan = { status: 'review', blob: null, url: null, items, title: '', found: items.length, error: '', ctl: null, keepPhoto: false, pasted: true };
+        state.sheet = { kind: 'scan' };
+        drawScan();
+      } }, 'Split into notes'))));
+}
+
 /* ---------- diagnostics ---------- */
 function setAiStatus(err) {
   state.aiErr = err || null;
@@ -1370,30 +1527,31 @@ async function runDiag() {
     drawDiag();
   };
   const installed = !!(navigator.serviceWorker && navigator.serviceWorker.controller);
+  add('Auto sort rules', ruleSort('Email the lab manager').bucket === 'make', 'On-phone sorting is available as a free fallback.');
   add('App', true, `Kura ${APP_VERSION} · ${navigator.onLine ? 'online' : 'offline'} · ${installed ? 'offline copy ready' : 'no offline copy yet'} · ${state.items.length} notes`);
 
   // Claude
   if (!state.api) {
-    add('Claude', false, 'No Anthropic API key saved, so Auto sort and Brain Camera are off.', 'Settings → Anthropic API key → paste your key → Save and test.');
+    add('AI', true, 'No AI key saved. Auto sort uses the free on-phone rules, and pages come in by pasting text from Google Lens.', 'Optional: add a free Gemini key in Settings to read photos of handwriting.');
   } else {
     let ids = null;
     try {
-      ids = await listModels(state.api.key);
-      add('Claude key', true, `Key accepted (…${state.api.key.slice(-4)}). Reading pages with ${state.api.scan}; sorting with ${state.api.sort}.`);
+      ids = await listModelsFor(state.api.provider, state.api.key);
+      add(providerName(state.api.provider) + ' key', true, `Key accepted (…${state.api.key.slice(-4)}). Reading pages with ${state.api.scan}; sorting with ${state.api.sort}.`);
     } catch (e) {
-      add('Claude key', false, sampleMsg(e) + errDetail(e), e && e.code === 'bad_key' ? 'Create a new key in the Anthropic Console and paste it in Settings.' : 'Check your connection, then try again.');
+      add(providerName(state.api.provider) + ' key', false, sampleMsg(e) + errDetail(e), e && e.code === 'bad_key' ? `Create a new key in ${state.api.provider === 'gemini' ? 'Google AI Studio' : 'the Anthropic Console'} and paste it in Settings.` : 'Check your connection, then try again.');
     }
     if (ids) {
       const gone = [state.api.scan, state.api.sort].filter(m => m && !ids.includes(m));
       if (gone.length) add('Claude models', false, 'Saved model no longer available: ' + gone.join(', '), 'Settings → Anthropic API key → Save and test to pick current models.');
       try {
-        const r = await makeSample(state.api)('Reply with the single word OK.', { modelTier: 'quick' });
+        const r = await makeSampleFor(state.api)('Reply with the single word OK.', { modelTier: 'quick' });
         add('Auto sort', true, `${r.model} answered "${r.text.trim().slice(0, 20)}".`);
         setAiStatus(null);
       } catch (e) {
         setAiStatus(sampleMsg(e));
         add('Auto sort', false, sampleMsg(e) + errDetail(e),
-          /credit|balance|billing/i.test((e && e.message) || '') ? 'Add credit in the Anthropic Console (Billing), then try again.' : 'Settings → Anthropic API key → Save and test.');
+          /credit|balance|billing/i.test((e && e.message) || '') ? 'Switch to Gemini (free) in Settings, or add credit in the Anthropic Console.' : e && e.code === 'quota' ? 'Wait for the free limit to reset. Until then Kura sorts on the phone.' : 'Settings → AI → Save and test.');
       }
     }
   }
@@ -1568,12 +1726,15 @@ async function submitPad() {
   const raw = els.input.value.trim();
   if (!raw) return;
   els.input.value = '';
-  const { text, tags } = parseMarks(raw);
+  const parsed = parseMarks(raw);
+  const text = parsed.text;
+  let tags = parsed.tags;
   const route = state.route;
   const actionTag = tags.some(t => t === 'task' || t === 'fup');
   const auto = route === 'auto' && !!state.sample && !actionTag;
   let bucket = route === 'today' ? 'make' : (BUCKETS.includes(route) ? route : 'stock');
   if (route === 'auto' && actionTag) bucket = 'make';
+  if (route === 'auto' && !auto && !actionTag) { const r = ruleSort(text, tags); bucket = r.bucket; tags = r.tags; toast(`Sorted to ${LABEL[bucket]}`); }
   const now = Date.now();
   const data = {
     text, tags, bucket,
@@ -1603,6 +1764,7 @@ Note:
 Reply with only JSON: {"bucket": "drop" | "stock" | "make", "tags": []}`;
   let bucket = null, newTags = tags, err = null;
   try {
+    if (!state.sample) throw { code: 'no_key' };
     const r = await state.sample.json(prompt, { modelTier: 'quick' });
     bucket = r && BUCKETS.includes(r.bucket) ? r.bucket : 'stock';
     setAiStatus(null);
@@ -1611,17 +1773,17 @@ Reply with only JSON: {"bucket": "drop" | "stock" | "make", "tags": []}`;
   } catch (e) { err = e; }
   const it = byId(id);
   if (!it || !it.pending || target !== store) return;
+  const byAi = !!bucket;
+  if (!byAi) { const r = ruleSort(text, tags); bucket = r.bucket; newTags = r.tags; }
   try {
-    await target.update(id, bucket ? { bucket, tags: newTags, pending: false, updatedAt: Date.now() } : { pending: false });
+    await target.update(id, { bucket, tags: newTags, pending: false, updatedAt: Date.now() });
   } catch (e) { return; }
-  if (bucket) {
-    toast(`Sorted to ${LABEL[bucket]}`);
-    if (innerWidth < 720) setTab(bucket);
-  } else {
+  if (byAi) toast(`Sorted to ${LABEL[bucket]}`);
+  else {
     setAiStatus(sampleMsg(err));
-    toast('Auto sort failed, so it went to STOCK. ' + sampleMsg(err));
-    disableClaude(err);
+    toast(`Sorted on the phone to ${LABEL[bucket]}. ${providerName(state.api && state.api.provider)} unavailable: ${sampleMsg(err)}`);
   }
+  if (innerWidth < 720) setTab(bucket);
 }
 
 /* ---------- tabs + search ---------- */
@@ -1868,7 +2030,7 @@ async function saveSymbols() {
 }
 
 /* ---------- Brain Camera ---------- */
-els.scan.addEventListener('click', () => els.fileCam.click());
+els.scan.addEventListener('click', () => (state.sample ? els.fileCam.click() : openPaste()));
 els.pick.addEventListener('click', () => els.filePick.click());
 for (const inp of [els.fileCam, els.filePick]) {
   inp.addEventListener('change', () => {
@@ -1922,7 +2084,7 @@ If the photo has no readable handwriting, reply {"title": "", "items": []}.`;
 }
 
 async function startScan(file) {
-  if (!state.sample || !state.canImages) { toast('Add your Anthropic API key in Settings to use Brain Camera.'); openSettings(); return; }
+  if (!state.sample || !state.canImages) { openPaste(); return; }
   const scan = { status: 'preparing', blob: null, url: null, items: [], title: '', found: 0, error: '', ctl: null,
     keepPhoto: !!store.putPhoto };
   state.scan = scan;
@@ -1995,13 +2157,14 @@ function drawScan() {
   if (scan.status === 'preparing' || scan.status === 'reading') {
     body.append(h('div', { class: 'status' }, h('span', { class: 'scanline', 'aria-hidden': 'true' }),
       h('span', { id: 'scan-status', text: scan.status === 'preparing' ? 'Preparing photo…' : 'Reading your handwriting…' })));
-    body.append(h('p', { class: 'muted', text: `Claude is transcribing the page, reading your symbols (${state.symbols.map(s => s.mark).join(' ')}) and sorting each line into DROP, STOCK or MAKE. This usually takes 10 to 40 seconds and uses your Anthropic API credit.` }));
+    body.append(h('p', { class: 'muted', text: `${providerName(state.api && state.api.provider)} is transcribing the page, reading your symbols (${state.symbols.map(s => s.mark).join(' ')}) and sorting each line into DROP, STOCK or MAKE. This usually takes 10 to 40 seconds and uses your ${state.api && state.api.provider === 'gemini' ? 'free Gemini allowance' : 'Anthropic API credit'}.` }));
     foot.append(h('span', { class: 'grow' }),
       h('button', { class: 'btn', type: 'button', onclick: () => { scan.ctl ? scan.ctl.abort() : closeSheet(); } }, icon('stop'), 'Stop'));
   } else if (scan.status === 'error') {
     body.append(h('p', { class: 'err', text: scan.error }));
     foot.append(h('span', { class: 'grow' }),
       h('button', { class: 'btn', type: 'button', onclick: closeSheet }, 'Close'),
+      h('button', { class: 'btn', type: 'button', onclick: () => openPaste(scan.error) }, 'Paste text instead'),
       scan.blob && state.sample && state.canImages
         ? h('button', { class: 'btn primary', type: 'button', onclick: () => readScan(scan) }, 'Try again') : null);
   } else if (!scan.items.length) {
@@ -2040,7 +2203,7 @@ function drawScan() {
       body.append(row);
     });
     syncCount();
-    if (store.putPhoto) {
+    if (store.putPhoto && scan.blob) {
       const k = h('input', { type: 'checkbox', id: 'keep-photo' });
       k.checked = scan.keepPhoto;
       k.addEventListener('change', () => { scan.keepPhoto = k.checked; });
@@ -2059,7 +2222,7 @@ function drawScan() {
   const prev = $('.sheet-body', els.sheet);
   const scroll = prev ? prev.scrollTop : 0;
   showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Brain Camera' },
-    head('BRAIN CAMERA', scan.status === 'review' && scan.items.length ? 'review' : ''), body, foot));
+    head(scan.pasted ? 'PASTE A PAGE' : 'BRAIN CAMERA', scan.status === 'review' && scan.items.length ? 'review' : ''), body, foot));
   body.scrollTop = scroll;
 }
 
@@ -2101,11 +2264,10 @@ async function commitScan(btn) {
 
 /* ---------- capabilities ---------- */
 function syncClaudeUI() {
-  const auto = $('.chip[data-r="auto"]', els.route);
-  auto.hidden = !state.sample;
-  if (!state.sample && state.route === 'auto') setRoute('stock');
-  els.scan.hidden = !(state.sample && state.canImages);
+  $('.chip[data-r="auto"]', els.route).hidden = false;   // on-phone rules always work
+  els.scan.hidden = false;                                // camera with AI, paste-a-page without
   els.pick.hidden = !(state.sample && state.canImages);
+  els.scan.title = state.sample ? 'Brain Camera: scan a page' : 'Paste a page (free)';
 }
 
 function drawDates() {
@@ -2125,11 +2287,11 @@ const EXAMPLES = [
 
 async function loadApi() {
   const cfg = store.kvGet ? await store.kvGet('api').catch(() => null) : null;
-  state.api = cfg && cfg.key ? cfg : null;
-  state.sample = state.api ? makeSample(state.api) : null;
+  state.api = cfg && cfg.key ? { provider: 'anthropic', ...cfg } : null;
+  state.sample = state.api ? makeSampleFor(state.api) : null;
   state.canImages = !!state.sample;
   setAiStatus(state.aiErr);
-  if (state.sample && !routeTouched) setRoute('auto');
+  if (!routeTouched) setRoute('auto');
   syncClaudeUI();
   drawBanner();
 }
@@ -2139,7 +2301,7 @@ function openSettings(section) {
   const a = state.api || {};
   const o = state.obs || DEFAULT_OBS;
   state.sheet = {
-    kind: 'settings', key: a.key || '', scan: a.scan || '', sort: a.sort || '', status: '', busy: false, confirmImport: null,
+    kind: 'settings', provider: a.provider || 'gemini', key: a.key || '', scan: a.scan || '', sort: a.sort || '', status: '', busy: false, confirmImport: null,
     vault: o.vault, target: o.target, note: o.note, tasksDates: o.tasksDates, includeDrop: o.includeDrop, obsStatus: '',
     gurl: (state.gt && state.gt.url) || '', glist: (state.gt && state.gt.list) || 'Kura', gmake: !!(state.gt && state.gt.includeMake), gstatus: '', gbusy: false, showScript: false,
   };
@@ -2162,7 +2324,7 @@ async function saveObs(s, quiet) {
 function drawSettings() {
   const s = state.sheet;
   if (!s || s.kind !== 'settings') return;
-  const key = h('input', { class: 'field-in', id: 'api-key', type: 'password', autocomplete: 'off', placeholder: 'sk-ant-…', 'aria-label': 'Anthropic API key' });
+  const key = h('input', { class: 'field-in', id: 'api-key', type: 'password', autocomplete: 'off', placeholder: s.provider === 'gemini' ? 'AIza…' : 'sk-ant-…', 'aria-label': 'API key' });
   key.value = s.key;
   key.addEventListener('input', () => { s.key = key.value.trim(); });
   const scan = h('input', { class: 'field-in', id: 'model-scan', type: 'text', placeholder: 'found automatically', 'aria-label': 'Model for Brain Camera' });
@@ -2177,18 +2339,19 @@ function drawSettings() {
     if (!store.kvSet) { s.status = "This browser won't let Kura save settings."; drawSettings(); return; }
     s.busy = true; s.status = 'Checking your key…'; drawSettings();
     try {
-      const ids = await listModels(s.key);
-      const pick = pickModels(ids);
+      const ids = await listModelsFor(s.provider, s.key);
+      const pick = pickModelsFor(s.provider, ids);
       if (!s.scan || !ids.includes(s.scan)) s.scan = pick.scan;
       if (!s.sort || !ids.includes(s.sort)) s.sort = pick.sort;
       if (!s.scan) throw { code: 'invalid_request', message: 'No models are available to this key.' };
-      const cfg = { key: s.key, scan: s.scan, sort: s.sort };
+      const cfg = { provider: s.provider, key: s.key, scan: s.scan, sort: s.sort };
       await store.kvSet('api', cfg);
+      state.aiErr = null;
       s.status = `Key works. Brain Camera uses ${s.scan}; Auto sort uses ${s.sort}.`;
       await loadApi();
     } catch (e) {
-      s.status = e && e.code === 'bad_key' ? 'That key was rejected. Copy it again from the Anthropic Console.'
-        : e && e.code === 'network' ? "Couldn't reach Anthropic. Check your connection." : sampleMsg(e);
+      s.status = e && e.code === 'bad_key' ? `That key was rejected. Copy it again from ${s.provider === 'gemini' ? 'Google AI Studio' : 'the Anthropic Console'}.`
+        : e && e.code === 'network' ? "Couldn't reach the AI service. Check your connection." : sampleMsg(e);
     }
     s.busy = false;
     drawSettings();
@@ -2320,16 +2483,30 @@ function drawSettings() {
     h('hr', { class: 'rule' }),
     obsSection,
     gtSection,
-    h('span', { class: 'lbl', text: 'Anthropic API key' }),
-    h('p', { class: 'muted', text: 'Brain Camera and Auto sort call Claude with your own API key. It is stored only on this phone and sent only to api.anthropic.com. Usage is billed to your Anthropic API account, separately from a Claude subscription.' }),
+    h('span', { class: 'lbl', text: 'AI for Auto sort and Brain Camera (optional)' }),
+    h('p', { class: 'muted', text: 'Without a key, Kura sorts notes with simple rules on your phone, and you bring in paper pages by pasting text from Google Lens. With a key, it reads photos of your handwriting and sorts more accurately.' }),
+    h('div', { class: 'row' }, h('div', { class: 'seg', role: 'group', 'aria-label': 'AI service' },
+      ...[['gemini', 'GEMINI · FREE'], ['anthropic', 'CLAUDE · PAID']].map(([val, label]) => h('button', {
+        type: 'button', style: '--c: var(--ink)', 'aria-pressed': String(s.provider === val),
+        onclick: () => {
+          if (s.provider === val) return;
+          s.provider = val;
+          s.scan = ''; s.sort = ''; s.status = '';
+          s.key = state.api && state.api.provider === val ? state.api.key : '';
+          drawSettings();
+        },
+      }, label)))),
+    h('p', { class: 'muted', text: s.provider === 'gemini'
+      ? 'Free key: go to aistudio.google.com, tap Get API key, then Create API key. No card needed. Free use has daily limits, and Google may use free-tier content to improve its products. The key stays on this phone.'
+      : 'Uses your Anthropic API key, billed per use to your Anthropic account (separate from a Claude subscription). The key stays on this phone.' }),
     h('div', { class: 'set-row' }, key),
     h('div', { class: 'row' },
       h('button', { class: 'btn primary', id: 'api-save', type: 'button', disabled: s.busy, onclick: saveKey }, s.busy ? 'Checking…' : 'Save and test'),
-      state.api ? h('button', { class: 'btn danger', type: 'button', onclick: removeKey }, 'Remove key') : null),
+      state.api && state.api.provider === s.provider ? h('button', { class: 'btn danger', type: 'button', onclick: removeKey }, 'Remove key') : null),
     s.status ? h('p', { class: 'muted ok', text: s.status }) : null,
     h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'Model for Brain Camera' }), scan),
     h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'Model for Auto sort' }), sort),
-    h('p', { class: 'muted', text: 'Leave the model boxes as they are. Kura picks the newest Sonnet for reading pages and the newest Haiku for sorting when you save the key.' }),
+    h('p', { class: 'muted', text: s.provider === 'gemini' ? 'Leave the model boxes as they are. Kura picks the newest Gemini Flash for reading pages and Flash-Lite for sorting when you save the key.' : 'Leave the model boxes as they are. Kura picks the newest Sonnet for reading pages and the newest Haiku for sorting when you save the key.' }),
     h('hr', { class: 'rule' }),
     h('span', { class: 'lbl', text: 'Backup' }),
     h('p', { class: 'muted', text: `Your ${state.items.length} notes are stored on this phone only. Export a backup now and then. Photos are not included.` }),
