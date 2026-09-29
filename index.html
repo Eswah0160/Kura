@@ -5,11 +5,29 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <title>Kura</title>
 <meta name="description" content="Kura: a notebook home for paper notes and AI. Write instantly, scan handwritten pages, sort into DROP, STOCK, MAKE and TODAY.">
-<meta name="theme-color" content="#E7E7E4" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#111110" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" id="theme-color" content="#111110">
+<script>
+/* Match the phone's status bar to the app's own background in light and dark mode.
+   Android Chrome ignores media-based theme-color tags, so keep one tag and update it. */
+(function () {
+  var mq = window.matchMedia ? matchMedia('(prefers-color-scheme: dark)') : null;
+  function sync() {
+    var dark = mq ? mq.matches : false;
+    var meta = document.getElementById('theme-color');
+    if (meta) meta.setAttribute('content', dark ? '#111110' : '#E7E7E4');
+  }
+  sync();
+  if (mq && mq.addEventListener) mq.addEventListener('change', sync);
+  document.addEventListener('visibilitychange', sync);
+})();
+</script>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png" type="image/png">
-<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Kura">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
