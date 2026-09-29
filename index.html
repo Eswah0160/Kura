@@ -1,0 +1,1835 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<title>Keitan</title>
+<meta name="description" content="Keitan: a notebook home for paper notes and AI. Write instantly, scan handwritten pages, sort into DROP, STOCK, MAKE and TODAY.">
+<meta name="theme-color" content="#E7E7E4" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#111110" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+/* Layout: launcher-style home. A widget card (date, score, pixel invaders for open tasks, spaced wordmark),
+   a numbered row of symbol tiles, then the notepad with TODAY beside it and three list lanes below.
+   Everything is sized to the visible area above the on-screen keyboard. */
+:root {
+  --paper: #E7E7E4;
+  --sheet: #F6F6F3;
+  --ink: #262625;
+  --ink-2: #7A7A76;
+  --rule: #D3D3CF;
+  --dot: #D5D5D1;
+  --red: #DE4336;
+  --drop: #9A9A96;
+  --stock: #3A3A38;
+  --make: #DE4336;
+  --scrim: rgba(30, 30, 28, 0.38);
+  --shadow: 0 1px 0 rgba(0, 0, 0, 0.03), 0 10px 24px -18px rgba(0, 0, 0, 0.35);
+  --f-mono: "DM Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --f-body: "Zen Kaku Gothic New", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #111110; --sheet: #1A1A19; --ink: #E7E7E3; --ink-2: #8D8D88; --rule: #2C2C2A; --dot: #2F2F2D;
+    --red: #FF5B4D; --drop: #7F7F7B; --stock: #D8D8D4; --make: #FF5B4D;
+    --scrim: rgba(0, 0, 0, 0.6);
+    --shadow: 0 1px 0 rgba(0, 0, 0, 0.3), 0 10px 24px -16px rgba(0, 0, 0, 0.9);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #111110; --sheet: #1A1A19; --ink: #E7E7E3; --ink-2: #8D8D88; --rule: #2C2C2A; --dot: #2F2F2D;
+  --red: #FF5B4D; --drop: #7F7F7B; --stock: #D8D8D4; --make: #FF5B4D;
+  --scrim: rgba(0, 0, 0, 0.6);
+  --shadow: 0 1px 0 rgba(0, 0, 0, 0.3), 0 10px 24px -16px rgba(0, 0, 0, 0.9);
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { height: 100%; margin: 0; }
+body {
+  background: var(--paper); color: var(--ink); font-family: var(--f-body); font-size: 14px;
+  overflow: hidden; overscroll-behavior: none; -webkit-tap-highlight-color: transparent;
+}
+button, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+svg { display: block; flex: none; }
+.lbl { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+
+/* fitted to the visible viewport (keyboard-aware) */
+.fit {
+  position: fixed; left: 0; right: 0;
+  top: calc(var(--vvt, 0px) + env(safe-area-inset-top, 0px));
+  height: calc(var(--vvh, 100vh) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+}
+.kb .fit { height: calc(var(--vvh, 100vh) - env(safe-area-inset-top, 0px)); }
+.app { display: flex; flex-direction: column; gap: 10px; max-width: 1240px; margin: 0 auto; padding: 10px 16px 12px; }
+
+/* widget card */
+.widget {
+  flex: none; background: var(--sheet); border: 1px solid var(--rule); border-radius: 8px; box-shadow: var(--shadow);
+  padding: 8px 12px 6px; display: flex; flex-direction: column; gap: 4px; position: relative;
+}
+.w-top { display: flex; align-items: center; gap: 16px; min-height: 30px; }
+.w-actions { margin-left: auto; display: flex; align-items: center; gap: 4px; }
+.ghost {
+  height: 30px; min-width: 30px; padding: 0 6px; border: 0; border-radius: 6px; background: transparent; color: var(--ink-2);
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase;
+}
+.ghost svg { width: 16px; height: 16px; }
+.search { display: flex; align-items: center; position: relative; }
+.search svg { position: absolute; left: 8px; width: 14px; height: 14px; color: var(--ink-2); pointer-events: none; }
+.search input {
+  height: 30px; width: 190px; border: 1px solid var(--rule); border-radius: 6px; background: var(--paper);
+  padding: 0 8px 0 28px; font-family: var(--f-mono); font-size: 12px; outline: none;
+}
+.search input:focus { border-color: var(--ink-2); }
+#btn-search { display: none; }
+
+.field { position: relative; padding: 6px 0 16px; }
+.inv-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 16px; max-height: 76px; overflow: hidden; padding: 2px 8px; }
+.inv { width: 22px; height: 16px; padding: 0; border: 0; background: none; color: var(--ink-2); }
+.inv.red { color: var(--red); }
+.inv svg { width: 100%; height: 100%; }
+.inv .fb { opacity: 0; }
+.inv .fa { animation: frameA 1.4s linear infinite; }
+.inv .fb { animation: frameB 1.4s linear infinite; }
+@keyframes frameA { 0%, 49.9% { opacity: 1; } 50%, 100% { opacity: 0; } }
+@keyframes frameB { 0%, 49.9% { opacity: 0; } 50%, 100% { opacity: 1; } }
+.inv.hit { animation: hit 0.28s ease-out forwards; }
+@keyframes hit { 0% { transform: scale(1); } 35% { transform: scale(1.6); color: var(--red); } 100% { transform: scale(0.2); opacity: 0; } }
+.more { font-family: var(--f-mono); font-size: 10.5px; color: var(--ink-2); align-self: center; letter-spacing: 0.1em; }
+.all-clear { text-align: center; padding: 8px 0 2px; }
+.cannon { position: absolute; bottom: 0; left: 50%; width: 20px; height: 11px; transform: translateX(-50%); color: var(--ink); transition: left 0.16s ease; }
+.laser { position: absolute; width: 2px; background: var(--red); transform: translateX(-50%) scaleY(0); transform-origin: bottom; animation: laser 0.16s ease-out forwards; }
+@keyframes laser { to { transform: translateX(-50%) scaleY(1); } }
+.wordmark {
+  display: flex; justify-content: space-between; align-items: center; width: 100%;
+  border: 0; border-top: 1px solid var(--rule); background: none; padding: 8px 4px 4px; cursor: text;
+  font-family: var(--f-mono); font-weight: 300; font-size: clamp(20px, 4.2vw, 34px); line-height: 1; color: var(--ink-2);
+}
+.wordmark .arr { font-size: 0.7em; }
+
+/* symbol tiles */
+.tagsrow { flex: none; display: flex; flex-direction: column; gap: 6px; }
+.tags-lbl { display: flex; align-items: center; gap: 10px; }
+.tags-lbl button { border: 0; background: none; padding: 0; color: var(--red); }
+.tiles { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding-bottom: 1px; }
+.tiles::-webkit-scrollbar { display: none; }
+.tile {
+  flex: 1 0 70px; max-width: 150px; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  height: 64px; padding: 14px 6px 6px; border: 1px solid var(--rule); border-radius: 8px; background: var(--sheet); color: var(--ink);
+}
+.tile .t-idx, .tile .t-n { position: absolute; top: 5px; font-family: var(--f-mono); font-size: 9.5px; color: var(--ink-2); letter-spacing: 0.06em; font-variant-numeric: tabular-nums; }
+.tile .t-idx { left: 7px; }
+.tile .t-n { right: 7px; }
+.tile .t-mark { font-family: var(--f-mono); font-size: 18px; line-height: 1; }
+.tile .t-mark.imp { color: var(--red); }
+.tile .t-name { font-family: var(--f-mono); font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.tile[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--sheet); }
+.tile[aria-pressed="true"] .t-name, .tile[aria-pressed="true"] .t-idx, .tile[aria-pressed="true"] .t-n { color: var(--sheet); }
+.tile.edit { flex: 0 0 64px; border-style: dashed; background: transparent; }
+
+/* work grid */
+.work {
+  flex: 1; min-height: 0; display: grid; gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: minmax(140px, 42%) minmax(0, 1fr);
+  grid-template-areas: "pad pad today" "drop stock make";
+}
+.card-box { background: var(--sheet); border: 1px solid var(--rule); border-radius: 8px; box-shadow: var(--shadow); display: flex; flex-direction: column; min-height: 0; }
+.box-head { display: flex; align-items: center; gap: 8px; padding: 9px 12px 7px; border-bottom: 1px solid var(--rule); flex: none; }
+.box-head .name { font-family: var(--f-mono); font-weight: 500; font-size: 11px; letter-spacing: 0.16em; color: var(--c, var(--ink)); }
+.box-head .gloss { margin-left: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.box-act { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+.link-btn { white-space: nowrap; border: 0; background: none; padding: 2px 0; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--red); }
+.link-btn.plain { color: var(--ink-2); }
+
+/* notepad */
+.pad { grid-area: pad; position: relative; }
+.pad:focus-within { border-color: var(--ink-2); }
+.pad textarea {
+  flex: 1; min-height: 44px; width: 100%; resize: none; border: 0; outline: none;
+  background-color: transparent;
+  background-image: radial-gradient(circle, var(--dot) 1px, transparent 1.4px);
+  background-size: 22px 22px; background-position: 11px 9px; background-attachment: local;
+  font-size: 16px; line-height: 22px; padding: 10px 14px; color: var(--ink);
+}
+.pad textarea::placeholder { color: var(--ink-2); opacity: 0.9; }
+.pad-bar { display: flex; align-items: center; gap: 6px; padding: 7px 8px; border-top: 1px solid var(--rule); min-width: 0; flex: none; }
+.icon-btn {
+  height: 32px; min-width: 32px; padding: 0 7px; border: 1px solid var(--rule); border-radius: 6px; background: var(--paper);
+  display: inline-flex; align-items: center; justify-content: center; flex: none;
+}
+.icon-btn svg { width: 16px; height: 16px; }
+.route { display: flex; gap: 4px; flex: 1; min-width: 0; overflow-x: auto; scrollbar-width: none; padding-inline: 2px; }
+.route::-webkit-scrollbar { display: none; }
+.chip {
+  display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; flex: none;
+  padding: 6px 8px; border-radius: 999px; border: 1px solid var(--rule); background: transparent;
+  font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2);
+}
+.chip::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--c, var(--ink-2)); }
+.chip[data-r="auto"]::before { background: conic-gradient(var(--drop) 0 33%, var(--stock) 0 66%, var(--make) 0); }
+.chip[aria-checked="true"] { background: var(--ink); border-color: var(--ink); color: var(--sheet); }
+.save {
+  border: 0; border-radius: 6px; background: var(--ink); color: var(--sheet); flex: none;
+  font-family: var(--f-mono); font-weight: 500; font-size: 11px; letter-spacing: 0.14em; padding: 9px 12px;
+}
+
+/* TODAY + lanes */
+.today { grid-area: today; contain: size; --c: var(--red); }
+.lane[data-b="drop"] { grid-area: drop; --c: var(--drop); }
+.lane[data-b="stock"] { grid-area: stock; --c: var(--stock); }
+.lane[data-b="make"] { grid-area: make; --c: var(--make); }
+.mini-inv { width: 13px; height: 10px; color: var(--red); }
+.list { list-style: none; margin: 0; padding: 0 12px; overflow: auto; flex: 1; min-height: 0; }
+.li { display: flex; align-items: flex-start; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--rule); position: relative; }
+.li.has-act .meta { padding-right: 76px; }
+.li:last-child { border-bottom: 0; }
+.li-body { flex: 1; min-width: 0; display: flex; align-items: flex-start; gap: 10px; border: 0; background: none; padding: 0; text-align: left; }
+.ico {
+  flex: none; width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--rule); display: grid; place-items: center;
+  font-family: var(--f-mono); font-size: 12px; line-height: 1; color: var(--ink);
+}
+.ico.imp { color: var(--red); border-color: color-mix(in srgb, var(--red) 45%, var(--rule)); }
+.ico.dot::after { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--c); }
+.main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.txt {
+  font-size: 14px; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere;
+  display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
+}
+.meta { display: flex; align-items: center; gap: 6px; font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.06em; color: var(--ink-2); min-width: 0; text-transform: uppercase; }
+.meta svg { width: 11px; height: 11px; }
+.meta .pg { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.meta .tg { color: var(--ink); white-space: nowrap; }
+.meta .tg.imp { color: var(--red); }
+.ex { border: 1px solid var(--rule); border-radius: 3px; padding: 0 4px; white-space: nowrap; }
+.sorting { color: var(--red); white-space: nowrap; }
+.is-pending .txt { opacity: 0.7; }
+.to-today {
+  position: absolute; right: 0; bottom: 7px; border: 1px dashed color-mix(in srgb, var(--red) 60%, transparent); background: transparent; color: var(--red);
+  border-radius: 999px; padding: 3px 8px; font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.1em;
+}
+.check {
+  width: 20px; height: 20px; margin-top: 1px; flex: none; border-radius: 4px; border: 1.5px solid var(--ink-2);
+  background: transparent; padding: 0; display: grid; place-items: center; color: transparent;
+}
+.check svg { width: 14px; height: 14px; }
+.done .check { background: var(--ink); border-color: var(--ink); color: var(--sheet); }
+.done .txt { text-decoration: line-through; color: var(--ink-2); }
+.carry { color: var(--red); }
+.empty { margin: 0; padding: 10px 12px; font-size: 13px; line-height: 1.5; color: var(--ink-2); max-width: 42ch; }
+.filter-note { padding: 6px 12px 0; }
+
+/* tabs (narrow only) */
+.tabs { display: none; }
+
+/* overlay sheet */
+.sheet-wrap { z-index: 20; display: flex; align-items: flex-end; justify-content: center; background: var(--scrim); }
+.sheet {
+  width: min(640px, 100%); max-height: 100%; display: flex; flex-direction: column;
+  background: var(--sheet); border: 1px solid var(--rule); border-radius: 12px 12px 0 0; box-shadow: var(--shadow);
+}
+.sheet-head { display: flex; align-items: center; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--rule); }
+.sheet-head h2 { margin: 0; font-family: var(--f-mono); font-weight: 500; font-size: 12px; letter-spacing: 0.18em; }
+.sheet-head .ghost { margin-left: auto; }
+.sheet-body { overflow: auto; min-height: 0; padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
+.sheet-foot { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-top: 1px solid var(--rule); flex-wrap: wrap; }
+.grow { flex: 1; }
+.btn {
+  border: 1px solid var(--rule); background: var(--sheet); border-radius: 6px; padding: 9px 14px; white-space: nowrap;
+  font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.btn svg { width: 14px; height: 14px; }
+.btn.primary { background: var(--ink); border-color: var(--ink); color: var(--sheet); font-weight: 500; }
+.btn.danger { color: var(--red); border-color: color-mix(in srgb, var(--red) 45%, var(--rule)); }
+.btn:disabled { opacity: 0.5; cursor: default; }
+.field-in {
+  width: 100%; border: 1px solid var(--rule); border-radius: 6px; background: var(--paper);
+  padding: 9px 11px; font-size: 16px; line-height: 1.5; outline: none;
+}
+textarea.field-in { resize: vertical; min-height: 96px; }
+.field-in:focus { border-color: var(--ink-2); }
+.row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.stack { display: flex; flex-direction: column; gap: 6px; }
+
+.seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; }
+.seg button {
+  border: 0; border-right: 1px solid var(--rule); background: transparent; color: var(--ink-2);
+  font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.12em; padding: 8px 11px; line-height: 1;
+}
+.seg button:last-child { border-right: 0; }
+.seg button[data-b="drop"] { --c: var(--drop); }
+.seg button[data-b="stock"] { --c: var(--stock); }
+.seg button[data-b="make"] { --c: var(--make); }
+.seg button[aria-pressed="true"] { background: var(--c); color: var(--sheet); }
+.seg.small button { padding: 6px 8px; font-size: 10px; }
+.tog {
+  border: 1px dashed var(--rule); background: transparent; border-radius: 999px; padding: 6px 11px;
+  font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2);
+}
+.tog[aria-pressed="true"] { background: var(--red); border: 1px solid var(--red); color: var(--sheet); }
+.tagchip {
+  border: 1px solid var(--rule); background: transparent; border-radius: 999px; padding: 5px 10px;
+  display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--ink-2);
+}
+.tagchip b { font-family: var(--f-mono); font-weight: 500; color: var(--ink); }
+.tagchip b.imp { color: var(--red); }
+.tagchip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--sheet); }
+.tagchip[aria-pressed="true"] b { color: var(--sheet); }
+.tagchip.small { padding: 4px 8px; font-size: 11.5px; }
+
+.src { display: flex; flex-direction: column; gap: 6px; }
+.src img { max-width: 100%; max-height: 160px; width: auto; object-fit: contain; align-self: flex-start; border-radius: 4px; border: 1px solid var(--rule); background: var(--paper); cursor: zoom-in; }
+.src img.big { max-height: none; cursor: zoom-out; }
+
+.status { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+.scanline { width: 34px; height: 3px; border-radius: 2px; background: var(--rule); position: relative; overflow: hidden; flex: none; }
+.scanline::after { content: ""; position: absolute; inset: 0; width: 40%; background: var(--red); border-radius: 2px; animation: sweep 1.1s ease-in-out infinite alternate; }
+@keyframes sweep { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+.err { color: var(--red); font-size: 14px; line-height: 1.5; margin: 0; }
+.muted { color: var(--ink-2); font-size: 13px; line-height: 1.55; margin: 0; }
+
+.rv { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; padding: 10px; border: 1px solid var(--rule); border-radius: 6px; background: var(--sheet); }
+.rv.off { opacity: 0.5; }
+.rv input[type="checkbox"] { width: 18px; height: 18px; margin: 4px 0 0; accent-color: var(--ink); }
+.rv .col { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.rv textarea { width: 100%; resize: none; border: 1px solid var(--rule); border-radius: 4px; background: var(--paper); padding: 7px 9px; font-size: 15px; line-height: 1.45; outline: none; overflow: hidden; }
+.rv textarea:focus { border-color: var(--ink-2); }
+.keep { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink-2); }
+.keep input { accent-color: var(--ink); width: 16px; height: 16px; }
+
+.sym { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 10px; border: 1px solid var(--rule); border-radius: 6px; }
+.sym .mark-in { text-align: center; font-family: var(--f-mono); font-size: 20px; padding: 6px 4px; }
+.sym .draw-in { grid-column: 1 / -1; font-size: 14px; }
+.sym .idx { font-family: var(--f-mono); font-size: 10px; color: var(--ink-2); }
+
+.log-day { margin: 8px 0 0; }
+.log-row { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--rule); }
+.log-row p { margin: 0; flex: 1; min-width: 0; font-size: 14px; line-height: 1.45; overflow-wrap: anywhere; white-space: pre-wrap; text-decoration: line-through; color: var(--ink-2); }
+
+.banner { flex: none; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 12.5px; line-height: 1.4; padding: 7px 12px; border: 1px dashed var(--ink-2); border-radius: 6px; color: var(--ink-2); }
+.banner button { border: 0; background: none; padding: 0; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--red); }
+
+.toast {
+  position: fixed; left: 50%; transform: translateX(-50%); z-index: 30;
+  top: calc(var(--vvt, 0px) + var(--vvh, 100vh) - env(safe-area-inset-bottom, 0px) - 56px);
+  background: var(--ink); color: var(--sheet); border-radius: 999px; padding: 8px 16px;
+  font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.08em; max-width: calc(100% - 32px); text-align: center; box-shadow: var(--shadow);
+}
+
+/* short screens: keyboard up on the Fold leaves roughly a 4:3 area */
+.short .field, .short .wordmark, .short .tags-lbl { display: none; }
+.short .widget { padding-block: 4px; }
+.short .tile { height: 38px; padding: 4px 8px; flex-direction: row; gap: 6px; flex-basis: 56px; }
+.short .tile .t-idx, .short .tile .t-name { display: none; }
+.short .tile .t-n { position: static; font-size: 10px; }
+.short .tile .t-mark { font-size: 15px; }
+.short .tile.edit { flex-basis: 44px; }
+.short .app { gap: 8px; padding-top: 6px; }
+
+/* narrow: cover screen */
+@media (max-width: 719px) {
+  .search { display: none; }
+  .searching .search { display: flex; position: absolute; left: 12px; right: 84px; top: 8px; z-index: 5; }
+  .searching .search input { width: 100%; }
+  #btn-search { display: inline-flex; }
+  #btn-log span { display: none; }
+  .inv-grid { max-height: 52px; gap: 8px 12px; }
+  .work {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    grid-template-areas: "pad" "tabs" "pane";
+    gap: 8px;
+  }
+  .pad textarea { flex: none; height: 70px; }
+  .short .pad textarea { height: 48px; }
+  .short .tagsrow { display: none; }
+  .tabs { display: flex; gap: 6px; grid-area: tabs; }
+  .tab {
+    flex: 1; min-width: 0; display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+    border: 1px solid var(--rule); border-radius: 6px; background: var(--sheet); color: var(--ink-2);
+    font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.1em; padding: 8px 4px; line-height: 1;
+  }
+  .tab small { font-size: 10px; letter-spacing: 0; color: var(--red); }
+  .tab[aria-selected="true"] { background: var(--ink); border-color: var(--ink); color: var(--sheet); }
+  .work > .today, .work > .lane[data-b] { grid-area: pane; display: none; contain: none; }
+  .app[data-tab="today"] .today,
+  .app[data-tab="drop"] .lane[data-b="drop"],
+  .app[data-tab="stock"] .lane[data-b="stock"],
+  .app[data-tab="make"] .lane[data-b="make"] { display: flex; }
+}
+@media (min-width: 720px) {
+  .sheet-wrap { align-items: center; padding-inline: 16px; }
+  .sheet { border-radius: 12px; max-height: calc(100% - 24px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .inv .fa, .inv .fb, .scanline::after { animation: none; }
+  .inv .fa { opacity: 1; }
+  .cannon { transition: none; }
+}
+.set-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.set-row .field-in { flex: 1; min-width: 0; }
+.ok { color: var(--ink); }
+hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 100%; }
+</style>
+</head>
+<body>
+
+<div id="app" class="app fit" data-tab="today">
+  <section class="widget" aria-label="Today at a glance">
+    <div class="w-top">
+      <span class="lbl" id="stamp">— / —</span>
+      <span class="lbl" id="score">SCORE 0000</span>
+      <div class="w-actions">
+        <label class="search" for="q">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg>
+          <input id="q" type="search" placeholder="SEARCH" autocomplete="off" aria-label="Search notes">
+        </label>
+        <button class="ghost" id="btn-search" type="button" aria-label="Search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6"/><path d="M20 20l-4.5-4.5"/></svg>
+        </button>
+        <button class="ghost" id="btn-settings" type="button" aria-label="Settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg>
+        </button>
+        <button class="ghost" id="btn-log" type="button" aria-label="Done log">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 7h10M10 12h10M10 17h10"/><path d="M3.5 7l1.2 1.2L7 5.8M3.5 12l1.2 1.2L7 10.8M3.5 17l1.2 1.2L7 15.8"/></svg>
+          <span>Done</span>
+        </button>
+      </div>
+    </div>
+    <div class="field" id="field">
+      <div class="inv-grid" id="inv-grid"></div>
+      <span class="cannon" id="cannon" aria-hidden="true"></span>
+    </div>
+    <button class="wordmark" id="wordmark" type="button" aria-label="Write a note">
+      <span>K</span><span>E</span><span>I</span><span>T</span><span>A</span><span>N</span><span class="arr">→</span>
+    </button>
+  </section>
+
+  <div class="banner" id="banner" hidden></div>
+
+  <section class="tagsrow" aria-label="Symbols">
+    <div class="tags-lbl"><span class="lbl" id="tags-count">SYMBOLS / 04</span><button class="lbl" id="clear-tag" type="button" hidden></button></div>
+    <div class="tiles" id="tiles"></div>
+  </section>
+
+  <main class="work">
+    <form class="pad card-box" id="pad" autocomplete="off">
+      <div class="box-head">
+        <span class="lbl">WRITE / NO.<span id="pad-no">001</span></span>
+        <span class="lbl" id="pad-date" style="margin-left:auto"></span>
+      </div>
+      <textarea id="pad-input" enterkeyhint="done" placeholder="Write anything. Enter saves. Start with ! ? [] -> to tag it." aria-label="New note"></textarea>
+      <div class="pad-bar">
+        <button class="icon-btn" id="btn-scan" type="button" hidden aria-label="Scan a notebook page with the camera" title="Brain Camera: scan a page">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
+        </button>
+        <button class="icon-btn" id="btn-pick" type="button" hidden aria-label="Scan a photo from your gallery" title="Scan a saved photo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="1.5"/><circle cx="9" cy="10" r="1.6"/><path d="M20 16l-5-5-8 8"/></svg>
+        </button>
+        <input type="file" id="file-cam" accept="image/*" capture="environment" hidden>
+        <input type="file" id="file-pick" accept="image/*" hidden>
+        <input type="file" id="file-import" accept="application/json,.json" hidden>
+        <div class="route" id="route" role="radiogroup" aria-label="Where this note goes">
+          <button class="chip" type="button" role="radio" data-r="auto" aria-checked="false" hidden>Auto</button>
+          <button class="chip" type="button" role="radio" data-r="drop" aria-checked="false" style="--c: var(--drop)">Drop</button>
+          <button class="chip" type="button" role="radio" data-r="stock" aria-checked="true" style="--c: var(--stock)">Stock</button>
+          <button class="chip" type="button" role="radio" data-r="make" aria-checked="false" style="--c: var(--make)">Make</button>
+          <button class="chip" type="button" role="radio" data-r="today" aria-checked="false" style="--c: var(--red)">Today</button>
+        </div>
+        <button class="save" id="btn-save" type="submit">SAVE</button>
+      </div>
+    </form>
+
+    <nav class="tabs" role="tablist" aria-label="Sections">
+      <button class="tab" type="button" role="tab" data-t="today" aria-selected="true">TODAY <small id="n-today"></small></button>
+      <button class="tab" type="button" role="tab" data-t="drop" aria-selected="false">DROP <small id="n-drop"></small></button>
+      <button class="tab" type="button" role="tab" data-t="stock" aria-selected="false">STOCK <small id="n-stock"></small></button>
+      <button class="tab" type="button" role="tab" data-t="make" aria-selected="false">MAKE <small id="n-make"></small></button>
+    </nav>
+
+    <aside class="today card-box" aria-labelledby="today-h">
+      <div class="box-head">
+        <svg class="mini-inv" id="today-inv" viewBox="0 0 11 8" shape-rendering="crispEdges" aria-hidden="true"></svg>
+        <span class="name" id="today-h">TODAY</span>
+        <span class="lbl" id="today-count"></span>
+      </div>
+      <ul class="list" id="today-list"></ul>
+      <p class="empty" id="today-empty"></p>
+    </aside>
+
+    <section class="lane card-box" data-b="drop" aria-label="Drop">
+      <div class="box-head"><span class="name">DROP</span><span class="lbl gloss">/ <span class="lane-count">0</span> · let go</span><div class="box-act"></div></div>
+      <ul class="list"></ul>
+      <p class="empty" data-empty="Fleeting notes land here. Let them go once they've done their job."></p>
+    </section>
+    <section class="lane card-box" data-b="stock" aria-label="Stock">
+      <div class="box-head"><span class="name">STOCK</span><span class="lbl gloss">/ <span class="lane-count">0</span> · keep</span><div class="box-act"></div></div>
+      <ul class="list"></ul>
+      <p class="empty" data-empty="Ideas, facts and references worth keeping."></p>
+    </section>
+    <section class="lane card-box" data-b="make" aria-label="Make">
+      <div class="box-head"><span class="name">MAKE</span><span class="lbl gloss">/ <span class="lane-count">0</span> · act</span><div class="box-act"></div></div>
+      <ul class="list"></ul>
+      <p class="empty" data-empty="Things to act on. Tap + TODAY to plan your day."></p>
+    </section>
+  </main>
+</div>
+
+<div class="sheet-wrap fit" id="sheet" hidden></div>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+<script>
+(() => {
+'use strict';
+
+/* ---------- helpers ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const BUCKETS = ['drop', 'stock', 'make'];
+const LABEL = { drop: 'DROP', stock: 'STOCK', make: 'MAKE' };
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const reduceMotion = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function h(tag, props, ...kids) {
+  const el = document.createElement(tag);
+  if (props) for (const [k, v] of Object.entries(props)) {
+    if (v == null || v === false) continue;
+    if (k === 'class') el.className = v;
+    else if (k === 'text') el.textContent = v;
+    else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else el.setAttribute(k, v === true ? '' : String(v));
+  }
+  for (const c of kids.flat()) if (c != null && c !== false) el.append(c.nodeType ? c : document.createTextNode(String(c)));
+  return el;
+}
+const ICONS = {
+  check: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  close: '<path d="M6 6l12 12M18 6L6 18"/>',
+  pen: '<path d="M4 20l4-1L19 8l-3-3L5 16z"/>',
+  page: '<path d="M6 3h9l4 4v14H6z"/><path d="M9 11h7M9 15h7"/>',
+  stop: '<rect x="7" y="7" width="10" height="10" rx="1"/>',
+};
+function icon(name, sw = 2) {
+  const t = document.createElement('template');
+  t.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name]}</svg>`;
+  return t.content.firstChild;
+}
+
+/* pixel sprites */
+const INV_A = ['..X.....X..', '...X...X...', '..XXXXXXX..', '.XX.XXX.XX.', 'XXXXXXXXXXX', 'X.XXXXXXX.X', 'X.X.....X.X', '...XX.XX...'];
+const INV_B = ['..X.....X..', 'X..X...X..X', 'X.XXXXXXX.X', 'XXX.XXX.XXX', 'XXXXXXXXXXX', '.XXXXXXXXX.', '..X.....X..', '.X.......X.'];
+const CANNON = ['......X......', '.....XXX.....', '.....XXX.....', '.XXXXXXXXXXX.', 'XXXXXXXXXXXXX', 'XXXXXXXXXXXXX', 'XXXXXXXXXXXXX'];
+const bm = rows => rows.map((r, y) => [...r].map((c, x) => (c === 'X' ? `M${x} ${y}h1v1h-1z` : '')).join('')).join('');
+const PATH_A = bm(INV_A), PATH_B = bm(INV_B);
+const INV_SVG = `<svg viewBox="0 0 11 8" shape-rendering="crispEdges" aria-hidden="true"><path class="fa" fill="currentColor" d="${PATH_A}"/><path class="fb" fill="currentColor" d="${PATH_B}"/></svg>`;
+$('#cannon').innerHTML = `<svg viewBox="0 0 13 7" shape-rendering="crispEdges" width="20" height="11"><path fill="currentColor" d="${bm(CANNON)}"/></svg>`;
+$('#today-inv').innerHTML = `<path fill="currentColor" d="${PATH_A}"/>`;
+
+const pad2 = n => String(n).padStart(2, '0');
+const dayStr = (d = new Date()) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+const parseDay = s => { const [y, m, d] = String(s).split('-').map(Number); return new Date(y, (m || 1) - 1, d || 1); };
+const startOfDay = ms => { const d = new Date(ms); d.setHours(0, 0, 0, 0); return d.getTime(); };
+let TODAY = dayStr();
+
+function rel(ms) {
+  if (!ms) return '';
+  const mins = Math.round((Date.now() - ms) / 60000);
+  if (mins < 1) return 'now';
+  if (mins < 60) return mins + 'm';
+  const days = Math.round((startOfDay(Date.now()) - startOfDay(ms)) / 86400000);
+  if (days === 0) return Math.round(mins / 60) + 'h';
+  if (days === 1) return 'yesterday';
+  if (days < 7) return new Date(ms).toLocaleDateString('en-AU', { weekday: 'short' });
+  return new Date(ms).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
+}
+function dayName(ds) {
+  const d = parseDay(ds);
+  const days = Math.round((startOfDay(Date.now()) - d.getTime()) / 86400000);
+  if (days === 1) return 'yesterday';
+  if (days < 7) return d.toLocaleDateString('en-AU', { weekday: 'short' });
+  return d.toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
+}
+
+/* ---------- symbols (Brain Camera) ---------- */
+const DEFAULT_SYMBOLS = [
+  { id: 'imp', mark: '!', name: 'Important', draw: 'an exclamation mark in the margin' },
+  { id: 'unr', mark: '?', name: 'Unresolved', draw: 'a question mark next to the line' },
+  { id: 'task', mark: '☐', name: 'Task', draw: 'a small empty box before the line' },
+  { id: 'fup', mark: '→', name: 'Follow-up', draw: 'an arrow pointing right' },
+];
+const ALTS = { task: ['[ ]', '[]', '□'], fup: ['->', '=>'] };
+function cleanSymbols(list) {
+  if (!Array.isArray(list)) return null;
+  const seen = new Set();
+  const out = [];
+  for (const s of list.slice(0, 8)) {
+    if (!s || typeof s !== 'object') continue;
+    const id = String(s.id || '').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 24);
+    const mark = String(s.mark || '').trim().slice(0, 3);
+    const name = String(s.name || '').trim().slice(0, 20);
+    if (!id || !mark || !name || seen.has(id)) continue;
+    seen.add(id);
+    out.push({ id, mark, name, draw: String(s.draw || '').trim().slice(0, 100) });
+  }
+  return out.length ? out : null;
+}
+const symById = id => state.symbols.find(s => s.id === id);
+const knownTags = it => (Array.isArray(it.tags) ? it.tags : []).filter(t => symById(t));
+
+function parseMarks(text) {
+  const toks = [];
+  for (const s of state.symbols) for (const tok of [s.mark, ...(ALTS[s.id] || [])]) if (tok) toks.push({ id: s.id, tok });
+  toks.sort((a, b) => b.tok.length - a.tok.length);
+  let t = text;
+  const tags = [];
+  for (let guard = 0; guard < 8; guard++) {
+    const s = t.replace(/^\s+/, '');
+    const hit = toks.find(({ tok }) => s.startsWith(tok) && (s.length === tok.length || /\s/.test(s[tok.length]) || !/[A-Za-z0-9]/.test(tok)));
+    if (!hit) break;
+    if (!tags.includes(hit.id)) tags.push(hit.id);
+    t = s.slice(hit.tok.length);
+  }
+  const rest = t.trim();
+  return rest ? { text: rest, tags } : { text: text.trim(), tags: [] };
+}
+
+/* ---------- state ---------- */
+const state = {
+  items: [],
+  symbols: DEFAULT_SYMBOLS.map(s => ({ ...s })),
+  route: 'stock',
+  tab: 'today',
+  q: '',
+  tag: null,
+  sample: null,
+  canImages: false,
+  assets: null,
+  confirmDrop: false,
+  sheet: null,
+  scan: null,
+};
+const byId = id => state.items.find(i => i.id === id);
+
+/* ---------- stores ---------- */
+function memoryStore() {
+  const map = new Map();
+  let cb = () => {}, scb = () => {}, settings = null;
+  const emit = () => cb([...map.values()]);
+  return {
+    mode: 'memory',
+    subscribe(f) { cb = f; emit(); return () => { cb = () => {}; }; },
+    subscribeSettings(f) { scb = f; f(settings); return () => { scb = () => {}; }; },
+    async setSettings(d) { settings = d; scb(d); },
+    newId() { return 'm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); },
+    async set(id, data) { map.set(id, { ...data, id }); emit(); },
+    async update(id, p) { const cur = map.get(id); if (!cur) return; map.set(id, { ...cur, ...p }); emit(); },
+    async remove(id) { map.delete(id); emit(); },
+    all() { return [...map.values()]; },
+  };
+}
+/* on-phone storage (IndexedDB) */
+function openDb() {
+  return new Promise((resolve, reject) => {
+    const r = indexedDB.open('keitan', 1);
+    r.onupgradeneeded = () => {
+      const db = r.result;
+      if (!db.objectStoreNames.contains('items')) db.createObjectStore('items', { keyPath: 'id' });
+      if (!db.objectStoreNames.contains('photos')) db.createObjectStore('photos');
+      if (!db.objectStoreNames.contains('kv')) db.createObjectStore('kv');
+    };
+    r.onsuccess = () => resolve(r.result);
+    r.onerror = () => reject(r.error);
+  });
+}
+function idbReq(db, name, mode, fn) {
+  return new Promise((resolve, reject) => {
+    const t = db.transaction(name, mode);
+    const r = fn(t.objectStore(name));
+    t.oncomplete = () => resolve(r ? r.result : undefined);
+    t.onerror = t.onabort = () => reject({ code: 'storage', message: String(t.error || 'storage error') });
+  });
+}
+async function localStore() {
+  const db = await openDb();
+  const rows = (await idbReq(db, 'items', 'readonly', st => st.getAll())) || [];
+  const map = new Map(rows.map(i => [i.id, i]));
+  let settings = (await idbReq(db, 'kv', 'readonly', st => st.get('settings'))) || null;
+  let cb = () => {}, scb = () => {};
+  const emit = () => cb([...map.values()]);
+  const put = v => idbReq(db, 'items', 'readwrite', st => st.put(v));
+  return {
+    mode: 'local',
+    subscribe(f) { cb = f; emit(); return () => { cb = () => {}; }; },
+    subscribeSettings(f) { scb = f; f(settings); return () => { scb = () => {}; }; },
+    async setSettings(d) { settings = d; scb(d); await idbReq(db, 'kv', 'readwrite', st => st.put(d, 'settings')); },
+    newId() { return 'n' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7); },
+    async set(id, data) { const v = { ...data, id }; map.set(id, v); emit(); await put(v); },
+    async update(id, p) {
+      const cur = map.get(id);
+      if (!cur) throw { code: 'invalid_argument' };
+      const v = { ...cur, ...p };
+      map.set(id, v); emit(); await put(v);
+    },
+    async remove(id) { map.delete(id); emit(); await idbReq(db, 'items', 'readwrite', st => st.delete(id)); },
+    async putPhoto(blob) {
+      const id = 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+      await idbReq(db, 'photos', 'readwrite', st => st.put(blob, id));
+      return id;
+    },
+    getPhoto(id) { return idbReq(db, 'photos', 'readonly', st => st.get(id)); },
+    kvGet(k) { return idbReq(db, 'kv', 'readonly', st => st.get(k)); },
+    kvSet(k, v) { return idbReq(db, 'kv', 'readwrite', st => st.put(v, k)); },
+    kvDel(k) { return idbReq(db, 'kv', 'readwrite', st => st.delete(k)); },
+    all() { return [...map.values()]; },
+  };
+}
+
+/* Anthropic API (your own key) */
+const API = 'https://api.anthropic.com/v1';
+const apiHeaders = key => ({
+  'x-api-key': key,
+  'anthropic-version': '2023-06-01',
+  'anthropic-dangerous-direct-browser-access': 'true',
+  'content-type': 'application/json',
+});
+async function apiError(r) {
+  let msg = '';
+  try { const j = await r.json(); msg = (j && j.error && j.error.message) || ''; } catch (e) {}
+  const code = r.status === 401 || r.status === 403 ? 'bad_key'
+    : r.status === 429 ? 'rate_limited'
+    : r.status === 400 || r.status === 404 || r.status === 413 ? 'invalid_request'
+    : 'upstream_error';
+  return { code, message: msg || ('HTTP ' + r.status) };
+}
+async function listModels(key) {
+  let r;
+  try { r = await fetch(API + '/models?limit=100', { headers: apiHeaders(key) }); }
+  catch (e) { throw { code: 'network', message: String(e) }; }
+  if (!r.ok) throw await apiError(r);
+  const j = await r.json();
+  return (j.data || []).map(m => String(m.id));
+}
+function pickModels(ids) {
+  const find = w => ids.find(id => id.includes(w));
+  return { scan: find('sonnet') || find('opus') || ids[0] || '', sort: find('haiku') || find('sonnet') || ids[0] || '' };
+}
+function blobToB64(blob) {
+  return new Promise((resolve, reject) => {
+    const fr = new FileReader();
+    fr.onload = () => resolve(String(fr.result).split(',')[1] || '');
+    fr.onerror = () => reject(fr.error);
+    fr.readAsDataURL(blob);
+  });
+}
+function parseLooseJson(text) {
+  const tryParse = t => { try { return JSON.parse(t); } catch (e) { return undefined; } };
+  let v = tryParse(text.trim());
+  if (v !== undefined) return v;
+  const fence = text.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (fence) { v = tryParse(fence[1].trim()); if (v !== undefined) return v; }
+  const a = text.search(/[\[{]/), b = Math.max(text.lastIndexOf('}'), text.lastIndexOf(']'));
+  if (a >= 0 && b > a) return tryParse(text.slice(a, b + 1));
+  return undefined;
+}
+function makeSample(cfg) {
+  async function call(prompt, opts = {}) {
+    const content = [];
+    for (const b of opts.images || []) {
+      content.push({ type: 'image', source: { type: 'base64', media_type: b.type || 'image/jpeg', data: await blobToB64(b) } });
+    }
+    content.push({ type: 'text', text: prompt });
+    const model = opts.modelTier === 'quick' ? (cfg.sort || cfg.scan) : (cfg.scan || cfg.sort);
+    let r;
+    try {
+      r = await fetch(API + '/messages', {
+        method: 'POST', headers: apiHeaders(cfg.key), signal: opts.signal,
+        body: JSON.stringify({ model, max_tokens: opts.images ? 4096 : 400, messages: [{ role: 'user', content }] }),
+      });
+    } catch (e) {
+      if (opts.signal && opts.signal.aborted) throw { code: 'cancelled' };
+      throw { code: 'network', message: String(e) };
+    }
+    if (!r.ok) throw await apiError(r);
+    let j;
+    try { j = await r.json(); } catch (e) { if (opts.signal && opts.signal.aborted) throw { code: 'cancelled' }; throw { code: 'upstream_error' }; }
+    if (j.stop_reason === 'refusal') throw { code: 'refused' };
+    const text = (j.content || []).filter(c => c.type === 'text').map(c => c.text).join('');
+    if (!text.trim()) throw { code: 'empty_completion' };
+    return { text, truncated: j.stop_reason === 'max_tokens' };
+  }
+  const sample = (p, o) => call(p, o);
+  sample.json = async (p, o) => {
+    const res = await call(p, o);
+    const v = parseLooseJson(res.text);
+    if (v === undefined) throw { code: 'invalid_json', text: res.text };
+    return v;
+  };
+  sample.limits = async () => ({ images: { maxCount: 5 } });
+  return sample;
+}
+
+let store = memoryStore();
+let unsub = null, unsubS = null;
+
+function onItems(list) {
+  state.items = list;
+  render();
+  if (state.sheet && state.sheet.kind === 'log') drawLog();
+}
+function onSettings(d) {
+  const syms = d && cleanSymbols(d.symbols);
+  state.symbols = syms || DEFAULT_SYMBOLS.map(s => ({ ...s }));
+  if (state.tag && !symById(state.tag)) state.tag = null;
+  render();
+}
+
+/* ---------- elements ---------- */
+const els = {
+  app: $('#app'), input: $('#pad-input'), pad: $('#pad'), route: $('#route'),
+  scan: $('#btn-scan'), pick: $('#btn-pick'), fileCam: $('#file-cam'), filePick: $('#file-pick'),
+  todayList: $('#today-list'), todayCount: $('#today-count'), todayEmpty: $('#today-empty'),
+  banner: $('#banner'), q: $('#q'), sheet: $('#sheet'), toast: $('#toast'),
+  no: $('#pad-no'), padDate: $('#pad-date'), stamp: $('#stamp'), score: $('#score'),
+  grid: $('#inv-grid'), field: $('#field'), cannon: $('#cannon'), tiles: $('#tiles'),
+  tagsCount: $('#tags-count'), clearTag: $('#clear-tag'),
+};
+
+/* ---------- keyboard-aware fit ---------- */
+function fit() {
+  const vv = window.visualViewport;
+  const hgt = vv ? vv.height : window.innerHeight;
+  const top = vv ? vv.offsetTop : 0;
+  const root = document.documentElement;
+  root.style.setProperty('--vvh', hgt + 'px');
+  root.style.setProperty('--vvt', top + 'px');
+  const typing = document.activeElement && /TEXTAREA|INPUT/.test(document.activeElement.tagName);
+  const kb = !!vv && (window.innerHeight - vv.height > 140 || (typing && screen.height && screen.height - vv.height > screen.height * 0.4));
+  document.body.classList.toggle('kb', kb);
+  document.body.classList.toggle('short', hgt < 640);
+}
+if (window.visualViewport) {
+  visualViewport.addEventListener('resize', fit);
+  visualViewport.addEventListener('scroll', fit);
+}
+window.addEventListener('resize', fit);
+fit();
+
+/* ---------- toast ---------- */
+let toastT;
+function toast(msg) {
+  els.toast.textContent = msg;
+  els.toast.hidden = false;
+  clearTimeout(toastT);
+  toastT = setTimeout(() => { els.toast.hidden = true; }, 2600);
+}
+
+/* ---------- error copy ---------- */
+function dbMsg(e) {
+  switch (e && e.code) {
+    case 'quota_exceeded': return 'Your notebook is full. Let some DROP notes go to make room.';
+    case 'invalid_argument': return "This couldn't be saved from this view.";
+    case 'resource_exhausted': return 'Saving too fast. Wait a moment and try again.';
+    case 'revoked': case 'not_granted': case 'capability_disabled': case 'capability_removed':
+      return 'Saving is unavailable in this view.';
+    default: return "Couldn't save. Check your connection and try again.";
+  }
+}
+const onWriteError = e => toast(dbMsg(e));
+function sampleMsg(e) {
+  switch (e && e.code) {
+    case 'bad_key': return 'Your Anthropic API key was rejected. Check it in Settings.';
+    case 'rate_limited': return 'Anthropic rate limit reached. Wait a minute and try again.';
+    case 'network': return "Couldn't reach Anthropic. Check your connection and try again.";
+    case 'refused': return "Claude couldn't read this page. Try another photo.";
+    case 'invalid_json': case 'empty_completion': return "The page came back in a form Keitan couldn't read. Try again.";
+    case 'invalid_request': return 'Anthropic said: ' + ((e && e.message) || 'the request was invalid.') + ' Check the model names and credit balance in Settings.';
+    case 'no_key': return 'Add your Anthropic API key in Settings to use Brain Camera.';
+    default: return 'Anthropic had a problem (' + ((e && e.message) || 'unknown error') + '). Try again.';
+  }
+}
+function disableClaude(e) { /* keep features on; errors are shown per call */ }
+
+/* ---------- render ---------- */
+const inToday = it => !!it.today && (!it.done || (it.doneAt && dayStr(new Date(it.doneAt)) === TODAY));
+function todaySort(a, b) {
+  if (!!a.done !== !!b.done) return a.done ? 1 : -1;
+  if (a.today !== b.today) return a.today < b.today ? -1 : 1;
+  return (a.createdAt || 0) - (b.createdAt || 0);
+}
+function icoFor(it) {
+  const tags = knownTags(it);
+  if (tags.length) {
+    const s = symById(tags[0]);
+    return h('span', { class: 'ico' + (s.id === 'imp' ? ' imp' : ''), 'aria-hidden': 'true', text: s.mark });
+  }
+  return h('span', { class: 'ico dot', 'aria-hidden': 'true' });
+}
+function tagMeta(it) {
+  return knownTags(it).map(id => {
+    const s = symById(id);
+    return h('span', { class: 'tg' + (id === 'imp' ? ' imp' : ''), text: s.mark + ' ' + s.name });
+  });
+}
+function laneRow(it) {
+  const pending = it.pending && Date.now() - (it.createdAt || 0) < 120000;
+  return h('li', { class: 'li' + (pending ? ' is-pending' : '') + (it.bucket === 'make' ? ' has-act' : ''), 'data-id': it.id },
+    h('button', { class: 'li-body', type: 'button', onclick: () => openItem(it.id) },
+      icoFor(it),
+      h('span', { class: 'main' },
+        h('span', { class: 'txt', text: it.text }),
+        h('span', { class: 'meta' },
+          icon(it.source === 'scan' ? 'page' : 'pen', 1.8),
+          h('span', { text: rel(it.createdAt) }),
+          tagMeta(it),
+          it.page ? h('span', { class: 'pg', text: '· ' + it.page }) : null,
+          it.example ? h('span', { class: 'ex', text: 'Example' }) : null,
+          pending ? h('span', { class: 'sorting', text: 'sorting…' }) : null))),
+    it.bucket === 'make'
+      ? h('button', { class: 'to-today', type: 'button', onclick: () => sendToday(it.id) }, '+ TODAY') : null);
+}
+
+function render() {
+  const q = state.q.trim().toLowerCase();
+  const match = it => (!q || String(it.text || '').toLowerCase().includes(q) || String(it.page || '').toLowerCase().includes(q))
+    && (!state.tag || knownTags(it).includes(state.tag));
+  const items = state.items.filter(match);
+  const filtering = !!(q || state.tag);
+
+  // TODAY
+  const t = items.filter(inToday).sort(todaySort);
+  const left = t.filter(i => !i.done).length;
+  els.todayCount.textContent = t.length ? `/ ${pad2(left)} left` : '';
+  els.todayList.replaceChildren(...t.map(it => {
+    const carried = !it.done && it.today < TODAY;
+    return h('li', { class: 'li' + (it.done ? ' done' : ''), 'data-id': it.id },
+      h('button', {
+        class: 'check', type: 'button', role: 'checkbox', 'aria-checked': String(!!it.done),
+        'aria-label': it.done ? 'Mark not done' : 'Mark done', onclick: () => toggleDone(it.id),
+      }, icon('check', 2.6)),
+      h('button', { class: 'li-body', type: 'button', onclick: () => openItem(it.id) },
+        h('span', { class: 'main' },
+          h('span', { class: 'txt', text: it.text }),
+          (carried || knownTags(it).length || it.example) ? h('span', { class: 'meta' },
+            carried ? h('span', { class: 'carry', text: 'since ' + dayName(it.today) }) : null,
+            tagMeta(it),
+            it.example ? h('span', { class: 'ex', text: 'Example' }) : null) : null)));
+  }));
+  els.todayEmpty.hidden = t.length > 0;
+  els.todayEmpty.textContent = filtering ? 'No matches.' : 'Nothing planned yet. Tap + TODAY on a MAKE note, or pick Today before you save.';
+  $('#n-today').textContent = left || '';
+
+  // lanes
+  for (const b of BUCKETS) {
+    const lane = $(`.lane[data-b="${b}"]`);
+    const list = items.filter(it => it.bucket === b && !it.today && !it.done).sort((x, y) => (y.createdAt || 0) - (x.createdAt || 0));
+    $('.lane-count', lane).textContent = pad2(list.length);
+    $('.list', lane).replaceChildren(...list.map(laneRow));
+    const empty = $('.empty', lane);
+    empty.hidden = list.length > 0;
+    empty.textContent = filtering ? 'No matches.' : empty.dataset.empty;
+    $('#n-' + b).textContent = list.length || '';
+    if (b === 'drop') drawDropActions(list);
+  }
+
+  els.no.textContent = String(state.items.length + 1).padStart(3, '0');
+  drawField();
+  drawTiles();
+  drawBanner();
+}
+
+function drawField() {
+  const done = state.items.filter(i => i.done).length;
+  els.score.textContent = 'SCORE ' + String(done * 10).padStart(4, '0');
+  const open = state.items.filter(i => !i.done && (i.today || i.bucket === 'make'))
+    .sort((a, b) => (!!b.today - !!a.today) || (a.today && b.today ? (a.today < b.today ? -1 : 1) : 0) || (b.createdAt || 0) - (a.createdAt || 0));
+  const cap = innerWidth < 720 ? 16 : 30;
+  const shown = open.slice(0, cap);
+  const nodes = shown.map(it => {
+    const b = h('button', { class: 'inv' + (it.today ? ' red' : ''), type: 'button', 'data-id': it.id, title: it.text, 'aria-label': (it.today ? 'Today: ' : 'Task: ') + it.text, onclick: () => openItem(it.id) });
+    b.innerHTML = INV_SVG;
+    return b;
+  });
+  if (open.length > cap) nodes.push(h('span', { class: 'more', text: '+' + (open.length - cap) }));
+  if (!open.length) nodes.push(h('span', { class: 'lbl all-clear', text: 'ALL CLEAR · NO OPEN TASKS' }));
+  els.grid.replaceChildren(...nodes);
+}
+
+function drawTiles() {
+  els.tagsCount.textContent = `SYMBOLS / ${pad2(state.symbols.length)}`;
+  const counts = {};
+  for (const it of state.items) if (!it.done) for (const t of knownTags(it)) counts[t] = (counts[t] || 0) + 1;
+  const tiles = state.symbols.map((s, i) => h('button', {
+    class: 'tile', type: 'button', 'aria-pressed': String(state.tag === s.id),
+    'aria-label': `${s.name}: ${counts[s.id] || 0} open. Tap to filter.`,
+    onclick: () => { state.tag = state.tag === s.id ? null : s.id; render(); },
+  },
+    h('span', { class: 't-idx', text: pad2(i + 1) }),
+    h('span', { class: 't-n', text: counts[s.id] ? pad2(counts[s.id]) : '' }),
+    h('span', { class: 't-mark' + (s.id === 'imp' ? ' imp' : ''), text: s.mark }),
+    h('span', { class: 't-name', text: s.name })));
+  tiles.push(h('button', { class: 'tile edit', type: 'button', 'aria-label': 'Edit your symbols', onclick: openSymbols },
+    h('span', { class: 't-mark', text: '✎' }), h('span', { class: 't-name', text: 'Edit' })));
+  els.tiles.replaceChildren(...tiles);
+  const s = state.tag && symById(state.tag);
+  els.clearTag.hidden = !s;
+  if (s) els.clearTag.textContent = `SHOWING ${s.mark} ${s.name} · CLEAR`;
+}
+els.clearTag.addEventListener('click', () => { state.tag = null; render(); });
+
+function drawDropActions(list) {
+  const act = $('.lane[data-b="drop"] .box-act');
+  if (!list.length || state.q || state.tag) { act.replaceChildren(); state.confirmDrop = false; return; }
+  if (state.confirmDrop) {
+    act.replaceChildren(
+      h('button', { class: 'link-btn', type: 'button', onclick: () => letGoAll(list.map(i => i.id)) }, `Let go ${list.length}`),
+      h('button', { class: 'link-btn plain', type: 'button', onclick: () => { state.confirmDrop = false; render(); } }, 'Cancel'));
+  } else {
+    act.replaceChildren(h('button', { class: 'link-btn plain', type: 'button', onclick: () => { state.confirmDrop = true; render(); } }, 'Clear'));
+  }
+}
+
+let bannerMsg = null;
+function drawBanner() {
+  const nodes = [];
+  if (bannerMsg) nodes.push(h('span', { text: bannerMsg }));
+  if (!state.sample && !state.keyDismissed) {
+    nodes.push(h('span', { text: 'Add your Anthropic API key to turn on Brain Camera and Auto sort.' }),
+      h('button', { type: 'button', onclick: openSettings }, 'Open settings'),
+      h('button', { type: 'button', onclick: () => { state.keyDismissed = true; drawBanner(); } }, 'Later'));
+  }
+  const ex = state.items.filter(i => i.example);
+  if (ex.length) {
+    nodes.push(h('span', { text: `${ex.length} example notes are showing.` }),
+      h('button', { type: 'button', onclick: () => clearExamples(ex.map(i => i.id)) }, 'Clear examples'));
+  }
+  els.banner.replaceChildren(...nodes);
+  els.banner.hidden = nodes.length === 0;
+}
+
+/* ---------- actions ---------- */
+function patch(id, p) { return store.update(id, { ...p, updatedAt: Date.now() }).catch(onWriteError); }
+function sendToday(id) { patch(id, { today: TODAY, done: false, doneAt: null, pending: false }); toast('Sent to TODAY'); }
+
+const busy = new Set();
+async function shoot(id) {
+  if (reduceMotion() || document.body.classList.contains('short')) return;
+  const inv = els.grid.querySelector(`.inv[data-id="${CSS.escape(id)}"]`);
+  if (!inv || !inv.offsetParent) return;
+  const f = els.field.getBoundingClientRect();
+  const r = inv.getBoundingClientRect();
+  const c = els.cannon.getBoundingClientRect();
+  const x = r.left + r.width / 2 - f.left;
+  els.cannon.style.left = x + 'px';
+  await wait(170);
+  const laser = h('span', { class: 'laser', 'aria-hidden': 'true' });
+  laser.style.left = x + 'px';
+  laser.style.top = (r.bottom - f.top) + 'px';
+  laser.style.height = Math.max(4, c.top - r.bottom) + 'px';
+  els.field.append(laser);
+  await wait(150);
+  inv.classList.add('hit');
+  await wait(240);
+  laser.remove();
+  setTimeout(() => { els.cannon.style.left = ''; }, 900);
+}
+async function toggleDone(id) {
+  const it = byId(id);
+  if (!it || busy.has(id)) return;
+  if (it.done) { patch(id, { done: false, doneAt: null, today: TODAY }); return; }
+  busy.add(id);
+  try { await shoot(id); } catch (e) {}
+  busy.delete(id);
+  patch(id, { done: true, doneAt: Date.now() });
+}
+async function letGoAll(ids) {
+  state.confirmDrop = false;
+  let n = 0;
+  for (const id of ids) {
+    try { await store.remove(id); n++; } catch (e) { onWriteError(e); break; }
+  }
+  if (n) toast(`Let go of ${n} note${n === 1 ? '' : 's'}`);
+  render();
+}
+async function clearExamples(ids) {
+  for (const id of ids) {
+    try { await store.remove(id); } catch (e) { onWriteError(e); return; }
+  }
+  toast('Examples cleared');
+}
+
+/* ---------- route chips + pad ---------- */
+function setRoute(r) {
+  state.route = r;
+  $$('.chip', els.route).forEach(c => c.setAttribute('aria-checked', String(c.dataset.r === r)));
+}
+let padHadFocus = false;
+for (const t of ['pointerdown', 'mousedown']) {
+  els.pad.querySelector('.pad-bar').addEventListener(t, e => {
+    if (e.target.closest('.chip, .save')) {
+      padHadFocus = document.activeElement === els.input;
+      if (padHadFocus) e.preventDefault();
+    }
+  });
+}
+let routeTouched = false;
+els.route.addEventListener('click', e => {
+  const c = e.target.closest('.chip');
+  if (!c) return;
+  routeTouched = true;
+  setRoute(c.dataset.r);
+  if (padHadFocus) els.input.focus({ preventScroll: true });
+});
+$('#wordmark').addEventListener('click', () => els.input.focus());
+
+let shiftDown = false;
+els.input.addEventListener('keydown', e => {
+  shiftDown = e.shiftKey;
+  if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && e.keyCode !== 229) {
+    e.preventDefault();
+    submitPad();
+  }
+});
+els.input.addEventListener('keyup', e => { shiftDown = e.shiftKey; });
+els.input.addEventListener('beforeinput', e => {
+  if ((e.inputType === 'insertLineBreak' || e.inputType === 'insertParagraph') && !shiftDown) {
+    e.preventDefault();
+    submitPad();
+  }
+});
+els.input.addEventListener('focus', fit);
+els.input.addEventListener('blur', () => setTimeout(fit, 50));
+els.pad.addEventListener('submit', e => {
+  e.preventDefault();
+  submitPad();
+  if (padHadFocus) els.input.focus({ preventScroll: true });
+});
+
+async function submitPad() {
+  const raw = els.input.value.trim();
+  if (!raw) return;
+  els.input.value = '';
+  const { text, tags } = parseMarks(raw);
+  const route = state.route;
+  const actionTag = tags.some(t => t === 'task' || t === 'fup');
+  const auto = route === 'auto' && !!state.sample && !actionTag;
+  let bucket = route === 'today' ? 'make' : (BUCKETS.includes(route) ? route : 'stock');
+  if (route === 'auto' && actionTag) bucket = 'make';
+  const now = Date.now();
+  const data = {
+    text, tags, bucket,
+    today: route === 'today' ? TODAY : null,
+    done: false, doneAt: null,
+    createdAt: now, updatedAt: now,
+    source: 'typed', photo: null, page: null,
+    pending: auto,
+  };
+  const id = store.newId();
+  const target = store;
+  try { await target.set(id, data); }
+  catch (e) { els.input.value = raw; onWriteError(e); return; }
+  if (!auto && innerWidth < 720) setTab(route === 'today' ? 'today' : bucket);
+  if (auto) autoSort(id, text, tags, target);
+}
+
+async function autoSort(id, text, tags, target) {
+  const legend = state.symbols.map(s => `"${s.id}" = ${s.name}`).join(', ');
+  const prompt = `Sort one note from a notebook app.
+Buckets: "drop" = fleeting or finished, not useful after today; "stock" = worth keeping (a fact, insight, idea or reference); "make" = something to act on (a task or a thing to create).
+Tags you may add, only when clearly implied by the note: ${legend}.
+
+Note:
+"""${text.slice(0, 4000)}"""
+
+Reply with only JSON: {"bucket": "drop" | "stock" | "make", "tags": []}`;
+  let bucket = null, newTags = tags, err = null;
+  try {
+    const r = await state.sample.json(prompt, { modelTier: 'quick' });
+    bucket = r && BUCKETS.includes(r.bucket) ? r.bucket : 'stock';
+    const extra = r && Array.isArray(r.tags) ? r.tags.map(String).filter(t => symById(t)) : [];
+    newTags = [...new Set([...tags, ...extra])];
+  } catch (e) { err = e; }
+  const it = byId(id);
+  if (!it || !it.pending || target !== store) return;
+  try {
+    await target.update(id, bucket ? { bucket, tags: newTags, pending: false, updatedAt: Date.now() } : { pending: false });
+  } catch (e) { return; }
+  if (bucket) {
+    toast(`Sorted to ${LABEL[bucket]}`);
+    if (innerWidth < 720) setTab(bucket);
+  } else {
+    toast('Auto-sort failed, so it went to STOCK.' + (err && err.code === 'rate_limited' ? ' Claude is busy.' : ''));
+    disableClaude(err);
+  }
+}
+
+/* ---------- tabs + search ---------- */
+function setTab(t) {
+  state.tab = t;
+  els.app.dataset.tab = t;
+  $$('.tab').forEach(b => b.setAttribute('aria-selected', String(b.dataset.t === t)));
+  try { localStorage.setItem('keitan.tab', t); } catch (e) {}
+}
+$$('.tab').forEach(b => b.addEventListener('click', () => setTab(b.dataset.t)));
+try { const saved = localStorage.getItem('keitan.tab'); if (saved) setTab(saved); } catch (e) {}
+
+els.q.addEventListener('input', () => { state.q = els.q.value; render(); });
+$('#btn-search').addEventListener('click', () => {
+  const on = !els.app.classList.contains('searching');
+  els.app.classList.toggle('searching', on);
+  if (on) els.q.focus();
+  else { els.q.value = ''; state.q = ''; render(); }
+});
+els.q.addEventListener('blur', () => { if (!els.q.value) els.app.classList.remove('searching'); });
+$('#btn-log').addEventListener('click', openLog);
+
+/* ---------- sheet plumbing ---------- */
+let sheetHist = false;
+function showSheet(node) {
+  els.sheet.replaceChildren(node);
+  if (els.sheet.hidden && !sheetHist) {
+    try { history.pushState({ keitanSheet: true }, ''); sheetHist = true; } catch (e) {}
+  }
+  els.sheet.hidden = false;
+}
+window.addEventListener('popstate', () => {
+  sheetHist = false;
+  if (state.sheet || !els.sheet.hidden) closeSheet(true);
+});
+function closeSheet(fromPop) {
+  if (fromPop !== true && sheetHist) { sheetHist = false; try { history.back(); } catch (e) {} }
+  const s = state.sheet;
+  if (s && s.kind === 'item') commitItemText();
+  if (s && s.kind === 'scan' && state.scan) {
+    state.scan.ctl && state.scan.ctl.abort();
+    if (state.scan.url) URL.revokeObjectURL(state.scan.url);
+    state.scan = null;
+  }
+  state.sheet = null;
+  els.sheet.hidden = true;
+  els.sheet.replaceChildren();
+}
+els.sheet.addEventListener('click', e => { if (e.target === els.sheet && !(state.scan && state.scan.status === 'saving')) closeSheet(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && state.sheet) closeSheet(); });
+
+function segControl(value, onChange, small) {
+  const seg = h('div', { class: 'seg' + (small ? ' small' : ''), role: 'group', 'aria-label': 'Bucket' });
+  for (const b of BUCKETS) {
+    seg.append(h('button', {
+      type: 'button', 'data-b': b, 'aria-pressed': String(b === value),
+      onclick: () => {
+        $$('button', seg).forEach(x => x.setAttribute('aria-pressed', String(x.dataset.b === b)));
+        onChange(b);
+      },
+    }, LABEL[b]));
+  }
+  return seg;
+}
+function tagChips(selected, onChange, small) {
+  const wrap = h('div', { class: 'row', role: 'group', 'aria-label': 'Symbols' });
+  let cur = [...selected];
+  for (const s of state.symbols) {
+    const b = h('button', {
+      class: 'tagchip' + (small ? ' small' : ''), type: 'button', 'aria-pressed': String(cur.includes(s.id)),
+      onclick: () => {
+        cur = cur.includes(s.id) ? cur.filter(x => x !== s.id) : [...cur, s.id];
+        b.setAttribute('aria-pressed', String(cur.includes(s.id)));
+        onChange(cur);
+      },
+    }, h('b', { class: s.id === 'imp' ? 'imp' : null, text: s.mark }), s.name);
+    wrap.append(b);
+  }
+  return wrap;
+}
+function head(title, stamp) {
+  return h('div', { class: 'sheet-head' },
+    h('h2', { text: title }),
+    stamp ? h('span', { class: 'lbl', text: stamp }) : null,
+    h('button', { class: 'ghost', type: 'button', 'aria-label': 'Close', onclick: closeSheet }, icon('close')));
+}
+
+/* ---------- item sheet ---------- */
+function openItem(id) {
+  const it = byId(id);
+  if (!it) return;
+  state.sheet = { kind: 'item', id, text: it.text, confirm: false };
+  drawItem();
+}
+function commitItemText() {
+  const s = state.sheet;
+  const it = s && byId(s.id);
+  if (!it) return;
+  const text = String(s.text || '').trim();
+  if (text && text !== it.text) patch(it.id, { text, pending: false });
+}
+function drawItem() {
+  const s = state.sheet;
+  const it = byId(s.id);
+  if (!it) { closeSheet(); return; }
+  const created = it.createdAt ? new Date(it.createdAt).toLocaleString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }) : '';
+  const field = h('textarea', { class: 'field-in', id: 'item-text', 'aria-label': 'Note text' });
+  field.value = s.text;
+  field.addEventListener('input', () => { s.text = field.value; });
+
+  const todayBtn = h('button', {
+    class: 'tog', type: 'button', 'aria-pressed': String(!!it.today),
+    onclick: () => {
+      const cur = byId(s.id);
+      if (!cur) return;
+      const on = !cur.today;
+      patch(s.id, on ? { today: TODAY, done: false, doneAt: null, pending: false } : { today: null, done: false, doneAt: null });
+      todayBtn.setAttribute('aria-pressed', String(on));
+      todayBtn.textContent = on ? 'In TODAY ✓' : '+ TODAY';
+    },
+  }, it.today ? 'In TODAY ✓' : '+ TODAY');
+
+  const src = it.photo ? h('div', { class: 'src' },
+    h('span', { class: 'lbl', text: 'From your notebook' + (it.page ? ' · ' + it.page : '') }),
+    photoImg(it.photo)) : null;
+
+  const del = h('button', {
+    class: 'btn danger', type: 'button',
+    onclick: async () => {
+      if (!s.confirm) { s.confirm = true; del.textContent = 'Tap again to delete'; return; }
+      const id = s.id;
+      state.sheet = null;
+      closeSheet();
+      try { await store.remove(id); toast('Deleted'); } catch (e) { onWriteError(e); }
+    },
+  }, 'Delete');
+
+  showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Note' },
+    head(it.done ? 'DONE' : (it.today ? 'TODAY' : LABEL[it.bucket] || 'NOTE'), created),
+    h('div', { class: 'sheet-body' },
+      field,
+      h('div', { class: 'row' },
+        segControl(it.bucket, b => patch(s.id, { bucket: b, pending: false })),
+        todayBtn),
+      h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'Symbols' }),
+        tagChips(knownTags(it), tags => patch(s.id, { tags }))),
+      it.example ? h('p', { class: 'muted', text: 'This is an example note. Delete it, or clear all examples from the banner.' }) : null,
+      src),
+    h('div', { class: 'sheet-foot' }, del, h('span', { class: 'grow' }),
+      h('button', { class: 'btn primary', type: 'button', onclick: closeSheet }, 'Save'))));
+}
+
+function photoImg(photoId) {
+  const img = h('img', { alt: 'Notebook page this note came from', onclick: e => e.currentTarget.classList.toggle('big') });
+  Promise.resolve(store.getPhoto ? store.getPhoto(photoId) : null).then(b => {
+    if (b) { const u = URL.createObjectURL(b); img.src = u; img.addEventListener('load', () => setTimeout(() => URL.revokeObjectURL(u), 1000), { once: true }); }
+    else { const w = img.closest('.src'); if (w) w.hidden = true; }
+  }).catch(() => { const w = img.closest('.src'); if (w) w.hidden = true; });
+  return img;
+}
+
+/* ---------- done log ---------- */
+function openLog() { state.sheet = { kind: 'log' }; drawLog(); }
+function drawLog() {
+  if (!state.sheet || state.sheet.kind !== 'log') return;
+  const done = state.items.filter(i => i.done).sort((a, b) => (b.doneAt || 0) - (a.doneAt || 0));
+  const body = h('div', { class: 'sheet-body' });
+  if (!done.length) body.append(h('p', { class: 'muted', text: 'Tasks you tick off in TODAY are kept here. Each one is worth 10 points.' }));
+  let last = null;
+  for (const it of done) {
+    const d = it.doneAt ? dayStr(new Date(it.doneAt)) : '';
+    if (d !== last) {
+      last = d;
+      body.append(h('p', { class: 'lbl log-day', text: d === TODAY ? 'Today' : (d ? parseDay(d).toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' }) : 'Earlier') }));
+    }
+    body.append(h('div', { class: 'log-row' },
+      h('p', { text: it.text }),
+      h('button', { class: 'link-btn plain', type: 'button', onclick: () => { patch(it.id, { done: false, doneAt: null, today: TODAY }); toast('Back in TODAY'); } }, 'Undo')));
+  }
+  const prev = $('.sheet-body', els.sheet);
+  const scroll = prev ? prev.scrollTop : 0;
+  showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Done log' },
+    head('DONE LOG', `${done.length} done · score ${done.length * 10}`), body));
+  body.scrollTop = scroll;
+}
+
+/* ---------- symbol editor ---------- */
+function openSymbols() {
+  state.sheet = { kind: 'symbols', draft: state.symbols.map(s => ({ ...s })) };
+  drawSymbols();
+}
+function drawSymbols() {
+  const s = state.sheet;
+  if (!s || s.kind !== 'symbols') return;
+  const body = h('div', { class: 'sheet-body' },
+    h('p', { class: 'muted', text: 'Draw these next to lines in your paper notebook. Brain Camera reads them when you scan a page, and you can type a symbol at the start of a note to tag it.' }));
+  s.draft.forEach((sym, i) => {
+    const mark = h('input', { class: 'field-in mark-in', type: 'text', maxlength: '3', 'aria-label': `Symbol ${i + 1} mark` });
+    mark.value = sym.mark;
+    mark.addEventListener('input', () => { sym.mark = mark.value; });
+    const name = h('input', { class: 'field-in', type: 'text', maxlength: '20', placeholder: 'Name', 'aria-label': `Symbol ${i + 1} name` });
+    name.value = sym.name;
+    name.addEventListener('input', () => { sym.name = name.value; });
+    const draw = h('input', { class: 'field-in draw-in', type: 'text', maxlength: '100', placeholder: 'How you draw it, for Claude (e.g. a star in the margin)', 'aria-label': `How you draw symbol ${i + 1}` });
+    draw.value = sym.draw || '';
+    draw.addEventListener('input', () => { sym.draw = draw.value; });
+    body.append(h('div', { class: 'sym' }, mark, name,
+      h('button', { class: 'ghost', type: 'button', 'aria-label': `Remove ${sym.name || 'symbol'}`, onclick: () => { s.draft.splice(i, 1); drawSymbols(); } }, icon('close')),
+      draw));
+  });
+  if (s.draft.length < 8) {
+    body.append(h('button', {
+      class: 'btn', type: 'button',
+      onclick: () => { s.draft.push({ id: 's' + Math.random().toString(36).slice(2, 8), mark: '', name: '', draw: '' }); drawSymbols(); },
+    }, '+ Add symbol'));
+  }
+  const prev = $('.sheet-body', els.sheet);
+  const scroll = prev ? prev.scrollTop : 0;
+  showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Your symbols' },
+    head('YOUR SYMBOLS', `${s.draft.length} / 8`), body,
+    h('div', { class: 'sheet-foot' },
+      h('button', { class: 'link-btn plain', type: 'button', onclick: () => { s.draft = DEFAULT_SYMBOLS.map(x => ({ ...x })); drawSymbols(); } }, 'Reset to defaults'),
+      h('span', { class: 'grow' }),
+      h('button', { class: 'btn', type: 'button', onclick: closeSheet }, 'Cancel'),
+      h('button', { class: 'btn primary', type: 'button', onclick: saveSymbols }, 'Save'))));
+  body.scrollTop = scroll;
+}
+async function saveSymbols() {
+  const s = state.sheet;
+  const incomplete = s.draft.filter(x => !x.mark.trim() || !x.name.trim());
+  if (incomplete.length) { toast('Give every symbol a mark and a name, or remove it.'); return; }
+  const clean = cleanSymbols(s.draft);
+  if (!clean) { toast('Keep at least one symbol.'); return; }
+  closeSheet();
+  state.symbols = clean;
+  render();
+  try { await store.setSettings({ symbols: clean, updatedAt: Date.now() }); toast('Symbols saved'); }
+  catch (e) { onWriteError(e); }
+}
+
+/* ---------- Brain Camera ---------- */
+els.scan.addEventListener('click', () => els.fileCam.click());
+els.pick.addEventListener('click', () => els.filePick.click());
+for (const inp of [els.fileCam, els.filePick]) {
+  inp.addEventListener('change', () => {
+    const f = inp.files && inp.files[0];
+    inp.value = '';
+    if (f) startScan(f);
+  });
+}
+
+async function downscale(file, max, quality) {
+  let src;
+  try { src = await createImageBitmap(file, { imageOrientation: 'from-image' }); }
+  catch (e) {
+    src = await new Promise((res, rej) => {
+      const img = new Image();
+      img.onload = () => res(img);
+      img.onerror = rej;
+      img.src = URL.createObjectURL(file);
+    });
+  }
+  const w = src.width, hh = src.height;
+  if (!w || !hh) throw new Error('empty');
+  const k = Math.min(1, max / Math.max(w, hh));
+  const c = document.createElement('canvas');
+  c.width = Math.round(w * k); c.height = Math.round(hh * k);
+  c.getContext('2d').drawImage(src, 0, 0, c.width, c.height);
+  return await new Promise((res, rej) => c.toBlob(b => (b ? res(b) : rej(new Error('encode'))), 'image/jpeg', quality));
+}
+
+function ocrPrompt() {
+  const wd = new Date().toLocaleDateString('en-AU', { weekday: 'long' });
+  const legend = state.symbols.map(s => `   - id "${s.id}": ${s.mark}${s.draw ? ` (${s.draw})` : ''} = ${s.name}`).join('\n');
+  return `You are Brain Camera, the reading-and-sorting step of Keitan, a notebook app that links paper notes to a digital task list.
+The image is a phone photo of one page (or a two-page spread) of the user's handwritten notebook. Today is ${wd} ${TODAY}.
+
+1. Read all the handwriting. Ignore ruled lines, dot grids, page numbers, printed notebook branding and anything outside the page.
+2. Split the page into separate notes: one idea, fact or task per note. Bullet points and numbered lines are usually separate notes. Keep a heading only as part of the note it belongs to.
+3. Keep the writer's own words and language. Only fix obvious misreadings. Write [?] for a word you cannot read. Do not copy the symbols themselves into the text. Add no commentary.
+4. The writer marks lines with their own hand-drawn symbols, like a bullet journal:
+${legend}
+   Put the ids of the symbols drawn next to each note in "tags". If no symbol is drawn but the note clearly is one of these (for example an open question or a to-do), you may add that id. Otherwise leave "tags" empty.
+5. Put each note in one bucket:
+   "drop" = fleeting or already handled: crossed-out or ticked-off lines, scratch maths, reminders that only matter for a moment.
+   "stock" = worth keeping: facts, insights, ideas, references, open questions, names, numbers to remember.
+   "make" = something to act on: tasks, to-dos, follow-ups, things to write, build, send, buy or decide.
+6. Set "today": true only for a "make" note the writer clearly marked for today (the word "today", today's date, or a mark they use for today). Otherwise false.
+
+Reply with only this JSON:
+{"title": "a 2-6 word title for the page", "items": [{"text": "...", "bucket": "stock", "tags": [], "today": false}]}
+If the photo has no readable handwriting, reply {"title": "", "items": []}.`;
+}
+
+async function startScan(file) {
+  if (!state.sample || !state.canImages) { toast('Add your Anthropic API key in Settings to use Brain Camera.'); openSettings(); return; }
+  const scan = { status: 'preparing', blob: null, url: null, items: [], title: '', found: 0, error: '', ctl: null,
+    keepPhoto: !!store.putPhoto };
+  state.scan = scan;
+  state.sheet = { kind: 'scan' };
+  drawScan();
+  try { scan.blob = await downscale(file, 1600, 0.85); }
+  catch (e) {
+    scan.status = 'error';
+    scan.error = "This photo couldn't be opened. Try a JPEG or PNG. On a Samsung camera, turn off High efficiency pictures in camera settings.";
+    drawScan();
+    return;
+  }
+  if (state.scan !== scan) return;
+  scan.url = URL.createObjectURL(scan.blob);
+  readScan(scan);
+}
+
+async function readScan(scan) {
+  scan.status = 'reading';
+  scan.found = 0;
+  scan.error = '';
+  scan.ctl = new AbortController();
+  drawScan();
+  try {
+    const res = await state.sample.json(ocrPrompt(), {
+      images: [scan.blob],
+      signal: scan.ctl.signal,
+      onText: ({ text }) => {
+        const n = (text.match(/"text"\s*:/g) || []).length;
+        if (n !== scan.found && state.scan === scan) {
+          scan.found = n;
+          const el = $('#scan-status');
+          if (el) el.textContent = `Reading your handwriting… ${n} note${n === 1 ? '' : 's'} so far`;
+        }
+      },
+    });
+    if (state.scan !== scan) return;
+    const raw = res && Array.isArray(res.items) ? res.items : [];
+    scan.title = String((res && res.title) || '').trim().slice(0, 80);
+    scan.items = raw.map(r => {
+      const bucket = r && BUCKETS.includes(r.bucket) ? r.bucket : 'stock';
+      const tags = r && Array.isArray(r.tags) ? [...new Set(r.tags.map(String).filter(t => symById(t)))] : [];
+      return { text: String((r && r.text) || '').trim(), bucket, tags, today: !!(r && r.today) && bucket === 'make', keep: true };
+    }).filter(r => r.text);
+    scan.status = 'review';
+  } catch (e) {
+    if (state.scan !== scan) return;
+    if (e && e.code === 'cancelled') { closeSheet(); return; }
+    scan.status = 'error';
+    scan.error = sampleMsg(e);
+    disableClaude(e);
+  }
+  drawScan();
+}
+
+function autoGrow(t) { t.style.height = 'auto'; t.style.height = t.scrollHeight + 2 + 'px'; }
+
+function drawScan() {
+  const scan = state.scan;
+  if (!scan) return;
+  const body = h('div', { class: 'sheet-body' });
+  if (scan.url) {
+    body.append(h('div', { class: 'src' },
+      h('img', { src: scan.url, alt: 'Your notebook page', onclick: e => e.currentTarget.classList.toggle('big') })));
+  }
+  const foot = h('div', { class: 'sheet-foot' });
+
+  if (scan.status === 'preparing' || scan.status === 'reading') {
+    body.append(h('div', { class: 'status' }, h('span', { class: 'scanline', 'aria-hidden': 'true' }),
+      h('span', { id: 'scan-status', text: scan.status === 'preparing' ? 'Preparing photo…' : 'Reading your handwriting…' })));
+    body.append(h('p', { class: 'muted', text: `Claude is transcribing the page, reading your symbols (${state.symbols.map(s => s.mark).join(' ')}) and sorting each line into DROP, STOCK or MAKE. This usually takes 10 to 40 seconds and uses your Anthropic API credit.` }));
+    foot.append(h('span', { class: 'grow' }),
+      h('button', { class: 'btn', type: 'button', onclick: () => { scan.ctl ? scan.ctl.abort() : closeSheet(); } }, icon('stop'), 'Stop'));
+  } else if (scan.status === 'error') {
+    body.append(h('p', { class: 'err', text: scan.error }));
+    foot.append(h('span', { class: 'grow' }),
+      h('button', { class: 'btn', type: 'button', onclick: closeSheet }, 'Close'),
+      scan.blob && state.sample && state.canImages
+        ? h('button', { class: 'btn primary', type: 'button', onclick: () => readScan(scan) }, 'Try again') : null);
+  } else if (!scan.items.length) {
+    body.append(h('p', { class: 'muted', text: 'No handwriting found on this page. Try a closer, well-lit photo with the page filling the frame.' }));
+    foot.append(h('span', { class: 'grow' }), h('button', { class: 'btn primary', type: 'button', onclick: closeSheet }, 'Close'));
+  } else {
+    const title = h('input', { class: 'field-in', id: 'scan-title', type: 'text', 'aria-label': 'Page title', placeholder: 'Page title' });
+    title.value = scan.title;
+    title.addEventListener('input', () => { scan.title = title.value; });
+    body.append(h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'Page' }), title));
+    body.append(h('span', { class: 'lbl', text: `${pad2(scan.items.length)} notes found · check text, buckets and symbols` }));
+    const addBtn = h('button', { class: 'btn primary', type: 'button', onclick: () => commitScan(addBtn) });
+    const syncCount = () => {
+      const n = scan.items.filter(r => r.keep && r.text.trim()).length;
+      addBtn.textContent = scan.status === 'saving' ? 'Saving…' : `Add ${n} note${n === 1 ? '' : 's'}`;
+      addBtn.disabled = scan.status === 'saving' || n === 0;
+    };
+    scan.items.forEach((r, i) => {
+      const ta = h('textarea', { rows: '1', 'aria-label': `Note ${i + 1}` });
+      ta.value = r.text;
+      ta.addEventListener('input', () => { r.text = ta.value; autoGrow(ta); syncCount(); });
+      requestAnimationFrame(() => autoGrow(ta));
+      const tog = h('button', {
+        class: 'tog', type: 'button', 'aria-pressed': String(r.today), hidden: r.bucket !== 'make',
+        onclick: () => { r.today = !r.today; tog.setAttribute('aria-pressed', String(r.today)); },
+      }, 'Today');
+      const box = h('input', { type: 'checkbox', 'aria-label': `Include note ${i + 1}` });
+      box.checked = r.keep;
+      const row = h('div', { class: 'rv' + (r.keep ? '' : ' off') }, box,
+        h('div', { class: 'col' }, ta,
+          h('div', { class: 'row' },
+            segControl(r.bucket, b => { r.bucket = b; if (b !== 'make') r.today = false; tog.hidden = b !== 'make'; tog.setAttribute('aria-pressed', String(r.today)); }, true),
+            tog),
+          tagChips(r.tags, tags => { r.tags = tags; }, true)));
+      box.addEventListener('change', () => { r.keep = box.checked; row.classList.toggle('off', !r.keep); syncCount(); });
+      body.append(row);
+    });
+    syncCount();
+    if (store.putPhoto) {
+      const k = h('input', { type: 'checkbox', id: 'keep-photo' });
+      k.checked = scan.keepPhoto;
+      k.addEventListener('change', () => { scan.keepPhoto = k.checked; });
+      foot.append(h('label', { class: 'keep', for: 'keep-photo' }, k, 'Keep the photo'));
+    }
+    foot.append(h('span', { class: 'grow' }),
+      h('button', { class: 'btn', type: 'button', onclick: closeSheet, disabled: scan.status === 'saving' }, 'Cancel'),
+      addBtn);
+  }
+  const prev = $('.sheet-body', els.sheet);
+  const scroll = prev ? prev.scrollTop : 0;
+  showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Brain Camera' },
+    head('BRAIN CAMERA', scan.status === 'review' && scan.items.length ? 'review' : ''), body, foot));
+  body.scrollTop = scroll;
+}
+
+async function commitScan(btn) {
+  const scan = state.scan;
+  if (!scan || scan.status === 'saving') return;
+  const chosen = scan.items.filter(r => r.keep && r.text.trim());
+  if (!chosen.length) { closeSheet(); return; }
+  scan.status = 'saving';
+  btn.textContent = 'Saving…';
+  btn.disabled = true;
+  let photo = null;
+  if (scan.keepPhoto && store.putPhoto) {
+    try { photo = await store.putPhoto(scan.blob); }
+    catch (e) { toast("Couldn't keep the photo. Saving the notes without it."); }
+  }
+  const now = Date.now();
+  const page = scan.title.trim().slice(0, 80) || null;
+  let saved = 0;
+  for (let i = 0; i < chosen.length; i++) {
+    const r = chosen[i];
+    const id = store.newId();
+    try {
+      await store.set(id, {
+        text: r.text.trim(), tags: r.tags, bucket: r.bucket, today: r.today ? TODAY : null,
+        done: false, doneAt: null, createdAt: now - i, updatedAt: now,
+        source: 'scan', photo, page, pending: false,
+      });
+      saved++;
+    } catch (e) { onWriteError(e); break; }
+  }
+  closeSheet();
+  if (saved) toast(`Added ${saved} note${saved === 1 ? '' : 's'} from your page`);
+}
+
+/* ---------- capabilities ---------- */
+function syncClaudeUI() {
+  const auto = $('.chip[data-r="auto"]', els.route);
+  auto.hidden = !state.sample;
+  if (!state.sample && state.route === 'auto') setRoute('stock');
+  els.scan.hidden = !(state.sample && state.canImages);
+  els.pick.hidden = !(state.sample && state.canImages);
+}
+
+function drawDates() {
+  const now = new Date();
+  els.stamp.textContent = `${now.toLocaleDateString('en-AU', { weekday: 'short' }).toUpperCase()} / ${pad2(now.getDate())}`;
+  els.padDate.textContent = `${pad2(now.getDate())}.${pad2(now.getMonth() + 1)}.${String(now.getFullYear()).slice(2)}`;
+}
+
+const EXAMPLES = [
+  { text: 'Coffee with Sam moved to Thursday', bucket: 'drop', tags: [], today: false, source: 'typed', page: null },
+  { text: 'Keep a parking-lot page at the back of every notebook for stray thoughts', bucket: 'stock', tags: ['imp'], today: false, source: 'scan', page: 'Weekly review' },
+  { text: 'Why does the reading drift after two hours?', bucket: 'stock', tags: ['unr'], today: false, source: 'scan', page: 'Weekly review' },
+  { text: "Write up this week's experiment notes", bucket: 'make', tags: ['task'], today: false, source: 'scan', page: 'Weekly review' },
+  { text: 'Send the draft to the team', bucket: 'make', tags: ['fup'], today: false, source: 'scan', page: 'Weekly review' },
+  { text: 'Book lab time for Friday', bucket: 'make', tags: ['task'], today: true, source: 'typed', page: null },
+];
+
+async function loadApi() {
+  const cfg = store.kvGet ? await store.kvGet('api').catch(() => null) : null;
+  state.api = cfg && cfg.key ? cfg : null;
+  state.sample = state.api ? makeSample(state.api) : null;
+  state.canImages = !!state.sample;
+  if (state.sample && !routeTouched) setRoute('auto');
+  syncClaudeUI();
+  drawBanner();
+}
+
+/* ---------- settings ---------- */
+function openSettings() {
+  const a = state.api || {};
+  state.sheet = { kind: 'settings', key: a.key || '', scan: a.scan || '', sort: a.sort || '', status: '', busy: false, confirmImport: null };
+  drawSettings();
+}
+function drawSettings() {
+  const s = state.sheet;
+  if (!s || s.kind !== 'settings') return;
+  const key = h('input', { class: 'field-in', id: 'api-key', type: 'password', autocomplete: 'off', placeholder: 'sk-ant-…', 'aria-label': 'Anthropic API key' });
+  key.value = s.key;
+  key.addEventListener('input', () => { s.key = key.value.trim(); });
+  const scan = h('input', { class: 'field-in', id: 'model-scan', type: 'text', placeholder: 'found automatically', 'aria-label': 'Model for Brain Camera' });
+  scan.value = s.scan;
+  scan.addEventListener('input', () => { s.scan = scan.value.trim(); });
+  const sort = h('input', { class: 'field-in', id: 'model-sort', type: 'text', placeholder: 'found automatically', 'aria-label': 'Model for Auto sort' });
+  sort.value = s.sort;
+  sort.addEventListener('input', () => { s.sort = sort.value.trim(); });
+
+  const saveKey = async () => {
+    if (!s.key) { s.status = 'Paste your API key first.'; drawSettings(); return; }
+    if (!store.kvSet) { s.status = "This browser won't let Keitan save settings."; drawSettings(); return; }
+    s.busy = true; s.status = 'Checking your key…'; drawSettings();
+    try {
+      const ids = await listModels(s.key);
+      const pick = pickModels(ids);
+      if (!s.scan || !ids.includes(s.scan)) s.scan = pick.scan;
+      if (!s.sort || !ids.includes(s.sort)) s.sort = pick.sort;
+      if (!s.scan) throw { code: 'invalid_request', message: 'No models are available to this key.' };
+      const cfg = { key: s.key, scan: s.scan, sort: s.sort };
+      await store.kvSet('api', cfg);
+      s.status = `Key works. Brain Camera uses ${s.scan}; Auto sort uses ${s.sort}.`;
+      await loadApi();
+    } catch (e) {
+      s.status = e && e.code === 'bad_key' ? 'That key was rejected. Copy it again from the Anthropic Console.'
+        : e && e.code === 'network' ? "Couldn't reach Anthropic. Check your connection." : sampleMsg(e);
+    }
+    s.busy = false;
+    drawSettings();
+  };
+  const removeKey = async () => {
+    await store.kvDel('api').catch(() => {});
+    s.key = ''; s.scan = ''; s.sort = ''; s.status = 'Key removed from this phone.';
+    await loadApi();
+    drawSettings();
+  };
+
+  const body = h('div', { class: 'sheet-body' },
+    h('span', { class: 'lbl', text: 'Anthropic API key' }),
+    h('p', { class: 'muted', text: 'Brain Camera and Auto sort call Claude with your own API key. It is stored only on this phone and sent only to api.anthropic.com. Usage is billed to your Anthropic API account, separately from a Claude subscription.' }),
+    h('div', { class: 'set-row' }, key),
+    h('div', { class: 'row' },
+      h('button', { class: 'btn primary', type: 'button', disabled: s.busy, onclick: saveKey }, s.busy ? 'Checking…' : 'Save and test'),
+      state.api ? h('button', { class: 'btn danger', type: 'button', onclick: removeKey }, 'Remove key') : null),
+    s.status ? h('p', { class: 'muted ok', text: s.status }) : null,
+    h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'Model for Brain Camera' }), scan),
+    h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'Model for Auto sort' }), sort),
+    h('p', { class: 'muted', text: 'Leave the model boxes as they are. Keitan picks the newest Sonnet for reading pages and the newest Haiku for sorting when you save the key.' }),
+    h('hr', { class: 'rule' }),
+    h('span', { class: 'lbl', text: 'Backup' }),
+    h('p', { class: 'muted', text: `Your ${state.items.length} notes are stored on this phone only. Export a backup now and then. Photos are not included.` }),
+    h('div', { class: 'row' },
+      h('button', { class: 'btn', type: 'button', onclick: exportBackup }, 'Export backup'),
+      h('button', { class: 'btn', type: 'button', onclick: () => $('#file-import').click() }, 'Import backup')),
+    s.confirmImport ? h('div', { class: 'stack' },
+      h('p', { class: 'muted ok', text: `Import ${s.confirmImport.items.length} notes? Notes with the same ID are replaced; others are kept.` }),
+      h('div', { class: 'row' },
+        h('button', { class: 'btn primary', type: 'button', onclick: () => doImport(s.confirmImport) }, 'Import'),
+        h('button', { class: 'btn', type: 'button', onclick: () => { s.confirmImport = null; drawSettings(); } }, 'Cancel'))) : null);
+
+  const prev = $('.sheet-body', els.sheet);
+  const scroll = prev ? prev.scrollTop : 0;
+  showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Settings' },
+    head('SETTINGS', ''), body,
+    h('div', { class: 'sheet-foot' }, h('span', { class: 'grow' }),
+      h('button', { class: 'btn', type: 'button', onclick: async () => {
+        if (state.api && (s.scan !== state.api.scan || s.sort !== state.api.sort) && s.scan) {
+          const cfg = { ...state.api, scan: s.scan, sort: s.sort || s.scan };
+          await store.kvSet('api', cfg).catch(() => {});
+          await loadApi();
+        }
+        closeSheet();
+      } }, 'Done'))));
+  body.scrollTop = scroll;
+}
+$('#btn-settings').addEventListener('click', openSettings);
+
+function exportBackup() {
+  const data = { app: 'keitan', version: 1, exportedAt: new Date().toISOString(), symbols: state.symbols, items: state.items };
+  const blob = new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = h('a', { href: url, download: `keitan-backup-${dayStr()}.json` });
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+  toast('Backup exported');
+}
+$('#file-import').addEventListener('change', async e => {
+  const f = e.target.files && e.target.files[0];
+  e.target.value = '';
+  if (!f) return;
+  try {
+    const data = JSON.parse(await f.text());
+    if (!data || data.app !== 'keitan' || !Array.isArray(data.items)) throw new Error('not a backup');
+    if (!state.sheet || state.sheet.kind !== 'settings') openSettings();
+    state.sheet.confirmImport = data;
+    drawSettings();
+  } catch (err) { toast("That file isn't a Keitan backup."); }
+});
+async function doImport(data) {
+  let n = 0;
+  for (const it of data.items) {
+    if (!it || typeof it.id !== 'string' || typeof it.text !== 'string') continue;
+    const { id, ...rest } = it;
+    try { await store.set(id, rest); n++; } catch (e) { onWriteError(e); break; }
+  }
+  const syms = cleanSymbols(data.symbols);
+  if (syms) await store.setSettings({ symbols: syms, updatedAt: Date.now() }).catch(() => {});
+  if (state.sheet && state.sheet.kind === 'settings') { state.sheet.confirmImport = null; state.sheet.status = `Imported ${n} notes.`; drawSettings(); }
+}
+
+async function boot() {
+  drawDates();
+  try {
+    store = await localStore();
+  } catch (e) {
+    store = memoryStore();
+    bannerMsg = "This browser won't let Keitan save notes, so anything written now disappears when you close it.";
+  }
+  if (store.kvGet) {
+    const seeded = await store.kvGet('seeded').catch(() => true);
+    if (!seeded) {
+      const now = Date.now();
+      for (let i = 0; i < EXAMPLES.length; i++) {
+        const ex = EXAMPLES[i];
+        await store.set(store.newId(), {
+          text: ex.text, tags: ex.tags, bucket: ex.bucket, today: ex.today ? TODAY : null,
+          done: false, doneAt: null, createdAt: now - (i + 1) * 60000, updatedAt: now,
+          source: ex.source, photo: null, page: ex.page, pending: false, example: true,
+        }).catch(() => {});
+      }
+      await store.kvSet('seeded', true).catch(() => {});
+    }
+  }
+  unsub = store.subscribe(onItems);
+  unsubS = store.subscribeSettings(onSettings);
+  await loadApi();
+  try { els.input.focus({ preventScroll: true }); } catch (e) {}
+  if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+}
+
+// day rollover + relative times
+setInterval(() => {
+  const d = dayStr();
+  if (d !== TODAY) { TODAY = d; drawDates(); }
+  render();
+}, 60000);
+
+boot();
+})();
+</script>
+</body>
+</html>
