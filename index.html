@@ -36,7 +36,8 @@
    a numbered row of symbol tiles, then the notepad with TODAY beside it and three list lanes below.
    Everything is sized to the visible area above the on-screen keyboard. */
 :root {
-  --work: #3F6CA8; --personal: #3D8455; --fun: #B0701A;
+  --work: #2a78d6; --personal: #1baf7a; --fun: #eb6834;
+  --heat-0: #E0E0DC; --heat-1: #86b6ef; --heat-2: #5598e7; --heat-3: #2a78d6; --heat-4: #1c5cab;
   --paper: #E7E7E4;
   --sheet: #F6F6F3;
   --ink: #262625;
@@ -56,7 +57,8 @@
   :root:not([data-theme="light"]) {
     --paper: #111110; --sheet: #1A1A19; --ink: #E7E7E3; --ink-2: #8D8D88; --rule: #2C2C2A; --dot: #2F2F2D;
     --red: #FF5B4D; --drop: #7F7F7B; --stock: #D8D8D4; --make: #FF5B4D;
-    --work: #82A8DD; --personal: #78BC8A; --fun: #E2A64E;
+    --work: #3987e5; --personal: #199e70; --fun: #d95926;
+    --heat-0: #2C2C2A; --heat-1: #184f95; --heat-2: #256abf; --heat-3: #3987e5; --heat-4: #86b6ef;
     --scrim: rgba(0, 0, 0, 0.6);
     --shadow: 0 1px 0 rgba(0, 0, 0, 0.3), 0 10px 24px -16px rgba(0, 0, 0, 0.9);
     color-scheme: dark;
@@ -65,7 +67,8 @@
 :root[data-theme="dark"] {
   --paper: #111110; --sheet: #1A1A19; --ink: #E7E7E3; --ink-2: #8D8D88; --rule: #2C2C2A; --dot: #2F2F2D;
   --red: #FF5B4D; --drop: #7F7F7B; --stock: #D8D8D4; --make: #FF5B4D;
-    --work: #82A8DD; --personal: #78BC8A; --fun: #E2A64E;
+    --work: #3987e5; --personal: #199e70; --fun: #d95926;
+    --heat-0: #2C2C2A; --heat-1: #184f95; --heat-2: #256abf; --heat-3: #3987e5; --heat-4: #86b6ef;
   --scrim: rgba(0, 0, 0, 0.6);
   --shadow: 0 1px 0 rgba(0, 0, 0, 0.3), 0 10px 24px -16px rgba(0, 0, 0, 0.9);
   color-scheme: dark;
@@ -404,8 +407,9 @@ details summary { cursor: pointer; }
 [data-cat="personal"] { --cc: var(--personal); }
 [data-cat="fun"] { --cc: var(--fun); }
 .cdot { width: 7px; height: 7px; border-radius: 50%; background: var(--cc, var(--ink-2)); flex: none; display: inline-block; }
-.meta .cn { color: var(--cc, var(--ink-2)); white-space: nowrap; }
-.seg.cats button[data-cat][aria-pressed="true"] { background: var(--cc); color: var(--sheet); }
+.meta .cn { color: var(--ink-2); white-space: nowrap; }
+.seg.cats button[data-cat]::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--cc); margin-right: 6px; vertical-align: 1px; }
+.seg.cats button[data-cat][aria-pressed="true"] { background: var(--ink); color: var(--sheet); }
 .nb-tabs button { --c: var(--ink); }
 .nb-cats { flex: none; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 1px; }
 .nb-cats::-webkit-scrollbar { display: none; }
@@ -433,6 +437,144 @@ details summary { cursor: pointer; }
 .nb-row .meta > .pg { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 @media (max-width: 599px) { .nb-top h2 { display: none; } .nb-top { gap: 6px; } .nb-tabs button { padding: 8px 8px; } }
 
+/* v13: dates, week, projects, templates, voice, review */
+.when-hint {
+  border: 1px dashed color-mix(in srgb, var(--red) 60%, transparent); background: transparent; color: var(--red); border-radius: 999px;
+  padding: 2px 8px; font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap;
+  max-width: 62%; overflow: hidden; text-overflow: ellipsis; flex: 0 1 auto; min-width: 0;
+}
+.when-hint.off { color: var(--ink-2); border-color: var(--rule); text-decoration: line-through; }
+.day-toggle { margin-left: auto; }
+.wk-day { list-style: none; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2); padding: 10px 0 4px; border-bottom: 1px solid var(--rule); }
+.date-in { width: auto; padding: 6px 8px; font-size: 14px; }
+select.field-in { width: auto; max-width: 100%; padding: 7px 8px; font-size: 14px; }
+.proj-pick { display: inline-flex; gap: 6px; align-items: center; flex-wrap: wrap; min-width: 0; }
+.proj-pick input.field-in { width: 12em; font-size: 14px; padding: 7px 9px; }
+.mic.rec { background: var(--red); border-color: var(--red); color: var(--sheet); animation: recpulse 1.2s ease-in-out infinite; }
+@keyframes recpulse { 50% { opacity: 0.6; } }
+.pj-bar { display: block; height: 4px; border-radius: 2px; background: var(--rule); overflow: hidden; margin-top: 3px; }
+.pj-bar i { display: block; height: 100%; background: var(--cc, var(--ink)); }
+.pj-bar.big { height: 8px; border-radius: 4px; }
+.pj-prog { display: flex; flex-direction: column; gap: 6px; }
+.pj-row { border-bottom: 1px solid var(--rule); }
+.pj-next .gl-def { font-weight: 700; }
+.nb-chip.tpl[aria-pressed="true"] { background: var(--ink); color: var(--sheet); border-color: var(--ink); }
+.rv-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.rv-stats div { border: 1px solid var(--rule); border-radius: 6px; padding: 8px 10px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.rv-stats b { font-family: var(--f-mono); font-size: 22px; font-weight: 500; }
+.rv-cats { display: flex; gap: 6px; flex-wrap: wrap; }
+.rv-row { border-bottom: 1px solid var(--rule); padding: 8px 0; display: flex; flex-direction: column; gap: 6px; }
+.rv-acts { display: flex; gap: 6px; flex-wrap: wrap; padding-left: 0; }
+.mini {
+  border: 1px solid var(--rule); background: transparent; border-radius: 999px; padding: 5px 10px; white-space: nowrap;
+  font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink);
+}
+.rv-done { margin: 4px 0 0; padding-left: 18px; font-size: 14px; line-height: 1.5; }
+@media (max-width: 719px) { .rv-btn .vl { display: none; } }
+@media (max-width: 480px) { .rv-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 599px) {
+  #nb-new .nl { display: none; }
+  .nb-top { flex-wrap: wrap; row-gap: 8px; }
+  .nb-top .nb-tabs { order: 5; flex: 1 1 100%; display: flex; }
+  .nb-top .nb-tabs button { flex: 1; padding: 8px 4px; }
+}
+.w-top .lbl { white-space: nowrap; }
+@media (max-width: 479px) {
+  .w-top { gap: 10px; }
+  .w-actions { gap: 0; }
+  .w-actions .ghost { min-width: 28px; padding: 0 4px; }
+}
+.li.has-act .meta { flex-wrap: wrap; row-gap: 2px; }
+@media (prefers-reduced-motion: reduce) { .mic.rec { animation: none; } }
+/* v14: undo, swipes, focus, trophies, stats, tools, plan, share */
+.toast-act { border: 0; background: none; color: inherit; font: inherit; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; text-decoration: underline; text-underline-offset: 3px; padding: 0 0 0 12px; }
+.streak.hot { color: var(--red); }
+.list { overflow-x: hidden; }
+.list > .li[data-id] { touch-action: pan-y; transition: transform 0.16s ease; }
+.li.swiping { transition: none; background: var(--sheet); z-index: 1; }
+.li[data-hint]::before {
+  content: attr(data-hint); position: absolute; top: 0; bottom: 0; display: flex; align-items: center; white-space: nowrap; pointer-events: none;
+  font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.12em; color: var(--ink-2);
+}
+.li[data-side="right"]::before { right: 100%; padding-right: 14px; }
+.li[data-side="left"]::before { left: 100%; padding-left: 14px; }
+.li.armed::before { color: var(--red); font-weight: 500; }
+.tg.ok { color: var(--ink-2); }
+.nb-pick.step.done span { text-decoration: line-through; color: var(--ink-2); }
+.focus-pill {
+  position: fixed; right: 12px; z-index: 18; top: calc(var(--vvt, 0px) + var(--vvh, 100vh) - env(safe-area-inset-bottom, 0px) - 58px);
+  display: inline-flex; align-items: center; gap: 8px; max-width: min(72vw, 360px);
+  border: 1px solid var(--red); background: var(--sheet); color: var(--ink); border-radius: 999px; padding: 8px 14px 8px 10px; box-shadow: var(--shadow);
+  font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.08em;
+}
+.focus-pill svg { width: 16px; height: 16px; color: var(--red); flex: none; }
+.focus-pill b { font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.focus-pill span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--ink-2); min-width: 0; }
+.focus-pill[data-phase="break"], .focus-pill[data-phase="over"] { border-color: var(--ink-2); }
+body.focusing .toast { top: calc(var(--vvt, 0px) + var(--vvh, 100vh) - env(safe-area-inset-bottom, 0px) - 108px); }
+.focus-body { align-items: center; text-align: center; gap: 14px; }
+.focus-time { font-family: var(--f-mono); font-size: clamp(56px, 16vw, 104px); font-weight: 300; letter-spacing: 0.04em; font-variant-numeric: tabular-nums; line-height: 1; }
+.focus-body .pj-bar { width: min(100%, 420px); }
+.focus-body .pj-bar i { background: var(--red); transition: width 0.9s linear; }
+.focus-inv { width: 44px; color: var(--red); }
+.focus-inv svg { width: 100%; height: auto; display: block; }
+.focus-inv .fb { opacity: 0; }
+.focus-inv .fa { animation: frameA 1.4s linear infinite; }
+.focus-inv .fb { animation: frameB 1.4s linear infinite; }
+.focus-task { margin: 0; font-size: 18px; font-weight: 700; line-height: 1.35; max-width: 32ch; overflow-wrap: anywhere; }
+.more-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 8px; }
+.tile-btn {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 12px; min-height: 92px; text-align: left;
+  border: 1px solid var(--rule); border-radius: 8px; background: var(--paper); color: var(--ink);
+}
+.tile-btn svg { width: 20px; height: 20px; }
+.tile-btn .nm { font-weight: 700; font-size: 14px; line-height: 1.2; }
+.trophy-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 8px; }
+.trophy { border: 1px dashed var(--rule); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 4px; opacity: 0.6; }
+.trophy.won { border-style: solid; border-color: var(--ink-2); opacity: 1; }
+.trophy .tm { font-family: var(--f-mono); font-size: 20px; line-height: 1; height: 26px; display: flex; align-items: center; color: var(--ink-2); }
+.trophy.won .tm { color: var(--red); }
+.trophy .tm svg { width: 28px; height: auto; }
+.trophy b { font-size: 14px; }
+.trophy .muted { font-size: 12px; }
+.heat { width: 100%; max-width: 400px; height: auto; display: block; }
+.heat text { font-family: var(--f-mono); font-size: 8px; fill: var(--ink-2); }
+.heat rect { cursor: pointer; }
+.heat rect:hover, .heat rect.today { stroke: var(--ink); stroke-width: 1.2; }
+.heat .lv0, .sw.lv0 { fill: var(--heat-0); background: var(--heat-0); }
+.heat .lv1, .sw.lv1 { fill: var(--heat-1); background: var(--heat-1); }
+.heat .lv2, .sw.lv2 { fill: var(--heat-2); background: var(--heat-2); }
+.heat .lv3, .sw.lv3 { fill: var(--heat-3); background: var(--heat-3); }
+.heat .lv4, .sw.lv4 { fill: var(--heat-4); background: var(--heat-4); }
+.heat-legend { display: flex; align-items: center; gap: 4px; }
+.sw { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.heat-cap { min-height: 1.5em; }
+.catbar { display: flex; gap: 2px; height: 14px; }
+.catbar i { display: block; background: var(--cc); min-width: 4px; }
+.catbar i:first-child { border-radius: 4px 0 0 4px; }
+.catbar i:last-child { border-radius: 0 4px 4px 0; }
+.catbar i:only-child { border-radius: 4px; }
+.pbars { display: flex; flex-direction: column; gap: 8px; }
+.pbar { display: grid; grid-template-columns: minmax(70px, 30%) minmax(0, 1fr) auto; gap: 8px; align-items: center; font-size: 13px; }
+.pbar .pn { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; }
+.pt { height: 10px; background: color-mix(in srgb, var(--rule) 70%, transparent); border-radius: 4px; overflow: hidden; }
+.pt i { display: block; height: 100%; background: var(--heat-3); border-radius: 0 4px 4px 0; }
+.pbar .pv { font-family: var(--f-mono); font-size: 11px; color: var(--ink-2); white-space: nowrap; }
+.stat-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 6px; }
+.stat-table th, .stat-table td { text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--rule); }
+.stat-table th { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.1em; color: var(--ink-2); font-weight: 400; }
+.calc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; }
+.calc-f { display: flex; flex-direction: column; gap: 4px; }
+.calc-row { display: flex; gap: 6px; }
+.calc-in { flex: 1; min-width: 0; font-family: var(--f-mono); font-size: 16px; }
+.calc-u { flex: none; }
+.calc-out { gap: 4px; }
+.calc-main { margin: 0; font-size: 17px; font-weight: 700; line-height: 1.4; }
+.calc-line { margin: 0; font-family: var(--f-mono); font-size: 13px; }
+.plan-pick b { font-size: 14.5px; }
+@media (max-width: 719px) { .more-btn .vl { display: none; } }
+@media (max-width: 1179px) { #btn-review, #btn-log { display: none; } }
+@media (max-width: 400px) { #streak { display: none; } }
 /* short screens: keyboard up on the Fold leaves roughly a 4:3 area */
 .short .field, .short .wordmark, .short .tags-lbl { display: none; }
 .short .widget { padding-block: 4px; }
@@ -500,7 +642,8 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
   <section class="widget" aria-label="Today at a glance">
     <div class="w-top">
       <span class="lbl" id="stamp">— / —</span>
-      <span class="lbl" id="score">SCORE 0000</span>
+      <button class="lbl gt-stat" id="score" type="button" title="Trophies">SCORE 0000</button>
+      <button class="lbl gt-stat streak" id="streak" type="button" title="Stats">STREAK 00</button>
       <button class="lbl gt-stat" id="ai-stat" type="button" hidden>AI ✓</button>
       <button class="lbl gt-stat" id="gt-stat" type="button" hidden>TASKS ✓</button>
       <div class="w-actions">
@@ -518,6 +661,14 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
         <button class="ghost vault-btn" id="btn-vault" type="button" aria-label="Send new notes to Obsidian">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18v3H3z"/><path d="M4.5 8v11h15V8"/><path d="M12 10.5v5.5M9.5 13.5L12 16l2.5-2.5"/></svg>
           <span class="vl">Vault</span><b id="vault-n"></b>
+        </button>
+        <button class="ghost rv-btn" id="btn-review" type="button" aria-label="Weekly review">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="1.5"/><path d="M8 3v4M16 3v4M4 10h16M9 15l2 2 4-4"/></svg>
+          <span class="vl">Review</span>
+        </button>
+        <button class="ghost more-btn" id="btn-more" type="button" aria-label="More: focus, plan, stats, trophies, tools">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/></svg>
+          <span class="vl">More</span>
         </button>
         <button class="ghost" id="btn-settings" type="button" aria-label="Settings">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg>
@@ -548,7 +699,9 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
     <form class="pad card-box" id="pad" autocomplete="off">
       <div class="box-head">
         <span class="lbl">WRITE / NO.<span id="pad-no">001</span></span>
-        <span class="lbl" id="pad-date" style="margin-left:auto"></span>
+        <span class="grow"></span>
+        <button class="when-hint" id="when" type="button" hidden></button>
+        <span class="lbl" id="pad-date"></span>
       </div>
       <textarea id="pad-input" enterkeyhint="done" placeholder="Write anything. Enter saves. Start with ! ? [] -> to tag it." aria-label="New note"></textarea>
       <div class="pad-bar">
@@ -557,6 +710,9 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
         </button>
         <button class="icon-btn" id="btn-pick" type="button" hidden aria-label="Scan a photo from your gallery" title="Scan a saved photo">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="14" rx="1.5"/><circle cx="9" cy="10" r="1.6"/><path d="M20 16l-5-5-8 8"/></svg>
+        </button>
+        <button class="icon-btn mic" id="btn-mic" type="button" hidden aria-label="Dictate a note" title="Dictate">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3z"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>
         </button>
         <input type="file" id="file-cam" accept="image/*" capture="environment" hidden>
         <input type="file" id="file-pick" accept="image/*" hidden>
@@ -584,6 +740,7 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
         <svg class="mini-inv" id="today-inv" viewBox="0 0 11 8" shape-rendering="crispEdges" aria-hidden="true"></svg>
         <span class="name" id="today-h">TODAY</span>
         <span class="lbl" id="today-count"></span>
+        <button class="link-btn plain day-toggle" id="day-toggle" type="button" aria-pressed="false">WEEK →</button>
       </div>
       <ul class="list" id="today-list"></ul>
       <p class="empty" id="today-empty"></p>
@@ -609,13 +766,14 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
 
 <div class="nb fit" id="nb" hidden></div>
 <div class="sheet-wrap fit" id="sheet" hidden></div>
+<button class="focus-pill" id="focus-pill" type="button" hidden aria-label="Open focus timer"></button>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
 <script>
 (() => {
 'use strict';
 
-const APP_VERSION = 'v12';
+const APP_VERSION = 'v14';
 /* ---------- helpers ---------- */
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -642,6 +800,18 @@ const ICONS = {
   pen: '<path d="M4 20l4-1L19 8l-3-3L5 16z"/>',
   page: '<path d="M6 3h9l4 4v14H6z"/><path d="M9 11h7M9 15h7"/>',
   stop: '<rect x="7" y="7" width="10" height="10" rx="1"/>',
+  timer: '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2.5h6"/>',
+  plan: '<path d="M10 6h10M10 12h10M10 18h10"/><path d="M3.5 6l1.2 1.2L7 4.8M3.5 12l1.2 1.2L7 10.8"/><circle cx="5" cy="18" r="1.3"/>',
+  stats: '<path d="M5 20V11M11 20V5M17 20v-7M3 20h18"/>',
+  trophy: '<path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8.5 20.5h7M10 17h4"/>',
+  flask: '<path d="M9 3h6M10 3v6l-5.5 9.5A1.7 1.7 0 0 0 6 21h12a1.7 1.7 0 0 0 1.5-2.5L14 9V3"/><path d="M7.2 15h9.6"/>',
+  cal: '<rect x="4" y="5" width="16" height="15" rx="1.5"/><path d="M8 3v4M16 3v4M4 10h16M9 15l2 2 4-4"/>',
+  list: '<path d="M10 7h10M10 12h10M10 17h10"/><path d="M3.5 7l1.2 1.2L7 5.8M3.5 12l1.2 1.2L7 10.8M3.5 17l1.2 1.2L7 15.8"/>',
+  sound: '<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 9a4 4 0 0 1 0 6M19 6.5a7.5 7.5 0 0 1 0 11"/>',
+  mute: '<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M17 9.5l5 5M22 9.5l-5 5"/>',
+  gear: '<circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/>',
+  dots: '<circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/>',
+  mic: '<path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3z"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/>',
 };
 function icon(name, sw = 2) {
   const t = document.createElement('template');
@@ -1063,6 +1233,8 @@ let unsub = null, unsubS = null;
 
 function onItems(list) {
   state.items = list;
+  checkRepeats();
+  syncDoneLog();
   render();
   scheduleGtSync();
   if (state.sheet && state.sheet.kind === 'log') drawLog();
@@ -1108,11 +1280,14 @@ fit();
 
 /* ---------- toast ---------- */
 let toastT;
-function toast(msg) {
-  els.toast.textContent = msg;
+function toast(msg, action) {
+  els.toast.replaceChildren(document.createTextNode(msg));
+  if (action) {
+    els.toast.append(h('button', { class: 'toast-act', type: 'button', onclick: () => { els.toast.hidden = true; clearTimeout(toastT); action.fn(); } }, action.label));
+  }
   els.toast.hidden = false;
   clearTimeout(toastT);
-  toastT = setTimeout(() => { els.toast.hidden = true; }, 2600);
+  toastT = setTimeout(() => { els.toast.hidden = true; }, action ? 5000 : 2600);
 }
 
 /* ---------- error copy ---------- */
@@ -1170,14 +1345,17 @@ function laneRow(it) {
     h('button', { class: 'li-body', type: 'button', onclick: () => openItem(it.id) },
       icoFor(it),
       h('span', { class: 'main' },
-        h('span', { class: 'txt', text: it.text }),
+        h('span', { class: 'txt', text: rowText(it) }),
         h('span', { class: 'meta' },
           icon(it.source === 'scan' ? 'page' : it.source === 'gtasks' ? 'check' : 'pen', 1.8),
           h('span', { text: rel(it.createdAt) }),
           tagMeta(it),
+          stepMeta(it),
           it.page ? h('span', { class: 'pg', text: '· ' + it.page }) : null,
           it.example ? h('span', { class: 'ex', text: 'Example' }) : null,
           it.today && !isNow(it) ? h('span', { class: 'tg', text: 'due ' + futureLabel(it.today) }) : null,
+          it.repeat ? h('span', { class: 'tg', text: '↻ ' + repeatLabel(it.repeat) }) : null,
+          projOf(it) ? h('span', { class: 'tg', text: '#' + projOf(it).name }) : null,
           pending ? h('span', { class: 'sorting', text: 'sorting…' }) : null))),
     it.bucket === 'make'
       ? h('button', { class: 'to-today', type: 'button', onclick: () => sendToday(it.id) }, '+ TODAY') : null);
@@ -1203,15 +1381,19 @@ function render() {
       }, icon('check', 2.6)),
       h('button', { class: 'li-body', type: 'button', onclick: () => openItem(it.id) },
         h('span', { class: 'main' },
-          h('span', { class: 'txt', text: it.text }),
-          (carried || knownTags(it).length || it.example) ? h('span', { class: 'meta' },
+          h('span', { class: 'txt', text: rowText(it) }),
+          (carried || knownTags(it).length || it.example || it.repeat || projOf(it) || stepsOf(it.text).length) ? h('span', { class: 'meta' },
             carried ? h('span', { class: 'carry', text: 'since ' + dayName(it.today) }) : null,
+            it.repeat ? h('span', { class: 'tg', text: '↻ ' + repeatLabel(it.repeat) }) : null,
+            projOf(it) ? h('span', { class: 'tg', text: '#' + projOf(it).name }) : null,
+            stepMeta(it),
             tagMeta(it),
             it.example ? h('span', { class: 'ex', text: 'Example' }) : null) : null)));
   }));
   els.todayEmpty.hidden = t.length > 0;
   els.todayEmpty.textContent = filtering ? 'No matches.' : 'Nothing planned yet. Tap + TODAY on a MAKE note, or pick Today before you save.';
   $('#n-today').textContent = left || '';
+  if (state.dayView === 'week') drawWeek(items, filtering);
 
   // lanes
   for (const b of BUCKETS) {
@@ -1294,6 +1476,11 @@ function drawBanner() {
       h('button', { type: 'button', onclick: () => openSettings() }, 'Open settings'),
       h('button', { type: 'button', onclick: () => { state.keyDismissed = true; drawBanner(); } }, 'Later'));
   }
+  if (reviewDue() && !state.reviewDismissed) {
+    nodes.push(h('span', { text: 'Weekly review time: tidy loose ends and plan next week.' }),
+      h('button', { type: 'button', onclick: () => openReview() }, 'Start review'),
+      h('button', { type: 'button', onclick: () => { state.reviewDismissed = true; drawBanner(); } }, 'Later'));
+  }
   const ex = state.items.filter(i => i.example);
   if (ex.length) {
     nodes.push(h('span', { text: `${ex.length} example notes are showing.` }),
@@ -1304,12 +1491,15 @@ function drawBanner() {
 }
 
 /* ---------- Obsidian ---------- */
-const DEFAULT_OBS = { vault: '', target: 'daily', note: 'Kura/Inbox', tasksDates: true, includeDrop: false, notesFolder: 'Kura/Notes', glossaryNote: 'Kura/Glossary' };
+const DEFAULT_OBS = { vault: '', target: 'daily', note: 'Kura/Inbox', tasksDates: true, includeDrop: false, notesFolder: 'Kura/Notes', glossaryNote: 'Kura/Glossary', reviewsFolder: 'Kura/Reviews' };
 const tagSlug = t => String(t).toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\p{L}\p{N}_\-/]/gu, '');
 function mdLine(it, cfg) {
   const isTask = it.bucket === 'make' || !!it.today;
-  const text = String(it.text || '').trim().replace(/\r?\n/g, '\n  ');
+  const all = String(it.text || '').trim().split(/\r?\n/);
+  const text = all[0];
+  const rest = all.slice(1).map(l => { const m = RX_STEP.exec(l); return '  ' + (m ? `- [${m[1] && m[1].trim() ? 'x' : ' '}] ${m[2].trim()}` : l); }).join('\n');
   const tags = ['#kura/' + it.bucket, '#kura/' + catOf(it)];
+  if (projOf(it)) tags.push('#project/' + projSlug(projOf(it).name));
   for (const id of knownTags(it)) {
     const t = tagSlug(symById(id).name);
     if (t && /[^\d]/.test(t)) tags.push('#' + t);
@@ -1317,9 +1507,10 @@ function mdLine(it, cfg) {
   let line = (isTask ? (it.done ? '- [x] ' : '- [ ] ') : '- ') + text;
   if (it.page) line += ` (page: ${it.page})`;
   line += ' ' + tags.join(' ');
+  if (isTask && cfg.tasksDates && it.repeat) line += ' 🔁 ' + repeatTasksText(it.repeat);
   if (isTask && cfg.tasksDates && it.today) line += ' 📅 ' + it.today;
   if (isTask && cfg.tasksDates && it.done && it.doneAt) line += ' ✅ ' + dayStr(new Date(it.doneAt));
-  return line;
+  return rest ? line + '\n' + rest : line;
 }
 function unsent() {
   const cfg = state.obs;
@@ -1566,7 +1757,7 @@ async function gtSync(opts = {}) {
         const item = {
           text: title + (notes ? '\n' + notes : ''), tags: [], bucket: 'make', today: t.due || null,
           done: false, doneAt: null, createdAt: now, updatedAt: now, source: 'gtasks', photo: null, page: null,
-          pending: false, gtask: t.id, fromGoogle: true, cat: guessCat(title + ' ' + notes),
+          pending: false, gtask: t.id, fromGoogle: true, cat: guessCat(title + ' ' + notes), proj: takeProject(title).proj,
         };
         const id = m ? m[1] : store.newId();
         item.gSig = gtSig({ ...item, id });
@@ -1803,19 +1994,23 @@ async function shoot(id) {
 async function toggleDone(id) {
   const it = byId(id);
   if (!it || busy.has(id)) return;
-  if (it.done) { patch(id, { done: false, doneAt: null, today: TODAY }); return; }
+  if (it.done) {
+    if (it.spawnedId) { const nx = byId(it.spawnedId); if (nx && !nx.done) await store.remove(nx.id).catch(() => {}); }
+    patch(id, { done: false, doneAt: null, today: TODAY, spawned: false, spawnedId: null });
+    play('undo');
+    return;
+  }
   busy.add(id);
+  play('done');
+  buzz([14, 50, 26]);
   try { await shoot(id); } catch (e) {}
   busy.delete(id);
-  patch(id, { done: true, doneAt: Date.now() });
+  await patch(id, { done: true, doneAt: Date.now() });
+  if (!it.repeat) toast('Done · +10', { label: 'Undo', fn: () => toggleDone(id) });
 }
 async function letGoAll(ids) {
   state.confirmDrop = false;
-  let n = 0;
-  for (const id of ids) {
-    try { await store.remove(id); n++; } catch (e) { onWriteError(e); break; }
-  }
-  if (n) toast(`Let go of ${n} note${n === 1 ? '' : 's'}`);
+  await removeWithUndo(ids, `Let go of ${ids.length} note${ids.length === 1 ? '' : 's'}`);
   render();
 }
 async function clearExamples(ids) {
@@ -1877,28 +2072,39 @@ async function submitPad() {
   if (!raw) return;
   els.input.value = '';
   const parsed = parseMarks(raw);
-  const text = parsed.text;
+  const pj = takeProject(parsed.text);
+  let text = pj.text;
   let tags = parsed.tags;
   const route = state.route;
+  const when = !state.whenOff && route !== 'drop' && !RX_FLEETING.test(text) ? parseWhen(text) : null;
+  state.whenOff = false;
+  drawWhen();
+  if (when) text = when.text;
+  text = expandInlineSteps(text);
   const actionTag = tags.some(t => t === 'task' || t === 'fup');
-  const auto = route === 'auto' && !!state.sample && !actionTag;
+  const auto = route === 'auto' && !!state.sample && !actionTag && !when;
   let bucket = route === 'today' ? 'make' : (BUCKETS.includes(route) ? route : 'stock');
-  if (route === 'auto' && actionTag) bucket = 'make';
-  if (route === 'auto' && !auto && !actionTag) { const r = ruleSort(text, tags); bucket = r.bucket; tags = r.tags; toast(`Sorted to ${LABEL[bucket]}`); }
+  if (when || (route === 'auto' && actionTag)) bucket = 'make';
+  if (route === 'auto' && !auto && !actionTag && !when) { const r = ruleSort(text, tags); bucket = r.bucket; tags = r.tags; toast(`Sorted to ${LABEL[bucket]}`); }
+  const proj = projById(pj.proj);
   const now = Date.now();
   const data = {
     text, tags, bucket,
-    today: route === 'today' ? TODAY : null,
+    today: when ? when.date : route === 'today' ? TODAY : null,
+    repeat: when ? when.repeat : null,
     done: false, doneAt: null,
     createdAt: now, updatedAt: now,
     source: 'typed', photo: null, page: null,
-    pending: auto, cat: guessCat(text),
+    pending: auto, cat: proj ? proj.cat : guessCat(text), proj: proj ? proj.id : null,
   };
   const id = store.newId();
   const target = store;
   try { await target.set(id, data); }
   catch (e) { els.input.value = raw; onWriteError(e); return; }
-  if (!auto && innerWidth < 720) setTab(route === 'today' ? 'today' : bucket);
+  if (when) toast(`Planned ${whenLabel(when.date)}${when.repeat ? ' ↻ ' + repeatLabel(when.repeat) : ''}${proj ? ' · #' + proj.name : ''}`);
+  else if (proj && !auto) toast(`Added to #${proj.name}`);
+  const isToday = !!data.today && data.today <= TODAY;
+  if (!auto && innerWidth < 720) setTab(isToday ? 'today' : bucket);
   if (auto) autoSort(id, text, tags, target);
 }
 
@@ -1928,7 +2134,7 @@ Reply with only JSON: {"bucket": "drop" | "stock" | "make", "tags": [], "categor
   const byAi = !!bucket;
   if (!byAi) { const r = ruleSort(text, tags); bucket = r.bucket; newTags = r.tags; }
   try {
-    await target.update(id, { bucket, tags: newTags, pending: false, ...(cat ? { cat } : {}), updatedAt: Date.now() });
+    await target.update(id, { bucket, tags: newTags, pending: false, ...(cat && !(byId(id) || {}).proj ? { cat } : {}), updatedAt: Date.now() });
   } catch (e) { return; }
   if (byAi) toast(`Sorted to ${LABEL[bucket]}`);
   else {
@@ -1978,6 +2184,7 @@ function closeSheet(fromPop) {
   if (fromPop !== true && sheetHist) { sheetHist = false; histBack(); }
   const s = state.sheet;
   if (s && s.kind === 'item') commitItemText();
+  if (s && s.kind === 'focus') setTimeout(focusTick);
   if (s && s.kind === 'scan' && state.scan) {
     state.scan.ctl && state.scan.ctl.abort();
     if (state.scan.url) URL.revokeObjectURL(state.scan.url);
@@ -2070,21 +2277,29 @@ function drawItem() {
     onclick: async () => {
       if (!s.confirm) { s.confirm = true; del.textContent = 'Tap again to delete'; return; }
       const id = s.id;
+      commitItemText();
       state.sheet = null;
       closeSheet();
-      try { await store.remove(id); toast('Deleted'); } catch (e) { onWriteError(e); }
+      await removeWithUndo([id]);
     },
   }, 'Delete');
 
   showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Note' },
-    head(it.done ? 'DONE' : (it.today ? 'TODAY' : LABEL[it.bucket] || 'NOTE'), created),
+    head(it.done ? 'DONE' : isNow(it) ? 'TODAY' : it.today ? 'PLANNED · ' + futureLabel(it.today).toUpperCase() : (LABEL[it.bucket] || 'NOTE'), created),
     h('div', { class: 'sheet-body' },
       field,
       h('div', { class: 'row' },
         segControl(it.bucket, b => patch(s.id, { bucket: b, pending: false })),
         todayBtn),
-      h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'Category' }),
-        h('div', { class: 'row', id: 'item-cat' }, catSeg(catOf(it), c => patch(s.id, { cat: c })))),
+      h('div', { class: 'row' },
+        !it.done ? h('button', { class: 'tog', id: 'item-focus', type: 'button', onclick: () => { commitItemText(); startFocus(s.id); } }, '▶ Focus') : null,
+        h('button', { class: 'tog', id: 'item-share', type: 'button', onclick: () => { commitItemText(); shareOut('Kura', itemShareText(byId(s.id) || it)); } }, 'Share'),
+        it.focusMin ? h('span', { class: 'lbl', text: fmtMin(it.focusMin) + ' focused' }) : null),
+      checklistBox(s.id, () => s.text, v => { s.text = v; }),
+      h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'Category · project' }),
+        h('div', { class: 'row', id: 'item-cat' }, catSeg(catOf(it), c => patch(s.id, { cat: c })),
+          projPicker(it.proj || null, v => patch(s.id, { proj: v }), () => catOf(byId(s.id) || it)))),
+      whenControls(it, () => drawItem()),
       h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'Symbols' }),
         tagChips(knownTags(it), tags => patch(s.id, { tags }))),
       state.obs ? h('div', { class: 'row' },
@@ -2337,6 +2552,7 @@ function drawScan() {
     if (!scan.cat) scan.cat = guessCat(scan.items.map(r => r.text).join(' '));
     body.append(h('div', { class: 'stack' }, h('span', { class: 'lbl', text: scan.pasted ? 'Category · guessed, tap to change' : 'Category · suggested by AI, tap to change' }),
       h('div', { class: 'row', id: 'scan-cat' }, catSeg(scan.cat, c => { scan.cat = c; }))));
+    if ((state.projects || []).length) body.append(h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'Project (optional)' }), projPicker(scan.proj || null, v => { scan.proj = v; }, () => scan.cat)));
     body.append(h('span', { class: 'lbl', text: `${pad2(scan.items.length)} notes found · check text, buckets and symbols` }));
     const addBtn = h('button', { class: 'btn primary', type: 'button', onclick: () => commitScan(addBtn) });
     const syncCount = () => {
@@ -2409,11 +2625,13 @@ async function commitScan(btn) {
   for (let i = 0; i < chosen.length; i++) {
     const r = chosen[i];
     const id = store.newId();
+    const tp = takeProject(r.text.trim());
+    const w = r.bucket === 'make' ? parseWhen(tp.text) : null;
     try {
       await store.set(id, {
-        text: r.text.trim(), tags: r.tags, bucket: r.bucket, today: r.today ? TODAY : null,
+        text: (w && w.text) || tp.text, tags: r.tags, bucket: r.bucket, today: r.today ? TODAY : (w ? w.date : null), repeat: w ? w.repeat : null,
         done: false, doneAt: null, createdAt: now - i, updatedAt: now,
-        source: 'scan', photo, page, pending: false, cat: scan.cat || guessCat(r.text),
+        source: 'scan', photo, page, pending: false, cat: scan.cat || guessCat(r.text), proj: tp.proj || scan.proj || null,
       });
       saved++;
       savedIds.push(id);
@@ -2442,7 +2660,7 @@ function openNotebook(noteId) {
     q: '', draft: null, chat: [], busy: '', pane: noteId ? 'main' : (nbPrefs.tab === 'ask' ? 'main' : 'list'),
   };
   if (!state.nb.sel && state.nb.mode === 'view') { const first = nbSorted()[0]; state.nb.sel = first ? first.id : null; }
-  if (state.nb.mode === 'edit') Object.assign(state.nb, { tab: 'bank', draft: { id: null, title: '', raw: '', result: null, cat: null }, pane: 'main' });
+  if (state.nb.mode === 'edit') Object.assign(state.nb, { tab: 'bank', draft: { id: null, title: '', raw: '', result: null, cat: null, tpl: 'blank' }, pane: 'main' });
   if (el.hidden) { try { history.pushState({ kuraNb: true }, ''); nbHist = true; } catch (e) {} }
   el.hidden = false;
   drawNotebook();
@@ -2486,23 +2704,23 @@ function mdNodes(md) {
   return box;
 }
 
-function comprehendPrompt(raw) {
+function comprehendPrompt(raw, tpl) {
   const field = state.field ? `The writer's field: ${state.field}.` : 'The writer works in engineering and science.';
   return `You are the note-taking assistant inside Kura, a researcher's notebook app. ${field} Today is ${TODAY}.
 Turn the rough notebook entry below into a clean note.
-
+${tplPrompt(tpl)}
 Rules:
 - Keep the writer's meaning, facts and numbers exactly. Never invent results, measurements, citations, names or conclusions.
 - Fix spelling, expand obvious shorthand, and use correct technical terms and SI units. If something is unclear, keep it as written and add a question about it.
 - "context": up to 5 technical or scientific terms, equations or units the entry touches on, each with a short explanation from well-established textbook knowledge only. Give each "term" its standard name, with a common abbreviation in brackets if there is one, e.g. "Electrochemical impedance spectroscopy (EIS)". No citations, no speculation, nothing about the writer's own results. Use [] if the entry has nothing technical.
-- "category": "work" for research, study, lab or job; "personal" for life admin, family, friends, health, money, errands or home; "fun" for hobbies, games, entertainment, trips or things done for enjoyment.
+- "category": "work" for research, study, lab or job; "personal" for life admin, family, friends, health, money, errands or home; "fun" for hobbies, games, entertainment, trips or things done for enjoyment.${projRule()}
 - "tasks": things the writer needs to do, as short imperative lines. Lines marked with a box, [] or -> are tasks.
 - "questions": open questions the writer raised or left unresolved. Lines marked with ? are questions.
 - "tags": 1 to 5 short lowercase topic tags, hyphenated.
 - "note": the full cleaned-up entry in Markdown (short paragraphs and "- " bullets), with the same content as the original.
 
 Reply with only this JSON:
-{"title": "...", "summary": "1-2 sentences", "points": ["..."], "note": "...", "context": [{"term": "...", "explain": "..."}], "tasks": ["..."], "questions": ["..."], "tags": ["..."], "category": "work"}
+{"title": "...", "summary": "1-2 sentences", "points": ["..."], "note": "...", "context": [{"term": "...", "explain": "..."}], "tasks": ["..."], "questions": ["..."], "tags": ["..."], "category": "work", "project": ""}
 
 Entry:
 """
@@ -2523,23 +2741,25 @@ function cleanResult(r, raw) {
     tasks: arr(r && r.tasks, 20).map(t => ({ text: t, keep: true, today: false })),
     questions: arr(r && r.questions, 20).map(t => ({ text: t, keep: true })),
     tags: arr(r && r.tags, 5).map(t => t.toLowerCase().replace(/\s+/g, '-').replace(/[^\p{L}\p{N}_\-/]/gu, '')).filter(Boolean),
+    proj: ((r && r.project && projByTag(String(r.project))) || {}).id || takeProject(raw).proj || null,
     cat: CATS.includes(r && r.category) ? r.category : guessCat(raw),
     ai: true,
   };
 }
-function offlineResult(raw, title) {
-  const lines = splitPasted(raw);
+function offlineResult(raw, title, tpl) {
+  const lines = splitPasted(raw).filter(l => !/^#{1,6}\s/.test(l.text) && l.text !== '—');
   const tasks = lines.filter(l => l.bucket === 'make').map(l => ({ text: l.text, keep: true, today: false }));
   const questions = lines.filter(l => l.bucket !== 'make' && l.tags.includes('unr')).map(l => ({ text: l.text, keep: true }));
-  const first = String(raw).trim().split('\n')[0].replace(/^[!?\s]+/, '').slice(0, 80);
-  return { title: (title || '').trim() || first || 'Untitled note', summary: '', points: [], note: String(raw).trim(), context: [], tasks, questions, tags: [], cat: guessCat(raw), ai: false };
+  const first = (String(raw).split('\n').map(x => x.trim()).find(x => x && !/^#{1,6}\s/.test(x)) || '').replace(/^[!?\s]+/, '').slice(0, 80)
+    || (tpl && tpl !== 'blank' ? tplById(tpl).name + ' · ' + shortDay(TODAY) : '');
+  return { title: (title || '').trim() || first || 'Untitled note', summary: '', points: [], note: String(raw).trim(), context: [], tasks, questions, tags: [], cat: guessCat(raw), proj: takeProject(raw).proj || null, ai: false };
 }
 
 async function nbComprehend() {
   const nb = state.nb, d = nb && nb.draft;
   if (!d || !d.raw.trim()) { toast('Write something first.'); return; }
   if (!state.sample) {
-    d.result = offlineResult(d.raw, d.title);
+    d.result = offlineResult(d.raw, d.title, d.tpl);
     drawNotebook();
     toast('No AI key: kept as written, with tasks and questions found by rules.');
     return;
@@ -2548,7 +2768,7 @@ async function nbComprehend() {
   nb.ctl = new AbortController();
   drawNotebook();
   try {
-    const r = await state.sample.json(comprehendPrompt(d.raw), { signal: nb.ctl.signal });
+    const r = await state.sample.json(comprehendPrompt(d.raw, d.tpl), { signal: nb.ctl.signal });
     if (state.nb !== nb) return;
     d.result = cleanResult(r, d.raw);
     if (d.title.trim()) d.result.title = d.title.trim();
@@ -2557,7 +2777,7 @@ async function nbComprehend() {
     if (state.nb !== nb) return;
     if (e && e.code === 'cancelled') { nb.busy = ''; drawNotebook(); return; }
     setAiStatus(sampleMsg(e));
-    d.result = offlineResult(d.raw, d.title);
+    d.result = offlineResult(d.raw, d.title, d.tpl);
     toast('AI unavailable, so the note was kept as written: ' + sampleMsg(e));
   }
   nb.busy = '';
@@ -2583,7 +2803,7 @@ async function nbTranscribe(file) {
 }
 
 function noteMarkdown(n) {
-  const lines = ['---', `created: ${dayStr(new Date(n.created || Date.now()))}`, 'source: kura', `category: ${CAT_NAME[catOf(n)]}`, `tags: [${['kura/note', 'kura/' + catOf(n), ...(n.tags || [])].join(', ')}]`, '---', '', `# ${n.title}`, ''];
+  const lines = ['---', `created: ${dayStr(new Date(n.created || Date.now()))}`, 'source: kura', `category: ${CAT_NAME[catOf(n)]}`, ...(projOf(n) ? [`project: ${projOf(n).name}`] : []), ...(n.tpl && n.tpl !== 'blank' ? [`type: ${n.tpl}`] : []), `tags: [${['kura/note', 'kura/' + catOf(n), ...(projOf(n) ? ['project/' + projSlug(projOf(n).name)] : []), ...(n.tpl && n.tpl !== 'blank' ? ['kura/' + n.tpl] : []), ...(n.tags || [])].join(', ')}]`, '---', '', `# ${n.title}`, ''];
   if (n.summary) lines.push(`> ${n.summary}`, '');
   if ((n.points || []).length) lines.push('## Key points', ...n.points.map(p => `- ${p}`), '');
   lines.push('## Notes', n.note || n.raw || '', '');
@@ -2617,14 +2837,15 @@ function sendNoteToObsidian(n) {
 async function nbSave(sendObs) {
   const nb = state.nb, d = nb && nb.draft;
   if (!d) return;
-  if (!d.result) d.result = offlineResult(d.raw, d.title);
+  if (!d.result) d.result = offlineResult(d.raw, d.title, d.tpl);
   const r = d.result;
   const now = Date.now();
   const prev = d.id ? noteById(d.id) : null;
   const n = {
     id: d.id || newNoteId(), created: prev ? prev.created : now, updated: now,
     title: (d.title.trim() || r.title).slice(0, 120), raw: d.raw, summary: r.summary, points: r.points, note: r.note,
-    context: r.context, tags: r.tags, ai: r.ai, cat: CATS.includes(d.cat) ? d.cat : (r.cat || guessCat(d.raw)), obsPath: prev ? prev.obsPath || null : null,
+    context: r.context, tags: r.tags, ai: r.ai, cat: CATS.includes(d.cat) ? d.cat : (r.cat || guessCat(d.raw)),
+    tpl: d.tpl || (prev && prev.tpl) || 'blank', proj: d.proj !== undefined ? (d.proj || null) : (r.proj || null), obsPath: prev ? prev.obsPath || null : null,
     tasks: r.tasks.filter(t => t.keep).map(t => t.text), questions: r.questions.filter(q => q.keep).map(q => q.text),
     itemIds: prev ? (prev.itemIds || []).slice() : [], sentAt: prev ? prev.sentAt : null,
   };
@@ -2633,21 +2854,23 @@ async function nbSave(sendObs) {
   let made = 0;
   for (const t of r.tasks.filter(x => x.keep && !existing.has(x.text.trim().toLowerCase()))) {
     const id = store.newId();
-    await store.set(id, { text: t.text, tags: symById('task') ? ['task'] : [], bucket: 'make', today: t.today ? TODAY : null, done: false, doneAt: null,
-      createdAt: now - made, updatedAt: now, source: 'note', photo: null, page: n.title, pending: false, noteId: n.id, cat: n.cat }).catch(onWriteError);
+    const w = parseWhen(t.text);
+    await store.set(id, { text: (w && w.text) || t.text, tags: symById('task') ? ['task'] : [], bucket: 'make', today: t.today ? TODAY : (w ? w.date : null), repeat: w ? w.repeat : null, done: false, doneAt: null,
+      createdAt: now - made, updatedAt: now, source: 'note', photo: null, page: n.title, pending: false, noteId: n.id, cat: n.cat, proj: n.proj }).catch(onWriteError);
     n.itemIds.push(id);
     made++;
   }
   for (const q of r.questions.filter(x => x.keep && !existing.has(x.text.trim().toLowerCase()))) {
     const id = store.newId();
     await store.set(id, { text: q.text, tags: symById('unr') ? ['unr'] : [], bucket: 'stock', today: null, done: false, doneAt: null,
-      createdAt: now - made, updatedAt: now, source: 'note', photo: null, page: n.title, pending: false, noteId: n.id, cat: n.cat }).catch(onWriteError);
+      createdAt: now - made, updatedAt: now, source: 'note', photo: null, page: n.title, pending: false, noteId: n.id, cat: n.cat, proj: n.proj }).catch(onWriteError);
     n.itemIds.push(id);
     made++;
   }
   await store.putNote(n).catch(onWriteError);
   state.notes = (state.notes || []).filter(x => x.id !== n.id).concat(n);
   if (prev && prev.cat !== n.cat) for (const it of state.items.filter(i => i.noteId === n.id && i.cat !== n.cat)) await patch(it.id, { cat: n.cat });
+  if (prev && (prev.proj || null) !== n.proj) for (const it of state.items.filter(i => i.noteId === n.id && (i.proj || null) !== n.proj)) await patch(it.id, { proj: n.proj });
   const newTerms = await syncGlossary(n);
   if (nb.cat && nb.cat !== 'all' && nb.cat !== n.cat) nb.cat = nbPrefs.cat = n.cat;
   nb.sel = n.id;
@@ -2656,6 +2879,7 @@ async function nbSave(sendObs) {
   drawNotebook();
   toast(['Note saved to ' + CAT_NAME[n.cat], made ? `${made} task${made === 1 ? '' : 's'}/question${made === 1 ? '' : 's'} added` : '', newTerms ? `${newTerms} new glossary term${newTerms === 1 ? '' : 's'}` : ''].filter(Boolean).join(' · '));
   if (sendObs && state.obs) setTimeout(() => sendNoteToObsidian(n), 150);
+  checkTrophies();
 }
 
 async function nbAsk(question) {
@@ -2667,9 +2891,9 @@ async function nbAsk(question) {
   const inCat = x => cat === 'all' || catOf(x) === cat;
   const docs = [
     ...(state.notes || []).filter(inCat).map(n => ({ ref: n.id, kind: 'note', title: n.title, date: dayStr(new Date(n.created || 0)),
-      body: [n.summary, (n.points || []).join('; '), n.note || n.raw, (n.tags || []).join(' ')].filter(Boolean).join('\n') })),
+      body: [projOf(n) ? 'Project: ' + projOf(n).name : '', n.summary, (n.points || []).join('; '), n.note || n.raw, (n.tags || []).join(' ')].filter(Boolean).join('\n') })),
     ...state.items.filter(it => !it.example && inCat(it)).map(it => ({ ref: it.id, kind: 'item', title: String(it.text).split('\n')[0].slice(0, 80), date: dayStr(new Date(it.createdAt || 0)),
-      body: `${it.text}${it.page ? ' (page: ' + it.page + ')' : ''} [${LABEL[it.bucket] || ''}${it.done ? ', done' : ''}]` })),
+      body: `${it.text}${it.page ? ' (page: ' + it.page + ')' : ''}${projOf(it) ? ' #' + projOf(it).name : ''}${it.today ? ' (planned ' + it.today + (it.repeat ? ', repeats ' + repeatLabel(it.repeat) : '') + ')' : ''} [${LABEL[it.bucket] || ''}${it.done ? ', done' : ''}]` })),
     ...(state.glossary || []).filter(g => cat === 'all' || termCats(g).includes(cat)).map(g => ({ ref: g.id, kind: 'term', title: g.term, date: dayStr(new Date(g.created || 0)), body: g.def })),
   ];
   const score = d => {
@@ -2920,20 +3144,23 @@ function bankRow(e, nb) {
       onclick: () => openNoteInBank(n.id),
     },
       h('span', { class: 't', text: n.title }),
-      h('span', { class: 'meta' }, h('span', { class: 'cdot' }), h('span', { class: 'cn', text: CAT_NAME[e.cat] }), h('span', { text: '· note · ' + rel(e.t) }),
+      h('span', { class: 'meta' }, h('span', { class: 'cdot' }), h('span', { class: 'cn', text: CAT_NAME[e.cat] }), h('span', { text: '· ' + (n.tpl && n.tpl !== 'blank' ? tplById(n.tpl).name : 'note') + ' · ' + rel(e.t) }),
+        projOf(n) ? h('span', { class: 'tg', text: '#' + projOf(n).name }) : null,
         n.ai ? h('span', { text: '· AI' }) : null,
         (n.tags || []).slice(0, 2).map(t => h('span', { class: 'tg', text: '#' + t }))));
   }
   const it = e.it;
   const where = it.done ? 'done' : isNow(it) ? 'today' : (LABEL[it.bucket] || '');
   return h('button', { class: 'nb-row', type: 'button', 'data-cat': e.cat, 'data-id': it.id, onclick: () => openItem(it.id) },
-    h('span', { class: 'x', text: it.text }),
+    h('span', { class: 'x', text: rowText(it) }),
     h('span', { class: 'meta' }, h('span', { class: 'cdot' }), h('span', { class: 'cn', text: CAT_NAME[e.cat] }), h('span', { text: `· ${where} · ${rel(e.t)}` }),
+      it.repeat ? h('span', { class: 'tg', text: '↻' }) : null,
+      projOf(it) ? h('span', { class: 'tg', text: '#' + projOf(it).name }) : null,
       it.page ? h('span', { class: 'pg', text: '· ' + it.page }) : null));
 }
 function refreshBank() {
   const nb = state.nb;
-  if (!nb || nb.mode === 'edit' || nb.gedit) return;
+  if (!nb || (nb.tab === 'bank' && nb.mode === 'edit') || (nb.tab === 'gloss' && nb.gedit) || (nb.tab === 'proj' && nb.pedit)) return;
   const a = document.activeElement;
   if (a && nbEl() && nbEl().contains(a) && /^(INPUT|TEXTAREA)$/.test(a.tagName)) return;
   drawNotebook();
@@ -2951,7 +3178,8 @@ function drawNotebook() {
   const entries = bankEntries();
   const terms = glossSorted();
   const counts = { all: 0, work: 0, personal: 0, fun: 0 };
-  if (nb.tab === 'gloss') for (const g of terms) { counts.all++; for (const c of termCats(g)) counts[c]++; }
+  if (nb.tab === 'proj') for (const p of state.projects || []) { if (!p.archived || nb.showArchived) { counts.all++; counts[p.cat]++; } }
+  else if (nb.tab === 'gloss') for (const g of terms) { counts.all++; for (const c of termCats(g)) counts[c]++; }
   else for (const e of entries) if (kindOk(e, nb.tab === 'bank' ? nb.kind : 'all')) { counts.all++; counts[e.cat]++; }
 
   const catBar = h('div', { class: 'nb-cats', role: 'radiogroup', 'aria-label': 'Category' },
@@ -2961,7 +3189,7 @@ function drawNotebook() {
     }, c === 'all' ? 'All' : CAT_NAME[c], h('b', { text: String(counts[c]) }))));
 
   // list column
-  const search = h('input', { class: 'field-in search-in', id: 'nb-search', type: 'search', placeholder: nb.tab === 'gloss' ? 'Search terms' : 'Search the bank', 'aria-label': nb.tab === 'gloss' ? 'Search glossary' : 'Search notes' });
+  const search = h('input', { class: 'field-in search-in', id: 'nb-search', type: 'search', placeholder: nb.tab === 'gloss' ? 'Search terms' : nb.tab === 'proj' ? 'Search projects' : 'Search the bank', 'aria-label': nb.tab === 'gloss' ? 'Search glossary' : 'Search notes' });
   search.value = nb.q;
   search.addEventListener('input', () => {
     nb.q = search.value;
@@ -2971,7 +3199,10 @@ function drawNotebook() {
     if (s2) { s2.focus(); s2.setSelectionRange(s2.value.length, s2.value.length); }
   });
   let listCol;
-  if (nb.tab === 'gloss') {
+  if (nb.tab === 'proj') {
+    const pc = projectListCol(nb, cat, q);
+    listCol = h('aside', { class: 'nb-list card-box' }, search, pc.list, pc.foot);
+  } else if (nb.tab === 'gloss') {
     const shown = terms.filter(g => (cat === 'all' || termCats(g).includes(cat)) && (!q || `${g.term} ${g.def}`.toLowerCase().includes(q)));
     const list = h('div', { class: 'list', style: 'padding:0' });
     let letter = '';
@@ -3028,14 +3259,15 @@ function drawNotebook() {
       const ta = h('textarea', { class: 'nb-editor', id: 'nb-raw', placeholder: 'Write freely. Shorthand, half-sentences and symbols (! ? [] ->) are fine. Tap Comprehend when you are done.', 'aria-label': 'Notebook entry' });
       ta.value = d.raw;
       ta.addEventListener('input', () => { d.raw = ta.value; });
-      scroll.append(title, ta, busyRow);
+      scroll.append(d.id ? null : tplChips(d), d.proj && projById(d.proj) ? h('span', { class: 'lbl', text: 'Project · #' + projById(d.proj).name }) : null, title, ta, busyRow);
       const photo = h('input', { type: 'file', accept: 'image/*', hidden: true });
       photo.addEventListener('change', () => { const f = photo.files && photo.files[0]; photo.value = ''; if (f) nbTranscribe(f); });
       foot.append(
         state.sample ? h('button', { class: 'btn', type: 'button', disabled: !!nb.busy, onclick: () => photo.click() }, 'Transcribe a page') : null, photo,
+        micButton(() => document.getElementById('nb-raw'), { id: 'nb-mic', label: 'Dictate', keepFocus: true }),
         h('span', { class: 'grow' }),
         h('button', { class: 'btn', type: 'button', disabled: !!nb.busy, onclick: () => { nb.mode = 'view'; nb.draft = null; nb.pane = nb.sel ? 'main' : 'list'; drawNotebook(); } }, 'Cancel'),
-        h('button', { class: 'btn', type: 'button', disabled: !!nb.busy, onclick: () => { if (!d.raw.trim()) { toast('Write something first.'); return; } d.result = offlineResult(d.raw, d.title); nbSave(false); } }, 'Save as written'),
+        h('button', { class: 'btn', type: 'button', disabled: !!nb.busy, onclick: () => { if (!d.raw.trim()) { toast('Write something first.'); return; } d.result = offlineResult(d.raw, d.title, d.tpl); nbSave(false); } }, 'Save as written'),
         h('button', { class: 'btn primary', id: 'nb-comprehend', type: 'button', disabled: !!nb.busy, onclick: nbComprehend }, state.sample ? 'Comprehend' : 'Tidy (no AI)'));
     } else {
       const r = d.result;
@@ -3045,7 +3277,10 @@ function drawNotebook() {
       scroll.append(h('span', { class: 'lbl', text: r.ai ? 'Review what Kura understood' : 'Kept as written (no AI)' }), title,
         h('div', { class: 'stack' },
           h('span', { class: 'lbl', text: d.id ? 'Category' : r.ai ? 'Category · suggested by AI, tap to change' : 'Category · guessed, tap to change' }),
-          h('div', { class: 'row', id: 'nb-cat' }, catSeg(d.cat || r.cat, c => { d.cat = c; }))));
+          h('div', { class: 'row', id: 'nb-cat' }, catSeg(d.cat || r.cat, c => { d.cat = c; }))),
+        h('div', { class: 'stack' },
+          h('span', { class: 'lbl', text: d.proj === undefined && r.proj ? 'Project · suggested, tap to change' : 'Project' }),
+          h('div', { class: 'row', id: 'nb-proj' }, projPicker(d.proj !== undefined ? d.proj : r.proj, v => { d.proj = v; }, () => d.cat || r.cat))));
       if (r.summary) scroll.append(h('p', { class: 'nb-sum', text: r.summary }));
       if (r.points.length) scroll.append(h('div', { class: 'nb-sec' }, h('span', { class: 'lbl', text: 'Key points' }), mdNodes(r.points.map(p => '- ' + p).join('\n'))));
       scroll.append(h('div', { class: 'nb-sec' }, h('span', { class: 'lbl', text: 'Note' }), mdNodes(r.note)));
@@ -3083,6 +3318,8 @@ function drawNotebook() {
         h('button', { class: 'btn', type: 'button', onclick: () => { d.result = null; drawNotebook(); } }, 'Back to editing'),
         h('button', { class: 'btn primary', id: 'nb-save', type: 'button', onclick: () => nbSave(!!state.obs && d.sendObs !== false) }, 'Save note'));
     }
+  } else if (nb.tab === 'proj') {
+    projectMain(nb, scroll, foot);
   } else if (nb.tab === 'ask') {
     scroll.append(h('p', { class: 'muted', text: state.sample
       ? 'Ask anything about your notes, quick notes and glossary. Answers cite the notes they come from; general knowledge is labelled as such.'
@@ -3095,7 +3332,7 @@ function drawNotebook() {
     const inp = h('input', { class: 'field-in', id: 'nb-ask', type: 'text', placeholder: 'e.g. what did I find about impedance?', 'aria-label': 'Question', enterkeyhint: 'send' });
     const go = () => { const v = inp.value; inp.value = ''; nbAsk(v); };
     inp.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); go(); } });
-    foot.append(h('div', { class: 'nb-ask-in', style: 'flex:1' }, inp, h('button', { class: 'btn primary', id: 'nb-ask-go', type: 'button', onclick: go }, 'Ask')));
+    foot.append(h('div', { class: 'nb-ask-in', style: 'flex:1' }, inp, micButton(() => document.getElementById('nb-ask'), { id: 'ask-mic', keepFocus: true }), h('button', { class: 'btn primary', id: 'nb-ask-go', type: 'button', onclick: go }, 'Ask')));
   } else if (nb.tab === 'gloss') {
     const g = nb.gsel && termById(nb.gsel);
     if (!g) {
@@ -3153,9 +3390,9 @@ function drawNotebook() {
       const c = catOf(n);
       const staleObs = n.sentAt && n.obsPath && state.obs && n.obsPath !== noteFilePath(n, state.obs);
       scroll.append(
-        h('span', { class: 'lbl', text: `${new Date(n.created).toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}${n.ai ? ' · comprehended' : ''}${n.sentAt ? ' · in Obsidian' : ''}` }),
+        h('span', { class: 'lbl', text: `${new Date(n.created).toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}${n.tpl && n.tpl !== 'blank' ? ' · ' + tplById(n.tpl).name : ''}${n.ai ? ' · comprehended' : ''}${n.sentAt ? ' · in Obsidian' : ''}` }),
         h('h3', { class: 'nb-title', text: n.title }),
-        h('div', { class: 'row', id: 'nb-cat' }, catSeg(c, v => setNoteCat(n, v))),
+        h('div', { class: 'row', id: 'nb-cat' }, catSeg(c, v => setNoteCat(n, v)), projPicker(n.proj || null, v => setNoteProj(n, v), () => catOf(n))),
         staleObs ? h('p', { class: 'muted', text: `In Obsidian this note is still at ${n.obsPath}. Tap Send again to file it under ${CAT_NAME[c]}, then delete the old copy in Obsidian.` }) : null,
         n.summary ? h('p', { class: 'nb-sum', text: n.summary }) : null,
         (n.points || []).length ? h('div', { class: 'nb-sec' }, h('span', { class: 'lbl', text: 'Key points' }), mdNodes(n.points.map(p => '- ' + p).join('\n'))) : null,
@@ -3174,12 +3411,19 @@ function drawNotebook() {
         nb.sel = next ? next.id : null;
         nb.pane = 'list';
         drawNotebook();
-        toast('Note deleted (its tasks stay in Kura)');
+        toast('Note deleted (its tasks stay in Kura)', { label: 'Undo', fn: async () => {
+          await store.putNote(n).catch(onWriteError);
+          state.notes = (state.notes || []).filter(x => x.id !== n.id).concat(n);
+          await syncGlossary(n);
+          if (state.nb) { state.nb.sel = n.id; state.nb.pane = 'main'; drawNotebook(); }
+          play('undo');
+        } });
       } }, 'Delete');
       foot.append(del, h('span', { class: 'grow' }),
+        h('button', { class: 'btn', id: 'nb-share', type: 'button', onclick: () => shareOut(n.title, noteShareText(n)) }, 'Share'),
         state.obs ? h('button', { class: 'btn', type: 'button', onclick: () => sendNoteToObsidian(n) }, n.sentAt ? 'Send again' : 'Send to Obsidian') : null,
-        h('button', { class: 'btn', type: 'button', onclick: () => { nb.draft = { id: n.id, title: n.title, raw: n.raw || n.note, result: null, cat: catOf(n) }; nb.mode = 'edit'; drawNotebook(); } }, 'Edit'),
-        h('button', { class: 'btn primary', type: 'button', onclick: () => { nb.draft = { id: n.id, title: '', raw: n.raw || n.note, result: null, cat: catOf(n) }; nb.mode = 'edit'; nbComprehend(); } }, state.sample ? 'Re-comprehend' : 'Re-tidy'));
+        h('button', { class: 'btn', type: 'button', onclick: () => { nb.draft = { id: n.id, title: n.title, raw: n.raw || n.note, result: null, cat: catOf(n), proj: n.proj || null, tpl: n.tpl || 'blank' }; nb.mode = 'edit'; drawNotebook(); } }, 'Edit'),
+        h('button', { class: 'btn primary', type: 'button', onclick: () => { nb.draft = { id: n.id, title: '', raw: n.raw || n.note, result: null, cat: catOf(n), proj: n.proj || null, tpl: n.tpl || 'blank' }; nb.mode = 'edit'; nbComprehend(); } }, state.sample ? 'Re-comprehend' : 'Re-tidy'));
     }
   }
   if (!foot.childNodes.length) foot.hidden = true;
@@ -3200,18 +3444,18 @@ function drawNotebook() {
     h('button', { class: 'ghost', type: 'button', 'aria-label': 'Back', onclick: () => { if (nb.pane === 'main' && innerWidth < 720 && nb.tab !== 'ask') { nb.pane = 'list'; drawNotebook(); } else closeNotebook(); } }, '←'),
     h('h2', { text: 'NOTEBOOK' }),
     h('div', { class: 'seg nb-tabs', role: 'group', 'aria-label': 'Section' },
-      tabBtn('bank', 'BANK', 'nb-tab-bank'), tabBtn('gloss', 'GLOSSARY', 'nb-tab-gloss'), tabBtn('ask', 'ASK', 'nb-ask-tab')),
+      tabBtn('bank', 'BANK', 'nb-tab-bank'), tabBtn('proj', 'PROJECTS', 'nb-tab-proj'), tabBtn('gloss', 'GLOSSARY', 'nb-tab-gloss'), tabBtn('ask', 'ASK', 'nb-ask-tab')),
     h('span', { class: 'grow' }),
     h('button', { class: 'btn primary', id: 'nb-new', type: 'button', onclick: () => {
-      Object.assign(nb, { tab: 'bank', draft: { id: null, title: '', raw: '', result: null, cat: null }, mode: 'edit', pane: 'main' });
+      Object.assign(nb, { tab: 'bank', draft: { id: null, title: '', raw: '', result: null, cat: null, tpl: 'blank' }, mode: 'edit', pane: 'main' });
       nbPrefs.tab = 'bank';
       drawNotebook();
       const t = document.getElementById('nb-raw'); if (t) t.focus();
-    } }, '+ New'),
+    } }, '+', h('span', { class: 'nl', text: ' New' })),
     h('button', { class: 'ghost', type: 'button', 'aria-label': 'Close notebook', onclick: () => closeNotebook() }, icon('close')));
 
   // keep scroll positions when redrawing the same view
-  const mainKey = nb.tab + ':' + (nb.tab === 'gloss' ? (nb.gsel || '') + (nb.gedit ? ':e' : '') : nb.tab === 'bank' ? nb.mode + ':' + (nb.sel || '') + (nb.draft && nb.draft.result ? ':r' : '') : '');
+  const mainKey = nb.tab + ':' + (nb.tab === 'proj' ? (nb.psel || '') + (nb.pedit ? ':e' : '') : nb.tab === 'gloss' ? (nb.gsel || '') + (nb.gedit ? ':e' : '') : nb.tab === 'bank' ? nb.mode + ':' + (nb.sel || '') + (nb.draft && nb.draft.result ? ':r' : '') : '');
   const prevScroll = el.querySelector('.nb-scroll');
   const prevList = el.querySelector('.nb-list .list');
   const keepMain = prevScroll && nb._mk === mainKey && nb.tab !== 'ask' ? prevScroll.scrollTop : 0;
@@ -3224,6 +3468,1730 @@ function drawNotebook() {
   if (keepList && newList) newList.scrollTop = keepList;
   if (nb.tab === 'ask') scroll.scrollTop = scroll.scrollHeight;
 }
+
+/* ---------- smart dates + repeating tasks ---------- */
+const DOW3 = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+const DOW_FULL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const DOW_LONG_RX = '(sunday|monday|tuesday|wednesday|thursday|friday|saturday)';
+const DOW_ANY_RX = '(sun(?:day)?|mon(?:day)?|tue(?:s|sday)?|wed(?:nesday)?|thu(?:r|rs|rsday)?|fri(?:day)?|sat(?:urday)?)';
+const MON_RX = '(jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)';
+const END = '(?=[\\s,.;!?)]|$)';
+const PREP = '(?:\\s(?:on|by|due|before|for|until|till|from))?';
+const dowIdx = s => DOW3.indexOf(String(s).slice(0, 3).toLowerCase());
+const monIdx = s => ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'].indexOf(String(s).slice(0, 3).toLowerCase());
+const addDays = (ds, n) => { const d = parseDay(ds); d.setDate(d.getDate() + n); return dayStr(d); };
+const dowOfDay = ds => parseDay(ds).getDay();
+const mondayOf = ds => addDays(ds, -((dowOfDay(ds) + 6) % 7));
+const ord = n => n + (n % 10 === 1 && n % 100 !== 11 ? 'st' : n % 10 === 2 && n % 100 !== 12 ? 'nd' : n % 10 === 3 && n % 100 !== 13 ? 'rd' : 'th');
+function nextDow(from, dow, inclusive) {
+  let d = inclusive ? from : addDays(from, 1);
+  for (let i = 0; i < 7 && dowOfDay(d) !== dow; i++) d = addDays(d, 1);
+  return d;
+}
+function dayMonth(day, mon, year) {
+  if (mon < 0 || day < 1 || day > 31) return null;
+  let y = year ? (year < 100 ? 2000 + year : year) : parseDay(TODAY).getFullYear();
+  let d = new Date(y, mon, day);
+  if (d.getMonth() !== mon) return null;
+  if (!year && dayStr(d) < TODAY) d = new Date(y + 1, mon, day);
+  return dayStr(d);
+}
+// first occurrence strictly after `after`
+function nextOccurrence(rule, after) {
+  const n = Math.max(1, rule.n || 1);
+  if (rule.unit === 'day') return addDays(after, n);
+  if (rule.unit === 'weekday') { let d = addDays(after, 1); while ([0, 6].includes(dowOfDay(d))) d = addDays(d, 1); return d; }
+  if (rule.unit === 'week') {
+    const dows = [...new Set(rule.dows && rule.dows.length ? rule.dows : [dowOfDay(after)])].sort((a, b) => ((a + 6) % 7) - ((b + 6) % 7));
+    const wk = mondayOf(after);
+    for (const dw of dows) { const d = addDays(wk, (dw + 6) % 7); if (d > after) return d; }
+    return addDays(addDays(wk, 7 * n), (dows[0] + 6) % 7);
+  }
+  if (rule.unit === 'month') {
+    const a = parseDay(after);
+    const dom = rule.dom || a.getDate();
+    const at = (y, m) => dayStr(new Date(y, m, Math.min(dom, new Date(y, m + 1, 0).getDate())));
+    const same = at(a.getFullYear(), a.getMonth());
+    return same > after ? same : at(a.getFullYear(), a.getMonth() + n);
+  }
+  return addDays(after, 1);
+}
+const firstOccurrence = (rule, from) => nextOccurrence({ ...rule, n: 1 }, addDays(from, -1));
+function repeatLabel(r) {
+  if (!r) return '';
+  const n = r.n || 1;
+  if (r.unit === 'day') return n > 1 ? `every ${n} days` : 'daily';
+  if (r.unit === 'weekday') return 'weekdays';
+  if (r.unit === 'week') {
+    const days = (r.dows || []).map(d => DOW_FULL[d].slice(0, 3)).join(', ');
+    return (n === 2 ? 'fortnightly' : n > 1 ? `every ${n} weeks` : 'every') + (days ? ' ' + days : n === 1 ? ' week' : '');
+  }
+  if (r.unit === 'month') return (n > 1 ? `every ${n} months` : 'monthly') + (r.dom ? ' on the ' + ord(r.dom) : '');
+  return '';
+}
+// Obsidian Tasks plugin wording
+function repeatTasksText(r) {
+  const n = r.n || 1;
+  if (r.unit === 'day') return n > 1 ? `every ${n} days` : 'every day';
+  if (r.unit === 'weekday') return 'every weekday';
+  if (r.unit === 'week') return (n > 1 ? `every ${n} weeks` : 'every week') + ((r.dows || []).length ? ' on ' + r.dows.map(d => DOW_FULL[d]).join(', ') : '');
+  if (r.unit === 'month') return (n > 1 ? `every ${n} months` : 'every month') + (r.dom ? ' on the ' + ord(r.dom) : '');
+  return 'every day';
+}
+function whenLabel(ds) {
+  if (!ds) return '';
+  if (ds === TODAY) return 'today';
+  if (ds < TODAY) return 'since ' + dayName(ds);
+  return futureLabel(ds);
+}
+// Finds a date or a repeat in a note ("fri", "tomorrow", "3 Oct", "in 2 weeks", "every mon") and strips it from the text.
+function parseWhen(input) {
+  let t = ' ' + String(input || '') + ' ';
+  let repeat = null, date = null;
+  const cut = (src, fn) => {
+    const m = new RegExp(src, 'i').exec(t);
+    if (!m) return false;
+    if (fn(m) === false) return false;
+    t = t.slice(0, m.index) + ' ' + t.slice(m.index + m[0].length);
+    return true;
+  };
+  // repeats
+  cut(`\\s(?:every\\s+day|each\\s+day|daily)${END}`, () => { repeat = { unit: 'day', n: 1 }; })
+    || cut(`\\severy\\s+(\\d{1,2})\\s+days?${END}`, m => { repeat = { unit: 'day', n: Math.max(1, +m[1]) }; })
+    || cut(`\\s(?:every\\s+weekday|every\\s+work\\s*day|weekdays)${END}`, () => { repeat = { unit: 'weekday', n: 1 }; })
+    || cut(`\\s(?:every|each)\\s+(other\\s+)?${DOW_ANY_RX}((?:\\s*(?:,|and|&)\\s*${DOW_ANY_RX})*)${END}`, m => {
+      const dows = [...new Set((m[0].match(new RegExp(DOW_ANY_RX, 'gi')) || []).map(dowIdx).filter(x => x >= 0))];
+      repeat = { unit: 'week', n: m[1] ? 2 : 1, dows };
+    })
+    || cut(`\\s(?:every\\s+(\\d{1,2})\\s+weeks?|every\\s+other\\s+week|every\\s+fortnight|fortnightly|every\\s+week|weekly)${END}`, m => {
+      repeat = { unit: 'week', n: m[1] ? Math.max(1, +m[1]) : /other|fortnight/i.test(m[0]) ? 2 : 1, dows: null };
+    })
+    || cut(`\\s(?:every\\s+(\\d{1,2})\\s+months?|every\\s+month|monthly)${END}`, m => { repeat = { unit: 'month', n: m[1] ? Math.max(1, +m[1]) : 1, dom: null }; });
+  // dates
+  cut(`${PREP}\\s(?:the\\s+)?day\\s+after\\s+tomorrow${END}`, () => { date = addDays(TODAY, 2); })
+    || cut(`${PREP}\\s(?:today|tonight|tdy)${END}`, () => { date = TODAY; })
+    || cut(`${PREP}\\s(?:tomorrow|tmrw|tmr|tomoz)${END}`, () => { date = addDays(TODAY, 1); })
+    || cut(`${PREP}\\sin\\s+(a|an|one|two|three|\\d{1,3})\\s+(days?|weeks?|months?)${END}`, m => {
+      const k = { a: 1, an: 1, one: 1, two: 2, three: 3 }[m[1].toLowerCase()] || +m[1];
+      if (/^d/i.test(m[2])) date = addDays(TODAY, k);
+      else if (/^w/i.test(m[2])) date = addDays(TODAY, 7 * k);
+      else { const d = parseDay(TODAY); d.setMonth(d.getMonth() + k); date = dayStr(d); }
+    })
+    || cut(`${PREP}\\snext\\s+week${END}`, () => { date = addDays(mondayOf(TODAY), 7); })
+    || cut(`${PREP}\\s(?:this\\s+|the\\s+)?weekend${END}`, () => { date = nextDow(TODAY, 6, true); if (dowOfDay(TODAY) === 0) date = TODAY; })
+    || cut(`${PREP}\\s(?:end\\s+of\\s+(?:the\\s+)?week|eow)${END}`, () => { date = nextDow(TODAY, 5, true); })
+    || cut(`${PREP}\\s(?:end\\s+of\\s+(?:the\\s+)?month|eom)${END}`, () => { const d = parseDay(TODAY); date = dayStr(new Date(d.getFullYear(), d.getMonth() + 1, 0)); })
+    || cut(`${PREP}\\s(\\d{4})-(\\d{2})-(\\d{2})${END}`, m => { date = dayMonth(+m[3], +m[2] - 1, +m[1]); return date ? undefined : false; })
+    || cut(`${PREP}\\s(\\d{1,2})(?:st|nd|rd|th)?\\s+(?:of\\s+)?${MON_RX}(?:\\s+(\\d{4}))?${END}`, m => { date = dayMonth(+m[1], monIdx(m[2]), m[3] ? +m[3] : 0); return date ? undefined : false; })
+    || cut(`${PREP}\\s${MON_RX}\\s+(\\d{1,2})(?:st|nd|rd|th)?(?:,?\\s+(\\d{4}))?${END}`, m => { date = dayMonth(+m[2], monIdx(m[1]), m[3] ? +m[3] : 0); return date ? undefined : false; })
+    || cut(`${PREP}\\s(\\d{1,2})\\/(\\d{1,2})(?:\\/(\\d{2,4}))?${END}`, m => { date = dayMonth(+m[1], +m[2] - 1, m[3] ? +m[3] : 0); return date ? undefined : false; })
+    // weekdays: full names anywhere, short names only after on/by/due/next/this or at the end
+    || cut(`(?:\\s(?:on|by|due|before|until|till|this|next|coming))?\\s(next\\s+|this\\s+|coming\\s+)?${DOW_LONG_RX}${END}`, m => { date = weekdayDate(m); })
+    || cut(`(?:\\s(?:on|by|due|before|until|till))?\\s(next\\s+|this\\s+|coming\\s+)?${DOW_ANY_RX}\\s*$`, m => { date = weekdayDate(m); })
+    || cut(`\\s(?:on|by|due|before|until|till)\\s(next\\s+|this\\s+|coming\\s+)?${DOW_ANY_RX}${END}`, m => { date = weekdayDate(m); });
+  if (!date && !repeat) return null;
+  if (repeat) {
+    const base = date || TODAY;
+    if (repeat.unit === 'week' && !(repeat.dows && repeat.dows.length)) repeat.dows = [dowOfDay(base)];
+    if (repeat.unit === 'month' && !repeat.dom) repeat.dom = parseDay(base).getDate();
+    if (!date) date = firstOccurrence(repeat, TODAY);
+  }
+  const text = t.replace(/\s{2,}/g, ' ').replace(/\s+([,.;!?])/g, '$1').replace(/[\s,;:.–-]+$/, '').trim();
+  return { text: text || String(input).trim(), date, repeat };
+}
+function weekdayDate(m) {
+  const pre = String(m[1] || '').trim().toLowerCase();
+  const dw = dowIdx(m[2]);
+  let d = nextDow(TODAY, dw, pre === 'this');
+  if (pre === 'next' && mondayOf(d) === mondayOf(TODAY)) d = addDays(d, 7);
+  return d;
+}
+
+// a repeating task that gets done schedules its next occurrence (works for ticks in Kura and in Google Tasks)
+const spawning = new Set();
+function checkRepeats() {
+  for (const it of state.items) if (it.done && it.repeat && !it.spawned && !spawning.has(it.id)) spawnNext(it);
+}
+async function spawnNext(it) {
+  spawning.add(it.id);
+  try {
+    const base = it.today && it.today > TODAY ? it.today : TODAY;
+    const next = nextOccurrence(it.repeat, base);
+    const id = store.newId();
+    const now = Date.now();
+    await store.update(it.id, { spawned: true, spawnedId: id });
+    await store.set(id, {
+      text: it.text, tags: it.tags || [], bucket: 'make', today: next, repeat: it.repeat, cat: it.cat, proj: it.proj || null,
+      done: false, doneAt: null, createdAt: now, updatedAt: now, source: it.source || 'typed', photo: null, page: it.page || null,
+      pending: false, noteId: it.noteId || null,
+    });
+    toast(`Done · repeats ${repeatLabel(it.repeat)} · next ${futureLabel(next)}`, { label: 'Undo', fn: () => toggleDone(it.id) });
+  } catch (e) { onWriteError(e); }
+}
+
+// pad hint: shows what Kura understood before you save
+function padWhen() {
+  const raw = els.input.value;
+  if (!raw.trim()) return null;
+  const pm = parseMarks(raw.trim());
+  const pj = takeProject(pm.text);
+  const w = state.route === 'drop' || RX_FLEETING.test(pj.text) ? null : parseWhen(pj.text);
+  return { when: w, proj: pj.proj };
+}
+function drawWhen() {
+  const el = document.getElementById('when');
+  if (!el) return;
+  const r = padWhen();
+  const bits = [];
+  if (r && r.when) bits.push('→ ' + whenLabel(r.when.date) + (r.when.repeat ? ' ↻ ' + repeatLabel(r.when.repeat) : ''));
+  if (r && r.proj && projById(r.proj)) bits.push('#' + projById(r.proj).name);
+  el.hidden = !bits.length;
+  el.textContent = bits.join(' · ');
+  el.classList.toggle('off', !!state.whenOff);
+  el.title = state.whenOff ? 'Dates ignored for this note. Tap to use them.' : 'Tap to save without the date';
+}
+
+function drawWeek(items, filtering) {
+  const end = addDays(TODAY, 7);
+  const byDay = (a, b) => (a.today < b.today ? -1 : a.today > b.today ? 1 : (a.createdAt || 0) - (b.createdAt || 0));
+  const up = items.filter(it => !it.done && it.today && it.today > TODAY && it.today <= end).sort(byDay);
+  const later = items.filter(it => !it.done && it.today && it.today > end).sort(byDay);
+  const nodes = [];
+  let day = '';
+  for (const it of up) {
+    if (it.today !== day) {
+      day = it.today;
+      nodes.push(h('li', { class: 'wk-day', text: parseDay(day).toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' }) + (day === addDays(TODAY, 1) ? ' · tomorrow' : '') }));
+    }
+    nodes.push(laneRow(it));
+  }
+  if (later.length) nodes.push(h('li', { class: 'wk-day', text: `Later · ${later.length}` }), ...later.slice(0, 5).map(laneRow));
+  els.todayList.replaceChildren(...nodes);
+  els.todayCount.textContent = up.length ? `/ ${pad2(up.length)} planned` : '';
+  els.todayEmpty.hidden = nodes.length > 0;
+  els.todayEmpty.textContent = filtering ? 'No matches.' : 'Nothing planned for the next 7 days. Type a date with a task, like "Submit abstract fri" or "Lab meeting prep every mon".';
+}
+function setDayView(v) {
+  state.dayView = v;
+  try { localStorage.setItem('kura.dayview', v); } catch (e) {}
+  const b = document.getElementById('day-toggle');
+  if (b) { b.textContent = v === 'week' ? '← TODAY' : 'WEEK →'; b.setAttribute('aria-pressed', String(v === 'week')); }
+  const nm = document.getElementById('today-h');
+  if (nm) nm.textContent = v === 'week' ? 'WEEK' : 'TODAY';
+  render();
+}
+
+// date + repeat controls for the note sheet
+function whenControls(it, onDone) {
+  const dateIn = h('input', { class: 'field-in date-in', id: 'item-date', type: 'date', 'aria-label': 'Planned date' });
+  dateIn.value = it.today || '';
+  dateIn.addEventListener('change', async () => {
+    const v = dateIn.value || null;
+    const cur = byId(it.id);
+    if (!cur) return;
+    await patch(it.id, v
+      ? { today: v, done: false, doneAt: null, pending: false, gtaskGone: false, bucket: cur.bucket === 'drop' ? 'make' : cur.bucket }
+      : { today: null, repeat: null });
+    onDone();
+  });
+  const base = it.today || TODAY;
+  const dw = dowOfDay(base), dom = parseDay(base).getDate();
+  const presets = {
+    day: { unit: 'day', n: 1 }, weekday: { unit: 'weekday', n: 1 },
+    week: { unit: 'week', n: 1, dows: [dw] }, week2: { unit: 'week', n: 2, dows: [dw] }, month: { unit: 'month', n: 1, dom },
+  };
+  const r = it.repeat;
+  const rkey = x => [x.unit, x.n || 1, (x.dows || []).join(','), x.dom || ''].join('|');
+  const curKey = !r ? '' : Object.keys(presets).find(k => rkey(presets[k]) === rkey(r)) || 'custom';
+  const sel = h('select', { class: 'field-in rep-sel', id: 'item-repeat', 'aria-label': 'Repeat' },
+    h('option', { value: '', text: "Doesn't repeat" }),
+    ...Object.keys(presets).map(k => h('option', { value: k, text: repeatLabel(presets[k]) })),
+    curKey === 'custom' ? h('option', { value: 'custom', text: repeatLabel(r) }) : null);
+  sel.value = curKey;
+  sel.addEventListener('change', async () => {
+    const k = sel.value;
+    if (k === 'custom') return;
+    const rule = k ? presets[k] : null;
+    const cur = byId(it.id);
+    if (!cur) return;
+    const p = { repeat: rule, spawned: false, spawnedId: null };
+    if (rule && !cur.today) Object.assign(p, { today: firstOccurrence(rule, TODAY), bucket: 'make', done: false, doneAt: null });
+    await patch(it.id, p);
+    onDone();
+  });
+  return h('div', { class: 'row' },
+    h('span', { class: 'lbl', text: 'Date' }), dateIn,
+    it.today ? h('button', { class: 'btn', type: 'button', 'aria-label': 'Clear date', onclick: async () => { await patch(it.id, { today: null, repeat: null }); onDone(); } }, '✕') : null,
+    h('span', { class: 'lbl', text: 'Repeat' }), sel);
+}
+
+/* ---------- projects ---------- */
+const projById = id => (id && (state.projects || []).find(p => p.id === id)) || null;
+const projSlug = s => String(s || '').toLowerCase().normalize('NFKD').replace(/[^\p{L}\p{N}]+/gu, '');
+const projByTag = t => (state.projects || []).find(p => !p.archived && projSlug(p.name) === projSlug(t)) || null;
+const projOf = x => (x && projById(x.proj)) || null;
+async function saveProjects() { if (store.kvSet) await store.kvSet('projects', state.projects).catch(onWriteError); }
+async function createProject(name, cat) {
+  const p = { id: 'pj' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), name: String(name).trim().replace(/^#/, '').slice(0, 40), cat: CATS.includes(cat) ? cat : 'work', created: Date.now(), archived: false };
+  state.projects = [...(state.projects || []), p];
+  await saveProjects();
+  return p;
+}
+// "#aurora" in a note puts it in the Aurora project (only for projects that exist)
+function takeProject(text) {
+  let proj = null;
+  const t = String(text || '').replace(/(^|\s)#([\p{L}\p{N}_-]{2,40})(?=[\s,.;!?]|$)/gu, (m, sp, tag) => {
+    const p = projByTag(tag);
+    if (p && !proj) { proj = p.id; return sp; }
+    return m;
+  });
+  return { text: proj ? t.replace(/\s{2,}/g, ' ').trim() : String(text || ''), proj };
+}
+function projPicker(value, onChange, catHint) {
+  const wrap = h('div', { class: 'proj-pick' });
+  const draw = v => {
+    const sel = h('select', { class: 'field-in proj-sel', 'aria-label': 'Project' },
+      h('option', { value: '', text: 'No project' }),
+      (state.projects || []).filter(p => !p.archived || p.id === v).map(p => h('option', { value: p.id, text: '#' + p.name })),
+      h('option', { value: '__new', text: '+ New project…' }));
+    sel.value = v || '';
+    sel.addEventListener('change', () => {
+      if (sel.value !== '__new') { onChange(sel.value || null); return; }
+      const inp = h('input', { class: 'field-in', type: 'text', placeholder: 'Project name', 'aria-label': 'New project name', maxlength: '40' });
+      const ok = h('button', { class: 'btn', type: 'button', onclick: async () => {
+        const name = inp.value.trim().replace(/^#/, '');
+        if (!name) { inp.focus(); return; }
+        const p = projByTag(name) || await createProject(name, typeof catHint === 'function' ? catHint() : catHint);
+        draw(p.id);
+        onChange(p.id);
+      } }, 'Add');
+      inp.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); ok.click(); } });
+      wrap.replaceChildren(inp, ok, h('button', { class: 'btn', type: 'button', 'aria-label': 'Cancel', onclick: () => draw(v) }, '✕'));
+      inp.focus();
+    });
+    wrap.replaceChildren(sel);
+  };
+  draw(value);
+  return wrap;
+}
+async function setNoteProj(n, v) {
+  n.proj = v || null;
+  await store.putNote(n).catch(onWriteError);
+  for (const it of state.items.filter(i => i.noteId === n.id && (i.proj || null) !== n.proj)) await patch(it.id, { proj: n.proj });
+  toast(n.proj ? `Added to #${projById(n.proj).name}` : 'Removed from project');
+  drawNotebook();
+}
+const taskOrder = (a, b) => (isNow(b) - isNow(a)) || ((a.today || '9999') < (b.today || '9999') ? -1 : (a.today || '9999') > (b.today || '9999') ? 1 : 0) || (a.createdAt || 0) - (b.createdAt || 0);
+function projStats(p) {
+  const its = state.items.filter(i => i.proj === p.id && !i.example);
+  const tasks = its.filter(i => i.bucket === 'make' || i.today);
+  const done = tasks.filter(i => i.done).sort((a, b) => (b.doneAt || 0) - (a.doneAt || 0));
+  const open = tasks.filter(i => !i.done).sort(taskOrder);
+  const questions = its.filter(i => !i.done && !tasks.includes(i) && knownTags(i).includes('unr'));
+  const kept = its.filter(i => !i.done && !tasks.includes(i) && !knownTags(i).includes('unr'));
+  const notes = (state.notes || []).filter(n => n.proj === p.id).sort((a, b) => (b.updated || 0) - (a.updated || 0));
+  return { tasks, done, open, questions, kept, notes, pct: tasks.length ? Math.round((done.length / tasks.length) * 100) : 0 };
+}
+function whenMeta(it) {
+  return [
+    it.today ? h('span', { class: isNow(it) && it.today < TODAY && !it.done ? 'carry' : 'tg', text: it.today === TODAY ? 'today' : whenLabel(it.today) }) : null,
+    it.repeat ? h('span', { class: 'tg', text: '↻ ' + repeatLabel(it.repeat) }) : null,
+  ];
+}
+function pjTaskRow(it) {
+  return h('div', { class: 'pj-row li' + (it.done ? ' done' : ''), 'data-id': it.id },
+    h('button', {
+      class: 'check', type: 'button', role: 'checkbox', 'aria-checked': String(!!it.done), 'aria-label': it.done ? 'Mark not done' : 'Mark done',
+      onclick: async () => { await toggleDone(it.id); drawNotebook(); },
+    }, icon('check', 2.6)),
+    h('button', { class: 'li-body', type: 'button', onclick: () => openItem(it.id) },
+      h('span', { class: 'main' }, h('span', { class: 'txt', text: rowText(it) }), h('span', { class: 'meta' }, whenMeta(it), tagMeta(it)))));
+}
+function pjNoteRow(it) {
+  return h('button', { class: 'nb-row', type: 'button', onclick: () => openItem(it.id) },
+    h('span', { class: 'x', text: rowText(it) }), h('span', { class: 'meta' }, h('span', { text: (LABEL[it.bucket] || '') + ' · ' + rel(it.createdAt) }), tagMeta(it)));
+}
+async function addTaskTo(p, raw) {
+  const pm = parseMarks(raw);
+  const w = parseWhen(pm.text);
+  const now = Date.now();
+  await store.set(store.newId(), {
+    text: (w && w.text) || pm.text, tags: pm.tags, bucket: 'make', today: w ? w.date : null, repeat: w ? w.repeat : null,
+    cat: p.cat, proj: p.id, done: false, doneAt: null, createdAt: now, updatedAt: now, source: 'typed', photo: null, page: null, pending: false,
+  }).catch(onWriteError);
+  toast(w ? `Added to #${p.name} · ${whenLabel(w.date)}${w.repeat ? ' ↻ ' + repeatLabel(w.repeat) : ''}` : `Added to #${p.name}`);
+}
+function projectListCol(nb, cat, q) {
+  const all = (state.projects || []).slice().sort((a, b) => a.name.localeCompare(b.name, 'en', { sensitivity: 'base' }));
+  const shown = all.filter(p => (nb.showArchived || !p.archived) && (cat === 'all' || p.cat === cat) && (!q || p.name.toLowerCase().includes(q)));
+  const list = h('div', { class: 'list', style: 'padding:0' });
+  for (const p of shown) {
+    const st = projStats(p);
+    const next = st.open[0];
+    list.append(h('button', {
+      class: 'nb-row', type: 'button', 'data-cat': p.cat, 'data-id': p.id, 'aria-current': String(nb.psel === p.id),
+      onclick: () => { nb.psel = p.id; nb.pedit = null; nb.pane = 'main'; drawNotebook(); },
+    },
+      h('span', { class: 't', text: '#' + p.name + (p.archived ? ' (archived)' : '') }),
+      next ? h('span', { class: 'x', text: 'Next: ' + next.text }) : null,
+      h('span', { class: 'meta' }, h('span', { class: 'cdot' }), h('span', { class: 'cn', text: CAT_NAME[p.cat] }),
+        h('span', { text: `· ${st.open.length} open · ${st.pct}% done` })),
+      h('span', { class: 'pj-bar', 'aria-hidden': 'true' }, h('i', { style: `width:${st.pct}%` }))));
+  }
+  if (!shown.length) list.append(h('p', { class: 'empty', text: all.length ? 'No projects match.' : 'No projects yet. Make one for each thread of work, like Aurora or Renalwave. Then type #aurora in any note to file it there.' }));
+  const archived = all.filter(p => p.archived).length;
+  if (archived) list.append(h('button', { class: 'link-btn plain', type: 'button', style: 'margin:10px 12px', onclick: () => { nb.showArchived = !nb.showArchived; drawNotebook(); } }, nb.showArchived ? 'Hide archived' : `Show archived (${archived})`));
+  const inp = h('input', { class: 'field-in', id: 'pj-new', type: 'text', placeholder: 'New project', 'aria-label': 'New project name', maxlength: '40', enterkeyhint: 'done' });
+  const add = async () => {
+    const name = inp.value.trim().replace(/^#/, '');
+    if (!name) { inp.focus(); return; }
+    if (projByTag(name)) { toast('That project already exists.'); return; }
+    const p = await createProject(name, cat === 'all' ? 'work' : cat);
+    nb.psel = p.id;
+    nb.pane = 'main';
+    drawNotebook();
+    toast(`Project #${p.name} created. Type #${projSlug(p.name)} in a note to file it here.`);
+  };
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); add(); } });
+  const foot = h('div', { class: 'nb-foot' }, h('div', { class: 'nb-ask-in', style: 'flex:1' }, inp, h('button', { class: 'btn', id: 'pj-create', type: 'button', onclick: add }, 'Add')));
+  return { list, foot };
+}
+function projectMain(nb, scroll, foot) {
+  const p = projById(nb.psel);
+  if (!p) {
+    scroll.append(h('p', { class: 'empty', text: (state.projects || []).length ? 'Pick a project.' : 'Projects group your notes and tasks by thread of work. Add one at the bottom of the list.' }));
+    return;
+  }
+  const st = projStats(p);
+  if (nb.pedit) {
+    const inp = h('input', { class: 'field-in nb-title-in', id: 'pj-name', type: 'text', maxlength: '40', 'aria-label': 'Project name' });
+    inp.value = nb.pedit.name;
+    inp.addEventListener('input', () => { nb.pedit.name = inp.value; });
+    scroll.append(h('span', { class: 'lbl', text: 'Rename project' }), inp);
+    foot.append(h('span', { class: 'grow' }),
+      h('button', { class: 'btn', type: 'button', onclick: () => { nb.pedit = null; drawNotebook(); } }, 'Cancel'),
+      h('button', { class: 'btn primary', type: 'button', onclick: async () => {
+        const name = nb.pedit.name.trim().replace(/^#/, '').slice(0, 40);
+        if (!name) return;
+        const clash = projByTag(name);
+        if (clash && clash.id !== p.id) { toast('Another project already has that name.'); return; }
+        p.name = name;
+        await saveProjects();
+        nb.pedit = null;
+        drawNotebook();
+      } }, 'Save'));
+    return;
+  }
+  const next = st.open[0];
+  const addIn = h('input', { class: 'field-in', id: 'pj-add', type: 'text', placeholder: 'Add a task (try "fri" or "every mon")', 'aria-label': `Add a task to ${p.name}`, enterkeyhint: 'done' });
+  const add = async () => {
+    const v = addIn.value.trim();
+    if (!v) return;
+    addIn.value = '';
+    await addTaskTo(p, v);
+    drawNotebook();
+    const again = document.getElementById('pj-add');
+    if (again) again.focus();
+  };
+  addIn.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); add(); } });
+  scroll.append(
+    h('span', { class: 'lbl', text: `Project · since ${new Date(p.created).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' })}${p.archived ? ' · archived' : ''}` }),
+    h('h3', { class: 'nb-title', text: '#' + p.name }),
+    h('div', { class: 'row' }, catSeg(p.cat, async c => { p.cat = c; await saveProjects(); drawNotebook(); })),
+    h('div', { class: 'pj-prog' }, h('span', { class: 'pj-bar big', 'aria-hidden': 'true' }, h('i', { style: `width:${st.pct}%` })),
+      h('span', { class: 'lbl', text: `${st.done.length} of ${st.tasks.length} task${st.tasks.length === 1 ? '' : 's'} done · ${st.pct}%` })),
+    next ? h('div', { class: 'nb-ctx pj-next' }, h('span', { class: 'lbl', text: 'Next action' }),
+      h('p', { class: 'gl-def', text: next.text }),
+      h('div', { class: 'row' }, h('span', { class: 'meta' }, whenMeta(next)), h('span', { class: 'grow' }),
+        !isNow(next) ? h('button', { class: 'btn', type: 'button', onclick: async () => { await patch(next.id, { today: TODAY, done: false, doneAt: null, gtaskGone: false }); drawNotebook(); toast('Sent to TODAY'); } }, '+ Today') : null,
+        h('button', { class: 'btn', type: 'button', onclick: () => startFocus(next.id) }, '▶ Focus'),
+        h('button', { class: 'btn primary', type: 'button', onclick: async () => { await toggleDone(next.id); drawNotebook(); } }, 'Done'))) : null,
+    h('div', { class: 'nb-ask-in' }, addIn, h('button', { class: 'btn primary', id: 'pj-add-go', type: 'button', onclick: add }, 'Add')),
+    st.open.length ? h('div', { class: 'nb-sec' }, h('span', { class: 'lbl', text: `Open tasks · ${st.open.length}` }), st.open.map(pjTaskRow)) : null,
+    st.questions.length ? h('div', { class: 'nb-sec' }, h('span', { class: 'lbl', text: `Open questions · ${st.questions.length}` }), st.questions.map(pjNoteRow)) : null,
+    h('div', { class: 'nb-sec' }, h('span', { class: 'lbl', text: `Notebook notes · ${st.notes.length}` }),
+      h('div', { class: 'nb-chips' }, st.notes.map(n => h('button', { class: 'nb-chip', type: 'button', 'data-cat': catOf(n), onclick: () => openNoteInBank(n.id) }, n.title)),
+        h('button', { class: 'nb-chip', type: 'button', id: 'pj-note', onclick: () => {
+          Object.assign(nb, { tab: 'bank', mode: 'edit', pane: 'main', draft: { id: null, title: '', raw: '', result: null, cat: p.cat, proj: p.id, tpl: 'blank' } });
+          nbPrefs.tab = 'bank';
+          drawNotebook();
+        } }, '+ New note here'))),
+    st.kept.length ? h('div', { class: 'nb-sec' }, h('span', { class: 'lbl', text: `Kept notes · ${st.kept.length}` }), st.kept.slice(0, 30).map(pjNoteRow)) : null,
+    st.done.length ? h('details', {}, h('summary', { class: 'lbl', text: `Done · ${st.done.length}` }), st.done.slice(0, 40).map(pjTaskRow)) : null);
+  const del = h('button', { class: 'btn danger', type: 'button', onclick: async () => {
+    if (!nb.confirmDel) { nb.confirmDel = true; del.textContent = 'Tap again to delete'; return; }
+    for (const it of state.items.filter(i => i.proj === p.id)) await patch(it.id, { proj: null });
+    for (const n of (state.notes || []).filter(x => x.proj === p.id)) { n.proj = null; await store.putNote(n).catch(() => {}); }
+    state.projects = state.projects.filter(x => x.id !== p.id);
+    await saveProjects();
+    nb.psel = null;
+    nb.pane = 'list';
+    drawNotebook();
+    toast('Project deleted. Its notes and tasks are still in Kura.');
+  } }, 'Delete');
+  foot.append(del, h('span', { class: 'grow' }),
+    h('button', { class: 'btn', type: 'button', onclick: async () => { p.archived = !p.archived; await saveProjects(); drawNotebook(); toast(p.archived ? 'Archived' : 'Back in your projects'); } }, p.archived ? 'Unarchive' : 'Archive'),
+    h('button', { class: 'btn', type: 'button', onclick: () => shareOut('#' + p.name, projectShareText(p)) }, 'Share'),
+    h('button', { class: 'btn', type: 'button', onclick: () => { nb.pedit = { name: p.name }; drawNotebook(); } }, 'Rename'));
+}
+
+/* ---------- notebook templates ---------- */
+const TEMPLATES = [
+  { id: 'blank', name: 'Blank', sections: [] },
+  { id: 'experiment', name: 'Experiment', sections: ['Hypothesis', 'Variables', 'Setup', 'Controls', 'Risks', 'Results', 'Next steps'] },
+  { id: 'paper', name: 'Paper', sections: ['Citation', 'Objective', 'Methods', 'Results', 'Limitations', 'Relevance'] },
+  { id: 'meeting', name: 'Meeting', sections: ['Who', 'Discussed', 'Decisions', 'Actions'] },
+  { id: 'daily', name: 'Daily log', sections: ['Done', 'Blocked', 'Next'] },
+];
+const tplById = id => TEMPLATES.find(t => t.id === id) || TEMPLATES[0];
+const tplSkeleton = t => t.sections.map(s => `## ${s}\n`).join('\n');
+function tplPrompt(id) {
+  const t = tplById(id);
+  if (!t.sections.length) return '';
+  return `\nThe entry uses the writer's "${t.name}" template. In "note", keep these sections as Markdown headings in this order: ${t.sections.map(s => '## ' + s).join(', ')}. Put each part of the entry under the right heading. If a section has nothing, write "—" under it. Never invent content to fill a section.${t.id === 'paper' ? ' For "Citation", keep exactly what the writer gave; never make up authors, years, journals or DOIs.' : ''}${t.id === 'meeting' ? ' Everything under "Actions" is a task.' : ''}${t.id === 'experiment' ? ' Everything under "Next steps" is a task.' : ''}\n`;
+}
+function tplChips(d) {
+  return h('div', { class: 'nb-chips', id: 'nb-tpl', role: 'group', 'aria-label': 'Template' },
+    TEMPLATES.map(t => h('button', {
+      class: 'nb-chip tpl', type: 'button', 'data-tpl': t.id, 'aria-pressed': String((d.tpl || 'blank') === t.id),
+      onclick: () => {
+        const cur = tplById(d.tpl);
+        if (d.raw.trim() && d.raw.trim() !== tplSkeleton(cur).trim()) { toast('Clear the page first to switch template.'); return; }
+        d.tpl = t.id;
+        d.raw = tplSkeleton(t);
+        drawNotebook();
+        const ta = document.getElementById('nb-raw');
+        if (ta) { ta.focus(); const i = ta.value.indexOf('\n') + 1; ta.setSelectionRange(i, i); }
+      },
+    }, t.name)));
+}
+
+/* ---------- voice capture (the browser's speech service; in Chrome the audio goes to Google for recognition) ---------- */
+const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+let rec = null, recBtn = null;
+function stopDictation() { if (rec) { try { rec.stop(); } catch (e) {} } }
+function micButton(getTarget, opts = {}) {
+  if (!SpeechRec) return null;
+  const b = h('button', { class: (opts.cls || 'btn') + ' mic', type: 'button', id: opts.id, 'aria-label': 'Dictate', title: 'Dictate' }, icon('mic', 1.8), opts.label || null);
+  b.addEventListener('pointerdown', e => { if (opts.keepFocus) e.preventDefault(); });
+  b.addEventListener('click', () => dictate(getTarget(), b));
+  return b;
+}
+function dictate(target, btn) {
+  if (!SpeechRec || !target) return;
+  if (rec) { const same = recBtn === btn; stopDictation(); if (same) return; }
+  const r = new SpeechRec();
+  r.lang = navigator.language || 'en-AU';
+  r.interimResults = true;
+  r.continuous = !/Android/i.test(navigator.userAgent); // Android repeats words in continuous mode
+  const base = target.value;
+  r.onresult = e => {
+    let said = '';
+    for (let i = 0; i < e.results.length; i++) said += e.results[i][0].transcript;
+    said = said.trim();
+    const glue = base && !/[\s\n]$/.test(base) ? ' ' : '';
+    target.value = base + (said ? glue + said : '');
+    target.dispatchEvent(new Event('input', { bubbles: true }));
+  };
+  r.onerror = e => {
+    const why = e && e.error;
+    if (why === 'not-allowed' || why === 'service-not-allowed') toast('Allow the microphone for Kura to dictate (site settings in Chrome).');
+    else if (why === 'network') toast('Voice input needs an internet connection.');
+    else if (why && why !== 'no-speech' && why !== 'aborted') toast('Voice input stopped: ' + why);
+  };
+  r.onend = () => {
+    if (rec !== r) return;
+    rec = null;
+    if (recBtn) recBtn.classList.remove('rec');
+    recBtn = null;
+  };
+  rec = r;
+  recBtn = btn;
+  btn.classList.add('rec');
+  try { r.start(); toast('Listening… tap the mic again to stop'); }
+  catch (e) { rec = null; recBtn = null; btn.classList.remove('rec'); toast("Couldn't start voice input."); }
+}
+
+/* ---------- weekly review ---------- */
+function isoWeek(ds) {
+  const d = parseDay(ds);
+  const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const day = t.getUTCDay() || 7;
+  t.setUTCDate(t.getUTCDate() + 4 - day);
+  const y = t.getUTCFullYear();
+  const wk = Math.ceil(((t - Date.UTC(y, 0, 1)) / 86400000 + 1) / 7);
+  return `${y}-W${pad2(wk)}`;
+}
+const shortDay = ds => parseDay(ds).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
+function reviewData() {
+  const wkStart = mondayOf(TODAY);
+  const startMs = parseDay(wkStart).getTime();
+  const real = state.items.filter(i => !i.example);
+  const now = Date.now();
+  const byToday = (a, b) => (a.today < b.today ? -1 : a.today > b.today ? 1 : 0);
+  return {
+    week: isoWeek(TODAY), wkStart, wkEnd: addDays(wkStart, 6),
+    done: real.filter(i => i.done && (i.doneAt || 0) >= startMs).sort((a, b) => (a.doneAt || 0) - (b.doneAt || 0)),
+    captured: real.filter(i => (i.createdAt || 0) >= startMs),
+    notes: (state.notes || []).filter(n => (n.created || 0) >= startMs),
+    overdue: real.filter(i => !i.done && i.today && i.today < TODAY).sort(byToday),
+    questions: real.filter(i => !i.done && knownTags(i).includes('unr')),
+    stale: real.filter(i => !i.done && i.bucket === 'stock' && !i.today && !knownTags(i).includes('unr') && now - (i.updatedAt || i.createdAt || 0) > 30 * 86400000),
+    oldDrop: real.filter(i => !i.done && i.bucket === 'drop' && now - (i.createdAt || 0) > 7 * 86400000),
+    upcoming: real.filter(i => !i.done && i.today && i.today > TODAY && i.today <= addDays(TODAY, 7)).sort(byToday),
+    undated: real.filter(i => !i.done && i.bucket === 'make' && !i.today),
+  };
+}
+function openReview() {
+  state.sheet = { kind: 'review', summary: null, busy: false, skip: new Set() };
+  drawReview();
+}
+function reviewRow(it, actions) {
+  return h('div', { class: 'rv-row' },
+    h('button', { class: 'li-body', type: 'button', onclick: () => openItem(it.id) },
+      h('span', { class: 'main' }, h('span', { class: 'txt', text: rowText(it) }),
+        h('span', { class: 'meta' }, whenMeta(it), projOf(it) ? h('span', { class: 'tg', text: '#' + projOf(it).name }) : null, h('span', { class: 'cn', 'data-cat': catOf(it), text: CAT_NAME[catOf(it)] })))),
+    h('div', { class: 'rv-acts' }, actions.map(([label, fn]) => h('button', { class: 'mini', type: 'button', onclick: async () => { await fn(); drawReview(); } }, label))));
+}
+function drawReview() {
+  const s = state.sheet;
+  if (!s || s.kind !== 'review') return;
+  const d = reviewData();
+  const skip = x => !s.skip.has(x.id);
+  const nextMon = addDays(mondayOf(TODAY), 7);
+  const cats = CATS.map(c => [c, d.done.filter(i => catOf(i) === c).length]);
+  const body = h('div', { class: 'sheet-body' },
+    h('div', { class: 'rv-stats' },
+      h('div', {}, h('b', { text: String(d.done.length) }), h('span', { class: 'lbl', text: 'tasks done' })),
+      h('div', {}, h('b', { text: String(d.notes.length) }), h('span', { class: 'lbl', text: 'notebook notes' })),
+      h('div', {}, h('b', { text: String(d.captured.length) }), h('span', { class: 'lbl', text: 'captured' })),
+      h('div', {}, h('b', { text: String(d.overdue.length + d.questions.length) }), h('span', { class: 'lbl', text: 'open loops' }))),
+    d.done.length ? h('div', { class: 'rv-cats' }, cats.filter(([, n]) => n).map(([c, n]) => h('span', { class: 'nb-chip', 'data-cat': c }, h('span', { class: 'cdot' }), ` ${CAT_NAME[c]} ${n}`))) : null,
+    d.done.length ? h('details', {}, h('summary', { class: 'lbl', text: `Done this week · ${d.done.length}` }),
+      h('ul', { class: 'rv-done' }, d.done.map(i => h('li', { text: i.text })))) : null,
+    s.summary ? h('div', { class: 'nb-ctx' }, h('span', { class: 'lbl', text: 'Your week · written by AI from your notes' }),
+      [['Wins', s.summary.wins], ['Open loops', s.summary.loops], ['Focus next week', s.summary.focus]]
+        .filter(([, l]) => l && l.length).map(([t, l]) => h('div', {}, h('strong', { text: t }), h('ul', { class: 'rv-done' }, l.map(x => h('li', { text: x })))))) : null,
+    s.busy ? h('div', { class: 'status' }, h('span', { class: 'scanline' }), h('span', { text: 'Summarising your week…' })) : null,
+    h('span', { class: 'lbl', text: `1 · Overdue · ${d.overdue.length}` }),
+    d.overdue.length ? d.overdue.map(it => reviewRow(it, [
+      ['Today', () => patch(it.id, { today: TODAY })],
+      ['Next Mon', () => patch(it.id, { today: nextMon })],
+      ['No date', () => patch(it.id, { today: null, repeat: null, bucket: 'make' })],
+      ['Done', () => patch(it.id, { done: true, doneAt: Date.now() })],
+      ['Drop', () => patch(it.id, { today: null, repeat: null, bucket: 'drop' })],
+    ])) : h('p', { class: 'muted', text: 'Nothing overdue.' }),
+    h('span', { class: 'lbl', text: `2 · Open questions · ${d.questions.filter(skip).length}` }),
+    d.questions.filter(skip).length ? d.questions.filter(skip).map(it => reviewRow(it, [
+      ['Answered', () => patch(it.id, { tags: (it.tags || []).filter(t => t !== 'unr') })],
+      ['Make a task', () => patch(it.id, { bucket: 'make' })],
+      ['Keep open', () => { s.skip.add(it.id); }],
+    ])) : h('p', { class: 'muted', text: 'No open questions.' }),
+    h('span', { class: 'lbl', text: `3 · Untouched for a month · ${d.stale.filter(skip).length}` }),
+    d.stale.filter(skip).length ? d.stale.filter(skip).slice(0, 15).map(it => reviewRow(it, [
+      ['Keep', () => patch(it.id, {})],
+      ['Make a task', () => patch(it.id, { bucket: 'make' })],
+      ['Drop', () => patch(it.id, { bucket: 'drop' })],
+    ])) : h('p', { class: 'muted', text: 'Everything in STOCK is fresh.' }),
+    d.oldDrop.length ? h('div', { class: 'row' }, h('span', { class: 'muted', text: `${d.oldDrop.length} DROP note${d.oldDrop.length === 1 ? ' is' : 's are'} over a week old.` }),
+      h('button', { class: 'mini', type: 'button', onclick: async () => { await letGoAll(d.oldDrop.map(i => i.id)); drawReview(); } }, 'Let them go')) : null,
+    h('span', { class: 'lbl', text: `4 · Next 7 days · ${d.upcoming.length}` }),
+    d.upcoming.length ? h('ul', { class: 'rv-done' }, d.upcoming.map(i => h('li', {}, h('b', { text: futureLabel(i.today) + ' · ' }), i.text + (i.repeat ? ' ↻' : '')))) : h('p', { class: 'muted', text: 'Nothing dated yet.' }),
+    d.undated.length ? h('p', { class: 'muted', text: `${d.undated.length} task${d.undated.length === 1 ? '' : 's'} in MAKE have no date. Open one and give it a day, or tap + TODAY on Monday.` }) : null);
+  const foot = h('div', { class: 'sheet-foot' },
+    state.sample ? h('button', { class: 'btn', id: 'rv-ai', type: 'button', disabled: s.busy, onclick: () => summariseWeek() }, s.summary ? 'Summarise again' : 'Summarise my week') : null,
+    state.obs ? h('button', { class: 'btn', id: 'rv-send', type: 'button', onclick: () => sendReviewToObsidian() }, 'Send to Obsidian') : null,
+    h('span', { class: 'grow' }),
+    h('button', { class: 'btn primary', id: 'rv-finish', type: 'button', onclick: async () => {
+      state.lastReview = TODAY;
+      if (store.kvSet) await store.kvSet('lastReview', TODAY).catch(() => {});
+      closeSheet();
+      drawBanner();
+      toast('Review done. Have a good week.');
+      checkTrophies();
+    } }, 'Finish review'));
+  const prev = $('.sheet-body', els.sheet);
+  const keep = prev ? prev.scrollTop : 0;
+  showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Weekly review' },
+    head('WEEKLY REVIEW', `${d.week} · ${shortDay(d.wkStart)}–${shortDay(d.wkEnd)}`), body, foot));
+  body.scrollTop = keep;
+}
+async function summariseWeek() {
+  const s = state.sheet;
+  if (!s || s.kind !== 'review' || !state.sample) return;
+  const d = reviewData();
+  const list = (arr, f) => arr.slice(0, 40).map(f).join('\n') || '(none)';
+  const prompt = `You help the user do a weekly review of their notebook and tasks. ${state.field ? "The user's field: " + state.field + '.' : ''}
+Use only the data below. Never invent results, tasks, people or numbers. Keep each line short.
+Reply with only this JSON: {"wins": ["up to 4 lines: what got done or learned"], "loops": ["up to 4 lines: open loops that need attention"], "focus": ["up to 3 lines: what to focus on next week, based only on the open items below"]}
+
+Week ${d.week}.
+DONE:
+${list(d.done, i => `- ${i.text}${projOf(i) ? ' (#' + projOf(i).name + ')' : ''}`)}
+NOTEBOOK NOTES WRITTEN:
+${list(d.notes, n => `- ${n.title}${n.summary ? ': ' + n.summary : ''}`)}
+OVERDUE:
+${list(d.overdue, i => `- ${i.text} (planned ${i.today})`)}
+OPEN QUESTIONS:
+${list(d.questions, i => `- ${i.text}`)}
+NEXT 7 DAYS:
+${list(d.upcoming, i => `- ${i.today}: ${i.text}`)}
+UNDATED TASKS:
+${list(d.undated, i => `- ${i.text}`)}`;
+  s.busy = true;
+  drawReview();
+  try {
+    const r = await state.sample.json(prompt, {});
+    const arr = v => (Array.isArray(v) ? v.map(x => String(x || '').trim()).filter(Boolean).slice(0, 4) : []);
+    if (state.sheet !== s) return;
+    s.summary = { wins: arr(r && r.wins), loops: arr(r && r.loops), focus: arr(r && r.focus) };
+    setAiStatus(null);
+  } catch (e) {
+    toast("Couldn't summarise: " + sampleMsg(e));
+  }
+  s.busy = false;
+  drawReview();
+}
+function reviewMarkdown() {
+  const s = state.sheet, d = reviewData(), cfg = state.obs || DEFAULT_OBS;
+  const L = ['---', 'type: weekly-review', `week: ${d.week}`, `created: ${TODAY}`, 'tags: [kura/review]', '---', '',
+    `# Weekly review ${d.week} (${shortDay(d.wkStart)} – ${shortDay(d.wkEnd)})`, '',
+    `**Done:** ${d.done.length} tasks · **Notebook notes:** ${d.notes.length} · **Captured:** ${d.captured.length} · **Open loops:** ${d.overdue.length + d.questions.length}`, ''];
+  if (s && s.summary) {
+    L.push('## Summary', '_Written by AI from this week\'s notes._', '');
+    for (const [t, l] of [['Wins', s.summary.wins], ['Open loops', s.summary.loops], ['Focus next week', s.summary.focus]]) if (l.length) L.push(`### ${t}`, ...l.map(x => `- ${x}`), '');
+  }
+  L.push('## Done this week', ...(d.done.length ? d.done.map(i => `- [x] ${i.text}${projOf(i) ? ' #project/' + projSlug(projOf(i).name) : ''} ✅ ${dayStr(new Date(i.doneAt))}`) : ['- (nothing ticked off)']), '');
+  if (d.notes.length) L.push('## Notebook notes', ...d.notes.map(n => (n.sentAt ? `- [[${n.obsPath || noteFilePath(n, cfg)}|${mdSafe(n.title)}]]` : `- ${n.title}`)), '');
+  L.push('## Still open', ...(d.overdue.length ? d.overdue.map(i => `- [ ] ${i.text} 📅 ${i.today}`) : ['- Nothing overdue']), ...d.questions.map(i => `- ? ${i.text}`), '');
+  L.push('## Next 7 days', ...(d.upcoming.length ? d.upcoming.map(i => `- [ ] ${i.text}${i.repeat ? ' 🔁 ' + repeatTasksText(i.repeat) : ''} 📅 ${i.today}`) : ['- Nothing dated']), '');
+  return L.join('\n');
+}
+function sendReviewToObsidian() {
+  const cfg = state.obs;
+  if (!cfg || !cfg.vault) { toast('Connect your Obsidian vault in Settings first.'); return; }
+  const enc = encodeURIComponent;
+  const folder = (cfg.reviewsFolder || DEFAULT_OBS.reviewsFolder).replace(/^\/+|\/+$/g, '');
+  const uri = `obsidian://new?vault=${enc(cfg.vault)}&file=${enc(folder + '/' + isoWeek(TODAY))}&content=${enc(reviewMarkdown())}&overwrite=true&silent=true`;
+  launchObsidian(uri, () => toast('Review sent to Obsidian'));
+}
+const reviewDue = () => [5, 6, 0].includes(new Date().getDay()) && (!state.lastReview || state.lastReview < mondayOf(TODAY)) && state.items.some(i => !i.example);
+
+function projRule() {
+  const ps = (state.projects || []).filter(p => !p.archived);
+  return ps.length ? `\n- "project": the writer's project this entry belongs to, exactly one of: ${ps.map(p => JSON.stringify(p.name)).join(', ')}. Use "" if none clearly fits.` : '';
+}
+
+// home-screen wiring for v13
+els.input.addEventListener('input', drawWhen);
+els.route.addEventListener('click', () => setTimeout(drawWhen));
+$('#when').addEventListener('pointerdown', e => e.preventDefault());
+$('#when').addEventListener('click', () => { state.whenOff = !state.whenOff; drawWhen(); });
+$('#day-toggle').addEventListener('click', () => setDayView(state.dayView === 'week' ? 'today' : 'week'));
+$('#btn-review').addEventListener('click', () => openReview());
+if (SpeechRec) {
+  const mb = $('#btn-mic');
+  mb.hidden = false;
+  mb.addEventListener('pointerdown', e => { if (document.activeElement === els.input) e.preventDefault(); });
+  mb.addEventListener('click', () => dictate(els.input, mb));
+}
+
+/* ---------- undo ---------- */
+const snapshotOf = it => (it ? { id: it.id, rest: (({ id, ...r }) => r)(it) } : null);
+async function restoreItems(snaps) {
+  let q = store.kvGet ? ((await store.kvGet('gdeletes').catch(() => null)) || []) : [];
+  let qChanged = false;
+  for (const sn of snaps.filter(Boolean)) {
+    const rest = { ...sn.rest };
+    if (rest.gtask) {
+      const i = q.indexOf(rest.gtask);
+      if (i >= 0) { q.splice(i, 1); qChanged = true; } // not deleted in Google yet: keep the link
+      else { delete rest.gtask; delete rest.gSig; delete rest.gtaskGone; } // already gone there: make a fresh one
+    }
+    await store.set(sn.id, rest).catch(onWriteError);
+  }
+  if (qChanged && store.kvSet) await store.kvSet('gdeletes', q).catch(() => {});
+  play('undo');
+  toast(snaps.length === 1 ? 'Restored' : `Restored ${snaps.length} notes`);
+}
+async function removeWithUndo(ids, label) {
+  const snaps = ids.map(id => snapshotOf(byId(id))).filter(Boolean);
+  let n = 0;
+  for (const id of ids) {
+    try { await store.remove(id); n++; } catch (e) { onWriteError(e); break; }
+  }
+  if (n) toast(label || (n === 1 ? 'Deleted' : `Deleted ${n} notes`), { label: 'Undo', fn: () => restoreItems(snaps) });
+  return n;
+}
+async function patchWithUndo(id, p, label) {
+  const it = byId(id);
+  if (!it) return;
+  const before = {};
+  for (const k of Object.keys(p)) before[k] = it[k] === undefined ? null : it[k];
+  await patch(id, p);
+  toast(label, { label: 'Undo', fn: async () => { await patch(id, before); play('undo'); } });
+}
+
+/* ---------- 8-bit sound + haptics ---------- */
+const fx = { sound: false, haptics: true, volume: 0.6 };
+let actx = null;
+function audio() {
+  if (!actx) {
+    const C = window.AudioContext || window.webkitAudioContext;
+    if (!C) return null;
+    actx = new C();
+  }
+  if (actx.state === 'suspended') actx.resume().catch(() => {});
+  return actx;
+}
+function tone(a, f1, f2, dur, type, gain, at = 0) {
+  const t = a.currentTime + at;
+  const o = a.createOscillator(), g = a.createGain();
+  o.type = type;
+  o.frequency.setValueAtTime(f1, t);
+  o.frequency.exponentialRampToValueAtTime(Math.max(20, f2), t + dur);
+  g.gain.setValueAtTime(Math.max(0.0001, gain * fx.volume), t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g).connect(a.destination);
+  o.start(t);
+  o.stop(t + dur + 0.03);
+}
+function noise(a, dur, gain, at = 0) {
+  const t = a.currentTime + at;
+  const n = Math.max(1, Math.floor(a.sampleRate * dur));
+  const buf = a.createBuffer(1, n, a.sampleRate), d = buf.getChannelData(0);
+  for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n) ** 2;
+  const src = a.createBufferSource();
+  src.buffer = buf;
+  const f = a.createBiquadFilter();
+  f.type = 'lowpass';
+  f.frequency.value = 1400;
+  const g = a.createGain();
+  g.gain.value = gain * fx.volume;
+  src.connect(f).connect(g).connect(a.destination);
+  src.start(t);
+}
+const SFX = {
+  done: a => { tone(a, 1500, 160, 0.15, 'square', 0.09); noise(a, 0.22, 0.22, 0.13); },
+  chime: a => { tone(a, 660, 660, 0.22, 'triangle', 0.22); tone(a, 990, 990, 0.35, 'triangle', 0.2, 0.2); },
+  trophy: a => [523, 659, 784, 1047].forEach((f, i) => tone(a, f, f, 0.11, 'square', 0.07, i * 0.09)),
+  swipe: a => tone(a, 320, 620, 0.07, 'sine', 0.1),
+  undo: a => tone(a, 620, 300, 0.09, 'sine', 0.1),
+  tick: a => tone(a, 1200, 1200, 0.03, 'square', 0.04),
+};
+function play(name) {
+  if (!fx.sound) return;
+  try { const a = audio(); if (a && SFX[name]) SFX[name](a); } catch (e) {}
+}
+function buzz(pattern) {
+  if (!fx.haptics || !navigator.vibrate) return;
+  try { navigator.vibrate(pattern); } catch (e) {}
+}
+async function saveFx() { if (store.kvSet) await store.kvSet('fx', { ...fx }).catch(() => {}); }
+
+/* ---------- checklists inside notes: lines like "[ ] step" ---------- */
+const RX_STEP = /^\s*(?:[-*•]\s*)?\[( |x|X|✓)?\]\s*(.+)$/;
+function stepsOf(text) {
+  return String(text || '').split('\n').map((l, i) => {
+    if (i === 0) return null; // the first line is the note itself
+    const m = RX_STEP.exec(l);
+    return m ? { i, done: !!(m[1] && m[1].trim()), text: m[2].trim() } : null;
+  }).filter(Boolean);
+}
+function toggleStepText(text, lineIdx) {
+  const lines = String(text || '').split('\n');
+  const m = RX_STEP.exec(lines[lineIdx] || '');
+  if (!m) return text;
+  lines[lineIdx] = `[${m[1] && m[1].trim() ? ' ' : 'x'}] ${m[2].trim()}`;
+  return lines.join('\n');
+}
+const rowText = it => { const t = String(it.text || ''); return t.split('\n').filter((l, i) => i === 0 || !RX_STEP.test(l)).join('\n').trim() || t; };
+function stepMeta(it) {
+  const st = stepsOf(it.text);
+  if (!st.length) return null;
+  const d = st.filter(x => x.done).length;
+  return h('span', { class: 'tg' + (d === st.length ? ' ok' : ''), text: `☐ ${d}/${st.length}` });
+}
+// "Prep samples [] wash [] dry [] weigh" → a note with three steps
+function expandInlineSteps(text) {
+  const t = String(text || '');
+  if (t.includes('\n')) return t;
+  const parts = t.split(/\s*\[\s?\]\s*/);
+  if (parts.length < 3 || !parts[0].trim()) return t;
+  return [parts[0].trim(), ...parts.slice(1).map(x => x.trim()).filter(Boolean).map(x => '[ ] ' + x)].join('\n');
+}
+function checklistBox(itId, getText, setText) {
+  const st = stepsOf(getText());
+  const it = byId(itId);
+  const box = h('div', { class: 'stack', id: 'item-steps' });
+  const done = st.filter(x => x.done).length;
+  if (st.length) {
+    box.append(h('span', { class: 'lbl', text: `Steps · ${done}/${st.length}` }),
+      h('span', { class: 'pj-bar', 'aria-hidden': 'true' }, h('i', { style: `width:${Math.round((done / st.length) * 100)}%` })));
+    for (const step of st) {
+      const cb = h('input', { type: 'checkbox', 'aria-label': step.text });
+      cb.checked = step.done;
+      cb.addEventListener('change', async () => {
+        const next = toggleStepText(getText(), step.i);
+        setText(next);
+        await patch(itId, { text: next, pending: false });
+        if (cb.checked) { play('tick'); buzz(8); }
+        drawItem();
+      });
+      box.append(h('label', { class: 'nb-pick step' + (step.done ? ' done' : '') }, cb, h('span', { text: step.text })));
+    }
+    if (done === st.length && it && !it.done) {
+      box.append(h('button', { class: 'btn primary', type: 'button', onclick: async () => { closeSheet(); await toggleDone(itId); } }, 'All steps done · finish the task'));
+    }
+  }
+  const inp = h('input', { class: 'field-in', id: 'step-new', type: 'text', placeholder: st.length ? 'Add a step' : 'Add a step to make a checklist', 'aria-label': 'New step', enterkeyhint: 'done' });
+  const add = async () => {
+    const v = inp.value.trim();
+    if (!v) return;
+    const next = getText().replace(/\s+$/, '') + '\n[ ] ' + v;
+    setText(next);
+    await patch(itId, { text: next, pending: false });
+    drawItem();
+    const again = document.getElementById('step-new');
+    if (again) again.focus();
+  };
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); add(); } });
+  box.append(h('div', { class: 'nb-ask-in' }, inp, h('button', { class: 'btn', type: 'button', onclick: add }, 'Add')));
+  return box;
+}
+
+/* ---------- swipe gestures on the lists ---------- */
+const SWIPE_MIN = 76;
+function swipeActions(it, where) {
+  const tomorrow = addDays(TODAY, 1);
+  if (where === 'today') return {
+    right: { hint: 'DONE ✓', run: () => toggleDone(it.id) },
+    left: { hint: 'TOMORROW →', run: () => patchWithUndo(it.id, { today: tomorrow }, 'Moved to tomorrow') },
+  };
+  if (where === 'week') return {
+    right: { hint: '+ TODAY', run: () => patchWithUndo(it.id, { today: TODAY, gtaskGone: false }, 'Sent to TODAY') },
+    left: { hint: '+1 DAY', run: () => patchWithUndo(it.id, { today: addDays(it.today || TODAY, 1) }, 'Pushed a day') },
+  };
+  if (it.bucket === 'make') return {
+    right: { hint: '+ TODAY', run: () => patchWithUndo(it.id, { today: TODAY, done: false, doneAt: null, pending: false, gtaskGone: false }, 'Sent to TODAY') },
+    left: { hint: 'TOMORROW →', run: () => patchWithUndo(it.id, { today: tomorrow }, 'Planned for tomorrow') },
+  };
+  if (it.bucket === 'stock') return {
+    right: { hint: 'TO MAKE', run: () => patchWithUndo(it.id, { bucket: 'make', pending: false }, 'Moved to MAKE') },
+    left: { hint: 'TO DROP', run: () => patchWithUndo(it.id, { bucket: 'drop', pending: false }, 'Moved to DROP') },
+  };
+  return {
+    right: { hint: 'KEEP', run: () => patchWithUndo(it.id, { bucket: 'stock', pending: false }, 'Kept in STOCK') },
+    left: { hint: 'LET GO', run: () => removeWithUndo([it.id], 'Let go') },
+  };
+}
+let swipe = null, swipeClickBlock = 0;
+function swipeWhere(li) {
+  if (li.closest('#today-list')) return state.dayView === 'week' ? 'week' : 'today';
+  return 'lane';
+}
+function initSwipes(root) {
+  root.addEventListener('pointerdown', e => {
+    if (e.button && e.button !== 0) return;
+    const li = e.target.closest('.list > .li[data-id]');
+    if (!li || e.target.closest('.check, .to-today')) return;
+    const it = byId(li.dataset.id);
+    if (!it) return;
+    swipe = { li, it, x: e.clientX, y: e.clientY, dx: 0, on: false, id: e.pointerId, acts: swipeActions(it, swipeWhere(li)) };
+  });
+  root.addEventListener('pointermove', e => {
+    if (!swipe || e.pointerId !== swipe.id) return;
+    const dx = e.clientX - swipe.x, dy = e.clientY - swipe.y;
+    if (!swipe.on) {
+      if (Math.abs(dy) > 12 && Math.abs(dy) > Math.abs(dx)) { swipe = null; return; }
+      if (Math.abs(dx) < 12 || Math.abs(dx) < Math.abs(dy) * 1.4) return;
+      swipe.on = true;
+      swipe.li.classList.add('swiping');
+      try { swipe.li.setPointerCapture(e.pointerId); } catch (err) {}
+    }
+    swipe.dx = dx;
+    const side = dx > 0 ? 'right' : 'left';
+    swipe.li.dataset.side = side;
+    swipe.li.dataset.hint = swipe.acts[side].hint;
+    swipe.li.classList.toggle('armed', Math.abs(dx) >= SWIPE_MIN);
+    swipe.li.style.transform = `translateX(${Math.max(-160, Math.min(160, dx))}px)`;
+    e.preventDefault();
+  });
+  const end = e => {
+    if (!swipe || (e && e.pointerId !== swipe.id)) return;
+    const s = swipe;
+    swipe = null;
+    if (!s.on) return;
+    swipeClickBlock = Date.now();
+    const go = Math.abs(s.dx) >= SWIPE_MIN && e && e.type === 'pointerup';
+    s.li.classList.remove('swiping', 'armed');
+    if (go) {
+      const side = s.dx > 0 ? 'right' : 'left';
+      s.li.style.transform = `translateX(${side === 'right' ? 110 : -110}%)`;
+      play('swipe');
+      buzz(15);
+      setTimeout(() => s.acts[side].run(), 140);
+    } else {
+      s.li.style.transform = '';
+      delete s.li.dataset.hint;
+    }
+  };
+  root.addEventListener('pointerup', end);
+  root.addEventListener('pointercancel', end);
+  root.addEventListener('click', e => { if (Date.now() - swipeClickBlock < 350) { e.stopPropagation(); e.preventDefault(); } }, true);
+}
+
+/* ---------- More: a small launcher ---------- */
+function openMore() { state.sheet = { kind: 'more' }; drawMore(); }
+function drawMore() {
+  const s = state.sheet;
+  if (!s || s.kind !== 'more') return;
+  const won = Object.keys(state.trophies || {}).length;
+  const tile = (id, ic, name, sub, fn) => h('button', { class: 'tile-btn', type: 'button', id: 'more-' + id, onclick: fn },
+    icon(ic, 1.8), h('span', { class: 'nm', text: name }), sub ? h('span', { class: 'lbl', text: sub }) : null);
+  const f = state.focus;
+  const grid = h('div', { class: 'more-grid' },
+    tile('focus', 'timer', 'Focus', f ? fmtClock(focusLeft()) + ' left' : '25 min timer', () => (f ? openFocusView() : openFocusPicker())),
+    tile('plan', 'plan', 'Plan my day', state.sample ? 'AI or rules' : 'suggestions', () => openPlan()),
+    tile('stats', 'stats', 'Stats', `streak ${streakNow()}`, () => openStats()),
+    tile('trophies', 'trophy', 'Trophies', `${won}/${TROPHIES.length}`, () => openTrophies()),
+    tile('tools', 'flask', 'Lab tools', 'dilution, units…', () => openTools()),
+    tile('review', 'cal', 'Weekly review', state.lastReview ? 'last ' + dayName(state.lastReview) : 'not done yet', () => openReview()),
+    tile('log', 'list', 'Done log', null, () => openLog()),
+    tile('sound', fx.sound ? 'sound' : 'mute', fx.sound ? 'Sound on' : 'Sound off', 'tap to switch', async () => { fx.sound = !fx.sound; await saveFx(); play('trophy'); drawMore(); }),
+    tile('settings', 'gear', 'Settings', null, () => openSettings()));
+  showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'More' },
+    head('MORE', 'KURA ' + APP_VERSION), h('div', { class: 'sheet-body' }, grid)));
+}
+
+/* ---------- share out ---------- */
+async function shareOut(title, text) {
+  const payload = { title: String(title || 'Kura').slice(0, 200), text: String(text || '') };
+  if (navigator.share) {
+    try { await navigator.share(payload); return; } catch (e) { if (e && e.name === 'AbortError') return; }
+  }
+  try { await navigator.clipboard.writeText(payload.text); toast('Copied. Paste it anywhere.'); }
+  catch (e) { toast("Couldn't share or copy on this device."); }
+}
+const itemShareText = it => [rowText(it), ...stepsOf(it.text).map(s => `${s.done ? '☑' : '☐'} ${s.text}`),
+  it.today ? `Planned: ${it.today}${it.repeat ? ' (' + repeatLabel(it.repeat) + ')' : ''}` : '', projOf(it) ? `#${projOf(it).name}` : ''].filter(Boolean).join('\n');
+const noteShareText = n => [n.title, n.summary ? '\n' + n.summary : '', '\n' + (n.note || n.raw || ''), (n.tasks || []).length ? '\nTasks:\n' + n.tasks.map(t => '- ' + t).join('\n') : ''].filter(Boolean).join('\n');
+function projectShareText(p) {
+  const st = projStats(p);
+  return [`#${p.name} · ${st.pct}% done (${st.done.length}/${st.tasks.length})`, st.open[0] ? `Next: ${st.open[0].text}` : '',
+    st.open.length ? '\nOpen:\n' + st.open.map(i => `- ${rowText(i)}${i.today ? ' (' + i.today + ')' : ''}`).join('\n') : ''].filter(Boolean).join('\n');
+}
+
+function htmlEl(tag, cls, html) { const el = document.createElement(tag); el.className = cls; el.setAttribute('aria-hidden', 'true'); el.innerHTML = html; return el; }
+/* ---------- focus timer ---------- */
+const FOCUS_PRESETS = [[25, 5], [50, 10], [15, 3]];
+let focusTimer = null, wakeLock = null;
+const fmtClock = ms => { const s = Math.max(0, Math.ceil(ms / 1000)); return pad2(Math.floor(s / 60)) + ':' + pad2(s % 60); };
+const fmtMin = m => (m >= 60 ? `${Math.floor(m / 60)} h ${m % 60 ? (m % 60) + ' min' : ''}`.trim() : `${m} min`);
+function focusLeft() { const f = state.focus; if (!f) return 0; return f.paused ? f.left : Math.max(0, f.endsAt - Date.now()); }
+function saveFocus() { try { if (state.focus) localStorage.setItem('kura.focus', JSON.stringify(state.focus)); else localStorage.removeItem('kura.focus'); } catch (e) {} }
+async function holdWake(on) {
+  try {
+    if (on && !wakeLock && 'wakeLock' in navigator && document.visibilityState === 'visible') {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', () => { wakeLock = null; });
+    } else if (!on && wakeLock) { await wakeLock.release(); wakeLock = null; }
+  } catch (e) { wakeLock = null; }
+}
+function startFocus(itemId, mins = 25, brk = 5) {
+  const it = itemId ? byId(itemId) : null;
+  state.focus = { itemId: it ? it.id : null, title: it ? rowText(it).split('\n')[0] : 'Free focus', phase: 'focus', dur: mins * 60000, dur0: mins * 60000, brk: brk * 60000, endsAt: Date.now() + mins * 60000, paused: false, left: 0, round: 1 };
+  saveFocus();
+  holdWake(true);
+  runFocusTimer();
+  play('tick');
+  buzz(20);
+  openFocusView();
+}
+function runFocusTimer() {
+  clearInterval(focusTimer);
+  focusTimer = setInterval(focusTick, 1000);
+  focusTick();
+}
+async function focusPhaseEnd() {
+  const f = state.focus;
+  if (!f) return;
+  if (f.phase === 'focus') {
+    const mins = Math.round(f.dur / 60000);
+    Object.assign(f, { phase: 'break', endsAt: Date.now() + f.brk, dur: f.brk, paused: false });
+    saveFocus();
+    toast(`Focus done · ${mins} min logged · take a ${Math.round(f.brk / 60000)} min break`);
+    holdWake(false);
+    logFocus(f.itemId, mins);
+  } else if (f.phase === 'break') {
+    Object.assign(f, { phase: 'over', paused: false });
+    toast('Break over');
+  }
+  saveFocus();
+  play('chime');
+  buzz([180, 90, 180]);
+  if (state.sheet && state.sheet.kind === 'focus') drawFocusView();
+}
+function focusTick() {
+  const f = state.focus;
+  const pill = document.getElementById('focus-pill');
+  document.body.classList.toggle('focusing', !!f);
+  if (!f) { clearInterval(focusTimer); focusTimer = null; if (pill) pill.hidden = true; return; }
+  if (!f.paused && f.phase !== 'over' && Date.now() >= f.endsAt) { focusPhaseEnd(); return; }
+  const label = f.phase === 'over' ? 'BREAK OVER' : (f.phase === 'break' ? 'BREAK ' : '') + fmtClock(focusLeft()) + (f.paused ? ' ❚❚' : '');
+  if (pill) {
+    pill.hidden = !!(state.sheet && state.sheet.kind === 'focus');
+    pill.replaceChildren(...[icon(f.phase === 'focus' ? 'timer' : 'cal', 2), h('b', { text: label }), f.phase === 'focus' ? h('span', { text: f.title }) : null].filter(Boolean));
+    pill.dataset.phase = f.phase;
+  }
+  const t = document.getElementById('focus-time');
+  if (t) {
+    t.textContent = f.phase === 'over' ? '00:00' : fmtClock(focusLeft());
+    const bar = document.getElementById('focus-bar');
+    if (bar) bar.style.width = (f.phase === 'over' ? 100 : Math.round((1 - focusLeft() / f.dur) * 100)) + '%';
+  }
+}
+async function stopFocus(logIt) {
+  const f = state.focus;
+  if (!f) return;
+  if (logIt && f.phase === 'focus') {
+    const spent = Math.floor((f.dur - focusLeft()) / 60000);
+    if (spent >= 1) await logFocus(f.itemId, spent);
+  }
+  state.focus = null;
+  saveFocus();
+  holdWake(false);
+  focusTick();
+}
+async function logFocus(itemId, minutes) {
+  const m = Math.round(minutes);
+  if (m < 1) return;
+  const it = itemId ? byId(itemId) : null;
+  state.focusSessions = [...(state.focusSessions || []), { d: TODAY, t: Date.now(), m, item: it ? it.id : null, proj: it ? it.proj || null : null }].slice(-3000);
+  if (store.kvSet) await store.kvSet('focusSessions', state.focusSessions).catch(() => {});
+  if (it) await patch(it.id, { focusMin: (it.focusMin || 0) + m });
+  checkTrophies();
+}
+function openFocusView() { state.sheet = { kind: 'focus' }; drawFocusView(); focusTick(); }
+function drawFocusView() {
+  const s = state.sheet, f = state.focus;
+  if (!s || s.kind !== 'focus') return;
+  if (!f) { openFocusPicker(); return; }
+  const it = f.itemId ? byId(f.itemId) : null;
+  const phaseName = f.phase === 'focus' ? `FOCUS · ROUND ${f.round}` : f.phase === 'break' ? 'BREAK' : 'BREAK OVER';
+  const body = h('div', { class: 'sheet-body focus-body' },
+    h('span', { class: 'lbl', text: phaseName }),
+    htmlEl('div', 'focus-inv', INV_SVG),
+    h('div', { class: 'focus-time', id: 'focus-time', text: fmtClock(focusLeft()) }),
+    h('span', { class: 'pj-bar big' }, h('i', { id: 'focus-bar', style: 'width:0%' })),
+    h('p', { class: 'focus-task', text: f.title }),
+    it && it.focusMin ? h('span', { class: 'lbl', text: `${fmtMin(it.focusMin)} focused on this so far` }) : null,
+    f.phase === 'focus' ? h('p', { class: 'muted', text: 'The screen stays on while Kura is open. If you leave the app, the timer keeps counting and catches up when you come back.' }) : null);
+  const foot = h('div', { class: 'sheet-foot' });
+  if (f.phase === 'over') {
+    foot.append(h('button', { class: 'btn', type: 'button', onclick: () => { stopFocus(false); closeSheet(); } }, 'Finish'),
+      h('span', { class: 'grow' }),
+      h('button', { class: 'btn primary', id: 'focus-next', type: 'button', onclick: () => {
+        Object.assign(f, { phase: 'focus', dur: f.dur0 || 25 * 60000, endsAt: Date.now() + (f.dur0 || 25 * 60000), round: f.round + 1, paused: false });
+        saveFocus(); holdWake(true); play('tick'); drawFocusView(); focusTick();
+      } }, 'Next round'));
+  } else {
+    foot.append(
+      h('button', { class: 'btn danger', id: 'focus-stop', type: 'button', onclick: async () => { await stopFocus(true); closeSheet(); toast('Focus stopped'); } }, 'Stop'),
+      h('button', { class: 'btn', id: 'focus-pause', type: 'button', onclick: () => {
+        if (f.paused) { f.endsAt = Date.now() + f.left; f.paused = false; if (f.phase === 'focus') holdWake(true); }
+        else { f.left = focusLeft(); f.paused = true; }
+        saveFocus(); drawFocusView(); focusTick();
+      } }, f.paused ? 'Resume' : 'Pause'),
+      h('button', { class: 'btn', type: 'button', onclick: () => { if (f.paused) f.left += 300000; else f.endsAt += 300000; f.dur += 300000; saveFocus(); focusTick(); } }, '+5 min'),
+      h('span', { class: 'grow' }),
+      f.phase === 'break'
+        ? h('button', { class: 'btn primary', type: 'button', onclick: () => { f.endsAt = Date.now(); f.paused = false; focusTick(); } }, 'Skip break')
+        : it && !it.done ? h('button', { class: 'btn primary', id: 'focus-done', type: 'button', onclick: async () => { await stopFocus(true); closeSheet(); await toggleDone(it.id); } }, 'Task done') : null);
+  }
+  showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Focus' }, head('FOCUS', f.phase === 'focus' ? `${Math.round(f.dur / 60000)} min` : ''), body, foot));
+  if (!f.dur0 && f.phase === 'focus') { f.dur0 = f.dur; saveFocus(); }
+}
+function openFocusPicker() {
+  state.sheet = { kind: 'focuspick', preset: 0 };
+  drawFocusPicker();
+}
+function drawFocusPicker() {
+  const s = state.sheet;
+  if (!s || s.kind !== 'focuspick') return;
+  const cands = state.items.filter(i => !i.done && !i.example && (isNow(i) || i.bucket === 'make')).sort(taskOrder).slice(0, 12);
+  const [m, b] = FOCUS_PRESETS[s.preset];
+  const body = h('div', { class: 'sheet-body' },
+    h('span', { class: 'lbl', text: 'Length' }),
+    h('div', { class: 'seg nb-tabs', role: 'group', 'aria-label': 'Focus length' }, FOCUS_PRESETS.map(([a, c], i) => h('button', {
+      type: 'button', 'aria-pressed': String(s.preset === i), onclick: () => { s.preset = i; drawFocusPicker(); },
+    }, `${a} / ${c}`))),
+    h('span', { class: 'lbl', text: 'What are you working on?' }),
+    cands.length ? cands.map(it => h('button', { class: 'nb-row', type: 'button', 'data-id': it.id, onclick: () => startFocus(it.id, m, b) },
+      h('span', { class: 'x', text: rowText(it) }), h('span', { class: 'meta' }, whenMeta(it), projOf(it) ? h('span', { class: 'tg', text: '#' + projOf(it).name }) : null, it.focusMin ? h('span', { text: fmtMin(it.focusMin) }) : null)))
+      : h('p', { class: 'muted', text: 'No open tasks. You can still focus without one.' }),
+    h('button', { class: 'btn', id: 'focus-free', type: 'button', onclick: () => startFocus(null, m, b) }, `Just focus for ${m} min`));
+  showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Start focus' }, head('FOCUS', `${m} min + ${b} min break`), body));
+}
+
+/* ---------- streaks + trophies ---------- */
+let doneLogT = null;
+function syncDoneLog() {
+  const log = state.doneLog || (state.doneLog = {});
+  let changed = false;
+  const open = new Set();
+  for (const it of state.items) {
+    if (it.example) continue;
+    if (it.done && it.doneAt) {
+      const d = dayStr(new Date(it.doneAt));
+      const arr = log[d] || (log[d] = []);
+      if (!arr.includes(it.id)) { arr.push(it.id); changed = true; }
+    } else open.add(it.id);
+  }
+  for (const d of Object.keys(log)) {
+    const keep = log[d].filter(id => !open.has(id));
+    if (keep.length !== log[d].length) { changed = true; if (keep.length) log[d] = keep; else delete log[d]; }
+  }
+  if (changed) {
+    clearTimeout(doneLogT);
+    doneLogT = setTimeout(() => { if (store.kvSet) store.kvSet('doneLog', state.doneLog).catch(() => {}); drawStreak(); checkTrophies(); }, 400);
+  }
+}
+const doneOn = d => ((state.doneLog || {})[d] || []).length;
+function streakNow() {
+  let d = doneOn(TODAY) ? TODAY : addDays(TODAY, -1), n = 0;
+  while (doneOn(d)) { n++; d = addDays(d, -1); }
+  return n;
+}
+function streakBest() {
+  const days = Object.keys(state.doneLog || {}).filter(d => doneOn(d)).sort();
+  let best = 0, run = 0, prev = null;
+  for (const d of days) { run = prev && addDays(prev, 1) === d ? run + 1 : 1; best = Math.max(best, run); prev = d; }
+  return best;
+}
+const totalDone = () => Object.values(state.doneLog || {}).reduce((a, l) => a + l.length, 0);
+const focusTotal = () => (state.focusSessions || []).reduce((a, s) => a + (s.m || 0), 0);
+function drawStreak() {
+  const el = document.getElementById('streak');
+  if (!el) return;
+  const n = streakNow();
+  el.textContent = 'STREAK ' + pad2(n);
+  el.classList.toggle('hot', n >= 3);
+}
+const TROPHIES = [
+  { id: 'first_shot', name: 'First shot', mark: '▲', desc: 'Finish your first task', goal: 1, val: () => totalDone() },
+  { id: 'sharpshooter', name: 'Sharpshooter', mark: '◆', desc: 'Finish 25 tasks', goal: 25, val: () => totalDone() },
+  { id: 'invader_hunter', name: 'Invader hunter', mark: '', desc: 'Finish 100 tasks', goal: 100, val: () => totalDone() },
+  { id: 'on_a_roll', name: 'On a roll', mark: '3', desc: 'A 3-day streak', goal: 3, val: () => streakBest() },
+  { id: 'week_warrior', name: 'Week warrior', mark: '7', desc: 'A 7-day streak', goal: 7, val: () => streakBest() },
+  { id: 'unstoppable', name: 'Unstoppable', mark: '30', desc: 'A 30-day streak', goal: 30, val: () => streakBest() },
+  { id: 'clean_sweep', name: 'Clean sweep', mark: '✓', desc: 'Clear a TODAY list of 3 or more tasks', goal: 1, val: () => (state.flags || {}).sweep ? 1 : 0 },
+  { id: 'brain_camera', name: 'Brain Camera', mark: '◉', desc: 'Bring in a page from your paper notebook', goal: 1, val: () => state.items.filter(i => i.source === 'scan' && !i.example).length ? 1 : 0 },
+  { id: 'scholar', name: 'Scholar', mark: '§', desc: 'Write 10 notebook notes', goal: 10, val: () => (state.notes || []).length },
+  { id: 'lexicon', name: 'Lexicon', mark: 'Ω', desc: 'Collect 25 glossary terms', goal: 25, val: () => (state.glossary || []).length },
+  { id: 'deep_work', name: 'Deep work', mark: '▶', desc: 'Finish a focus session', goal: 1, val: () => (state.focusSessions || []).length },
+  { id: 'flow_state', name: 'Flow state', mark: '∞', desc: '10 hours of focus', goal: 600, val: () => focusTotal() },
+  { id: 'reflective', name: 'Reflective', mark: '↺', desc: 'Finish a weekly review', goal: 1, val: () => (state.lastReview ? 1 : 0) },
+  { id: 'shipped', name: 'Shipped', mark: '⚑', desc: 'Finish every task in a project with 5 or more', goal: 1, val: () => (state.projects || []).some(p => { const st = projStats(p); return st.tasks.length >= 5 && !st.open.length; }) ? 1 : 0 },
+  { id: 'night_owl', name: 'Night owl', mark: '☾', desc: 'Finish a task between midnight and 4 am', goal: 1, val: () => (state.flags || {}).owl ? 1 : 0 },
+  { id: 'early_bird', name: 'Early bird', mark: '☀', desc: 'Finish a task before 7 am', goal: 1, val: () => (state.flags || {}).bird ? 1 : 0 },
+];
+let trophyT = null;
+function checkTrophies(silent) {
+  clearTimeout(trophyT);
+  trophyT = setTimeout(async () => {
+    if (!state.trophies) return; // not loaded yet
+    // event-style trophies
+    const flags = state.flags || (state.flags = {});
+    const todayList = state.items.filter(inToday);
+    let fchanged = false;
+    if (!flags.sweep && todayList.length >= 3 && todayList.every(i => i.done)) { flags.sweep = 1; fchanged = true; }
+    for (const it of state.items) {
+      if (!it.done || !it.doneAt || it.example) continue;
+      const hr = new Date(it.doneAt).getHours();
+      if (hr < 4 && !flags.owl) { flags.owl = 1; fchanged = true; }
+      if (hr >= 4 && hr < 7 && !flags.bird) { flags.bird = 1; fchanged = true; }
+    }
+    if (fchanged && store.kvSet) await store.kvSet('flags', flags).catch(() => {});
+    const fresh = TROPHIES.filter(t => !state.trophies[t.id] && t.val() >= t.goal);
+    if (!fresh.length) return;
+    for (const t of fresh) state.trophies[t.id] = Date.now();
+    if (store.kvSet) await store.kvSet('trophies', state.trophies).catch(() => {});
+    if (silent || Date.now() < (state.trophyQuietUntil || 0)) return; // first run: count history quietly
+    play('trophy');
+    buzz([30, 60, 30, 60, 80]);
+    toast(fresh.length === 1 ? `★ Trophy unlocked: ${fresh[0].name}` : `★ ${fresh.length} trophies unlocked`, { label: 'See', fn: () => openTrophies() });
+  }, silent ? 0 : 600);
+}
+function openTrophies() { state.sheet = { kind: 'trophies' }; drawTrophies(); }
+function drawTrophies() {
+  const s = state.sheet;
+  if (!s || s.kind !== 'trophies') return;
+  const won = TROPHIES.filter(t => state.trophies && state.trophies[t.id]).length;
+  const body = h('div', { class: 'sheet-body' },
+    h('p', { class: 'muted', text: `${won} of ${TROPHIES.length} unlocked · current streak ${streakNow()} day${streakNow() === 1 ? '' : 's'} · best ${streakBest()}` }),
+    h('div', { class: 'trophy-grid' }, TROPHIES.map(t => {
+      const at = state.trophies && state.trophies[t.id];
+      const v = Math.min(t.val(), t.goal);
+      return h('div', { class: 'trophy' + (at ? ' won' : ''), 'data-id': t.id },
+        t.id === 'invader_hunter' ? htmlEl('span', 'tm', INV_SVG) : h('span', { class: 'tm', 'aria-hidden': 'true', text: t.mark }),
+        h('b', { text: t.name }),
+        h('span', { class: 'muted', text: t.desc }),
+        h('span', { class: 'lbl', text: at ? 'Unlocked ' + new Date(at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' }) : t.goal > 1 ? `${t.id === 'flow_state' ? Math.floor(v / 60) + ' / 10 h' : v + ' / ' + t.goal}` : 'Locked' }));
+    })));
+  showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Trophies' }, head('TROPHIES', `${won}/${TROPHIES.length}`), body));
+}
+
+/* ---------- stats ---------- */
+function openStats() { state.sheet = { kind: 'stats', pick: null }; drawStats(); }
+function heatLevel(n) { return n <= 0 ? 0 : n === 1 ? 1 : n <= 3 ? 2 : n <= 5 ? 3 : 4; }
+function focusOn(d) { return (state.focusSessions || []).filter(x => x.d === d).reduce((a, x) => a + x.m, 0); }
+function dayCaption(d) {
+  const n = doneOn(d), fm = focusOn(d);
+  return `${parseDay(d).toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' })} · ${n} task${n === 1 ? '' : 's'} done${fm ? ' · ' + fmtMin(fm) + ' focus' : ''}`;
+}
+function heatmapSvg(onPick) {
+  const weeks = 16, cell = 13, gap = 2, stp = cell + gap, left = 26, top = 16;
+  const start = addDays(mondayOf(TODAY), -7 * (weeks - 1));
+  const W = left + weeks * stp, H = top + 7 * stp;
+  const NS = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.setAttribute('class', 'heat');
+  svg.setAttribute('role', 'img');
+  svg.setAttribute('aria-label', 'Tasks done per day over the last 16 weeks');
+  const txt = (x, y, s, anchor) => { const t = document.createElementNS(NS, 'text'); t.setAttribute('x', x); t.setAttribute('y', y); if (anchor) t.setAttribute('text-anchor', anchor); t.textContent = s; svg.append(t); };
+  ['Mon', '', 'Wed', '', 'Fri', '', ''].forEach((l, i) => l && txt(0, top + i * stp + cell - 3, l));
+  let lastMon = -1;
+  for (let w = 0; w < weeks; w++) {
+    const wd = addDays(start, w * 7);
+    const mo = parseDay(wd).getMonth();
+    if (mo !== lastMon) { if (w > 0 || parseDay(wd).getDate() <= 7) txt(left + w * stp, 10, parseDay(wd).toLocaleDateString('en-AU', { month: 'short' })); lastMon = mo; }
+    for (let d = 0; d < 7; d++) {
+      const ds = addDays(wd, d);
+      if (ds > TODAY) continue;
+      const n = doneOn(ds);
+      const r = document.createElementNS(NS, 'rect');
+      r.setAttribute('x', left + w * stp);
+      r.setAttribute('y', top + d * stp);
+      r.setAttribute('width', cell);
+      r.setAttribute('height', cell);
+      r.setAttribute('rx', 3);
+      r.setAttribute('class', 'lv' + heatLevel(n) + (ds === TODAY ? ' today' : ''));
+      r.dataset.d = ds;
+      const tt = document.createElementNS(NS, 'title');
+      tt.textContent = dayCaption(ds);
+      r.append(tt);
+      svg.append(r);
+    }
+  }
+  const pick = e => { const r = e.target.closest && e.target.closest('rect'); if (r && r.dataset.d) onPick(r.dataset.d); };
+  svg.addEventListener('pointerover', pick);
+  svg.addEventListener('click', pick);
+  return svg;
+}
+function drawStats() {
+  const s = state.sheet;
+  if (!s || s.kind !== 'stats') return;
+  const wk = mondayOf(TODAY);
+  let doneWeek = 0, focusWeek = 0;
+  for (let i = 0; i < 7; i++) { const d = addDays(wk, i); doneWeek += doneOn(d); focusWeek += focusOn(d); }
+  const since = addDays(TODAY, -29);
+  const recentIds = new Set(Object.entries(state.doneLog || {}).filter(([d]) => d >= since).flatMap(([, l]) => l));
+  const recent = state.items.filter(i => recentIds.has(i.id));
+  const byCat = CATS.map(c => [c, recent.filter(i => catOf(i) === c).length]);
+  const catTotal = byCat.reduce((a, [, n]) => a + n, 0);
+  const projRows = (state.projects || []).map(p => {
+    const done = recent.filter(i => i.proj === p.id).length;
+    const fm = (state.focusSessions || []).filter(x => x.proj === p.id && x.d >= since).reduce((a, x) => a + x.m, 0);
+    return { p, done, fm };
+  }).filter(r => r.done || r.fm).sort((a, b) => b.done - a.done || b.fm - a.fm).slice(0, 6);
+  const maxP = Math.max(1, ...projRows.map(r => r.done));
+  const cap = h('p', { class: 'muted heat-cap', id: 'heat-cap', text: s.pick ? dayCaption(s.pick) : 'Tap a day to see what you did.' });
+  const heat = heatmapSvg(d => { s.pick = d; cap.textContent = dayCaption(d); });
+  const tile = (v, l) => h('div', {}, h('b', { text: v }), h('span', { class: 'lbl', text: l }));
+  const last14 = Array.from({ length: 14 }, (_, i) => addDays(TODAY, -i));
+  const body = h('div', { class: 'sheet-body viz' },
+    h('div', { class: 'rv-stats' }, tile(String(streakNow()), 'day streak'), tile(String(streakBest()), 'best streak'), tile(String(doneWeek), 'done this week'), tile(focusWeek ? fmtMin(focusWeek) : '0', 'focus this week')),
+    h('span', { class: 'lbl', text: 'Tasks done · last 16 weeks' }),
+    heat,
+    h('div', { class: 'heat-legend', 'aria-hidden': 'true' }, h('span', { class: 'lbl', text: 'Less' }), [0, 1, 2, 3, 4].map(l => h('i', { class: 'sw lv' + l })), h('span', { class: 'lbl', text: 'More' })),
+    cap,
+    h('span', { class: 'lbl', text: `By category · last 30 days · ${catTotal} done` }),
+    catTotal ? h('div', { class: 'catbar', role: 'img', 'aria-label': byCat.map(([c, n]) => `${CAT_NAME[c]} ${n}`).join(', ') },
+      byCat.filter(([, n]) => n).map(([c, n]) => h('i', { 'data-cat': c, style: `flex:${n}`, title: `${CAT_NAME[c]}: ${n}` }))) : h('p', { class: 'muted', text: 'Nothing finished in the last 30 days yet.' }),
+    catTotal ? h('div', { class: 'rv-cats' }, byCat.map(([c, n]) => h('span', { class: 'nb-chip', 'data-cat': c }, h('span', { class: 'cdot' }), ` ${CAT_NAME[c]} ${n}`))) : null,
+    projRows.length ? h('span', { class: 'lbl', text: 'Projects · last 30 days' }) : null,
+    projRows.length ? h('div', { class: 'pbars' }, projRows.map(r => h('div', { class: 'pbar' },
+      h('span', { class: 'pn', text: '#' + r.p.name }),
+      h('span', { class: 'pt' }, h('i', { style: `width:${Math.max(2, Math.round((r.done / maxP) * 100))}%` })),
+      h('span', { class: 'pv', text: `${r.done} done${r.fm ? ' · ' + fmtMin(r.fm) : ''}` })))) : null,
+    h('div', { class: 'rv-stats' }, tile(String(totalDone()), 'tasks done ever'), tile(fmtMin(focusTotal()), 'focus ever'), tile(String((state.notes || []).length), 'notebook notes'), tile(String((state.glossary || []).length), 'glossary terms')),
+    h('details', {}, h('summary', { class: 'lbl', text: 'Last 14 days as a table' }),
+      h('table', { class: 'stat-table' }, h('thead', {}, h('tr', {}, h('th', { text: 'Day' }), h('th', { text: 'Done' }), h('th', { text: 'Focus' }))),
+        h('tbody', {}, last14.map(d => h('tr', {}, h('td', { text: parseDay(d).toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' }) }), h('td', { text: String(doneOn(d)) }), h('td', { text: focusOn(d) ? fmtMin(focusOn(d)) : '–' })))))));
+  showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Stats' }, head('STATS', ''), body));
+}
+
+/* ---------- lab tools ---------- */
+const UNITS = {
+  conc: [['M', 1], ['mM', 1e-3], ['µM', 1e-6], ['nM', 1e-9], ['pM', 1e-12]],
+  vol: [['L', 1], ['mL', 1e-3], ['µL', 1e-6], ['nL', 1e-9]],
+  mass: [['kg', 1e3], ['g', 1], ['mg', 1e-3], ['µg', 1e-6], ['ng', 1e-9]],
+  ohm: [['GΩ', 1e9], ['MΩ', 1e6], ['kΩ', 1e3], ['Ω', 1], ['mΩ', 1e-3]],
+  farad: [['F', 1], ['mF', 1e-3], ['µF', 1e-6], ['nF', 1e-9], ['pF', 1e-12]],
+  hz: [['GHz', 1e9], ['MHz', 1e6], ['kHz', 1e3], ['Hz', 1], ['mHz', 1e-3]],
+  time: [['s', 1], ['ms', 1e-3], ['µs', 1e-6], ['ns', 1e-9]],
+  volt: [['kV', 1e3], ['V', 1], ['mV', 1e-3], ['µV', 1e-6]],
+  amp: [['A', 1], ['mA', 1e-3], ['µA', 1e-6], ['nA', 1e-9]],
+  metre: [['km', 1e3], ['m', 1], ['cm', 1e-2], ['mm', 1e-3], ['µm', 1e-6], ['nm', 1e-9]],
+};
+const UNIT_KINDS = [['ohm', 'Resistance'], ['farad', 'Capacitance'], ['hz', 'Frequency'], ['volt', 'Voltage'], ['amp', 'Current'], ['time', 'Time'], ['metre', 'Length'], ['vol', 'Volume'], ['mass', 'Mass'], ['conc', 'Concentration']];
+const DEF_UNIT = { conc: 'mM', vol: 'mL', mass: 'mg', ohm: 'kΩ', farad: 'nF', hz: 'kHz', time: 'ms', volt: 'V', amp: 'mA', metre: 'mm' };
+const numIn = v => { const s = String(v == null ? '' : v).trim().replace(/\s/g, '').replace(',', '.'); if (!s) return null; const x = Number(s); return isFinite(x) ? x : null; };
+function fmtNum(x, sig = 4) {
+  if (x == null || !isFinite(x)) return '—';
+  if (x === 0) return '0';
+  const a = Math.abs(x);
+  if (a >= 1e-3 && a < 1e6) return String(+x.toPrecision(sig));
+  const [m, e] = x.toExponential(sig - 1).split('e');
+  return `${+m}×10^${+e}`;
+}
+function fmtUnit(x, kind) {
+  if (x == null || !isFinite(x)) return '—';
+  const us = UNITS[kind].slice().sort((a, b) => b[1] - a[1]);
+  for (const [u, f] of us) if (Math.abs(x) >= f * 0.99995) return fmtNum(x / f) + ' ' + u;
+  const [u, f] = us[us.length - 1];
+  return fmtNum(x / f) + ' ' + u;
+}
+const toolVals = {};
+const TOOLS = [
+  { id: 'dil', name: 'Dilution', hint: 'C1·V1 = C2·V2. Fill in three boxes; Kura solves the blank one.', fields: [['c1', 'Stock conc. C1', 'conc'], ['v1', 'Stock volume V1', 'vol'], ['c2', 'Final conc. C2', 'conc'], ['v2', 'Final volume V2', 'vol']],
+    solve: v => {
+      let { c1, v1, c2, v2 } = v;
+      const blanks = [c1, v1, c2, v2].filter(x => x == null).length;
+      if (blanks !== 1) return { msg: 'Fill in exactly three of the four boxes.' };
+      if (c1 == null) c1 = (c2 * v2) / v1; else if (v1 == null) v1 = (c2 * v2) / c1; else if (c2 == null) c2 = (c1 * v1) / v2; else v2 = (c1 * v1) / c2;
+      const lines = [`C1 ${fmtUnit(c1, 'conc')}`, `V1 ${fmtUnit(v1, 'vol')}`, `C2 ${fmtUnit(c2, 'conc')}`, `V2 ${fmtUnit(v2, 'vol')}`];
+      const warn = c2 > c1 ? 'C2 is higher than C1, so this is not a dilution. Check the units.' : v2 < v1 ? 'V2 is smaller than V1. Check the units.' : '';
+      const main = `Take ${fmtUnit(v1, 'vol')} of the ${fmtUnit(c1, 'conc')} stock and add ${fmtUnit(v2 - v1, 'vol')} diluent → ${fmtUnit(v2, 'vol')} at ${fmtUnit(c2, 'conc')}`;
+      return { main, lines, warn, note: `Dilution: ${main}` };
+    } },
+  { id: 'mol', name: 'Molarity', hint: 'mass = concentration × volume × molar mass. Leave one of the first three blank.', fields: [['mass', 'Mass', 'mass'], ['conc', 'Concentration', 'conc'], ['vol', 'Volume', 'vol'], ['mw', 'Molar mass (g/mol)', null]],
+    solve: v => {
+      let { mass, conc, vol, mw } = v;
+      if (mw == null || mw <= 0) return { msg: 'Enter the molar mass (g/mol), e.g. 58.44 for NaCl.' };
+      const blanks = [mass, conc, vol].filter(x => x == null).length;
+      if (blanks !== 1) return { msg: 'Leave exactly one of mass, concentration and volume blank.' };
+      if (mass == null) mass = conc * vol * mw; else if (conc == null) conc = mass / (vol * mw); else vol = mass / (conc * mw);
+      const main = `${fmtUnit(mass, 'mass')} in ${fmtUnit(vol, 'vol')} → ${fmtUnit(conc, 'conc')} (MW ${fmtNum(mw)} g/mol)`;
+      return { main, lines: [`${fmtNum(mass / mw)} mol`, `${fmtNum((mass * 1000) / (vol * 1000))} mg/mL`], note: `Molarity: ${main}` };
+    } },
+  { id: 'ser', name: 'Serial', hint: 'A dilution series: start concentration, dilution factor per step, number of tubes. Add a tube volume to get pipetting amounts.', fields: [['c0', 'Start conc.', 'conc'], ['f', 'Factor (e.g. 10)', null], ['n', 'Tubes (e.g. 6)', null], ['vt', 'Volume per tube (optional)', 'vol']],
+    solve: v => {
+      const { c0, f, n, vt } = v;
+      if (c0 == null || f == null || f <= 1) return { msg: 'Enter a start concentration and a factor above 1.' };
+      const k = Math.min(20, Math.max(1, Math.round(n || 6)));
+      const lines = Array.from({ length: k }, (_, i) => `Tube ${i + 1}: ${fmtUnit(c0 / f ** (i + 1), 'conc')}`);
+      const main = vt ? `Move ${fmtUnit(vt / f, 'vol')} into ${fmtUnit(vt - vt / f, 'vol')} diluent each step (1:${fmtNum(f)})` : `1:${fmtNum(f)} × ${k} from ${fmtUnit(c0, 'conc')}`;
+      return { main, lines, note: `Serial dilution 1:${fmtNum(f)} from ${fmtUnit(c0, 'conc')}: ${lines.map(l => l.replace(/^Tube \d+: /, '')).join(', ')}${vt ? '. ' + main : ''}` };
+    } },
+  { id: 'unit', name: 'Units', hint: 'Convert between SI prefixes.', fields: null,
+    solve: v => {
+      const kind = toolVals.unit.kind || 'ohm';
+      const x = v.x;
+      if (x == null) return { msg: 'Type a value.' };
+      const lines = UNITS[kind].filter(([, f]) => { const a = Math.abs(x / f); return a === 0 || (a >= 1e-4 && a < 1e7); }).map(([u, f]) => `${fmtNum(x / f, 6)} ${u}`);
+      return { main: fmtUnit(x, kind), lines, note: lines.join(' = ') };
+    } },
+  { id: 'pct', name: '% change', hint: 'How much did it change from A to B?', fields: [['a', 'Before (A)', null], ['b', 'After (B)', null]],
+    solve: v => {
+      const { a, b } = v;
+      if (a == null || b == null) return { msg: 'Enter both values.' };
+      if (a === 0) return { msg: "A is zero, so there's no percentage change." };
+      const pc = ((b - a) / Math.abs(a)) * 100;
+      const main = `${pc > 0 ? '+' : ''}${fmtNum(pc, 3)}% (${fmtNum(b / a, 3)}×)`;
+      return { main, lines: [`Difference ${fmtNum(b - a)}`, `Ratio B/A ${fmtNum(b / a)}`], note: `Change ${fmtNum(a)} → ${fmtNum(b)}: ${main}` };
+    } },
+  { id: 'rc', name: 'RC / Z', hint: 'Time constant, cutoff frequency and impedance of a resistor and capacitor. Frequency is optional.', fields: [['r', 'Resistance R', 'ohm'], ['c', 'Capacitance C', 'farad'], ['f', 'Frequency f (optional)', 'hz']],
+    solve: v => {
+      const { r, c, f } = v;
+      if (r == null || c == null || r <= 0 || c <= 0) return { msg: 'Enter R and C.' };
+      const tau = r * c, fc = 1 / (2 * Math.PI * r * c);
+      const lines = [`τ = RC = ${fmtUnit(tau, 'time')}`, `f꜀ = 1/(2πRC) = ${fmtUnit(fc, 'hz')}`];
+      let note = `RC: R ${fmtUnit(r, 'ohm')}, C ${fmtUnit(c, 'farad')} → τ ${fmtUnit(tau, 'time')}, fc ${fmtUnit(fc, 'hz')}`;
+      if (f != null && f > 0) {
+        const xc = 1 / (2 * Math.PI * f * c), zs = Math.hypot(r, xc), zp = (r * xc) / Math.hypot(r, xc), ph = (-Math.atan(xc / r) * 180) / Math.PI;
+        lines.push(`|Zc| at ${fmtUnit(f, 'hz')} = ${fmtUnit(xc, 'ohm')}`, `Series |Z| = ${fmtUnit(zs, 'ohm')}, phase ${fmtNum(ph, 3)}°`, `Parallel |Z| = ${fmtUnit(zp, 'ohm')}`);
+        note += `; at ${fmtUnit(f, 'hz')}: |Zc| ${fmtUnit(xc, 'ohm')}, series |Z| ${fmtUnit(zs, 'ohm')} (${fmtNum(ph, 3)}°)`;
+      }
+      return { main: `f꜀ = ${fmtUnit(fc, 'hz')}`, lines, note };
+    } },
+];
+function openTools(id) { state.sheet = { kind: 'tools', tool: id || (state.lastTool || 'dil') }; drawTools(); }
+function toolValues(tool) {
+  const tv = toolVals[tool.id] || (toolVals[tool.id] = {});
+  const out = {};
+  const fields = tool.id === 'unit' ? [['x', 'Value', tv.kind || 'ohm']] : tool.fields;
+  for (const [k, , kind] of fields) {
+    const f = tv[k] || {};
+    const x = numIn(f.val);
+    const u = kind ? UNITS[kind].find(([n]) => n === (f.unit || DEF_UNIT[kind])) : null;
+    out[k] = x == null ? null : x * (u ? u[1] : 1);
+  }
+  return out;
+}
+function drawToolOut(tool) {
+  const box = document.getElementById('calc-out');
+  if (!box) return;
+  const r = tool.solve(toolValues(tool));
+  state.sheet.result = r.note ? r : null;
+  box.replaceChildren(...[
+    r.msg ? h('p', { class: 'muted', text: r.msg }) : h('p', { class: 'calc-main', id: 'calc-main', text: r.main }),
+    r.warn ? h('p', { class: 'err', text: r.warn }) : null,
+    ...(r.lines || []).map(l => h('p', { class: 'calc-line', text: l }))].filter(Boolean));
+  const acts = document.getElementById('calc-acts');
+  if (acts) for (const b of acts.querySelectorAll('button')) b.disabled = !r.note;
+}
+function drawTools() {
+  const s = state.sheet;
+  if (!s || s.kind !== 'tools') return;
+  const tool = TOOLS.find(t => t.id === s.tool) || TOOLS[0];
+  state.lastTool = tool.id;
+  const tv = toolVals[tool.id] || (toolVals[tool.id] = {});
+  const field = (k, label, kind) => {
+    const f = tv[k] || (tv[k] = { val: '', unit: kind ? DEF_UNIT[kind] : '' });
+    if (kind && !UNITS[kind].some(([n]) => n === f.unit)) f.unit = DEF_UNIT[kind];
+    const inp = h('input', { class: 'field-in calc-in', type: 'text', inputmode: 'decimal', id: `calc-${tool.id}-${k}`, 'aria-label': label, placeholder: '—', autocomplete: 'off' });
+    inp.value = f.val;
+    inp.addEventListener('input', () => { f.val = inp.value; drawToolOut(tool); });
+    let sel = null;
+    if (kind) {
+      sel = h('select', { class: 'field-in calc-u', 'aria-label': label + ' unit' }, UNITS[kind].map(([u]) => h('option', { value: u, text: u })));
+      sel.value = f.unit;
+      sel.addEventListener('change', () => { f.unit = sel.value; drawToolOut(tool); });
+    }
+    return h('label', { class: 'calc-f' }, h('span', { class: 'lbl', text: label }), h('span', { class: 'calc-row' }, inp, sel));
+  };
+  let fields;
+  if (tool.id === 'unit') {
+    const kind = tv.kind || (tv.kind = 'ohm');
+    const ks = h('select', { class: 'field-in', id: 'calc-kind', 'aria-label': 'Quantity' }, UNIT_KINDS.map(([k, n]) => h('option', { value: k, text: n })));
+    ks.value = kind;
+    ks.addEventListener('change', () => { tv.kind = ks.value; if (tv.x) tv.x.unit = DEF_UNIT[ks.value]; drawTools(); });
+    fields = [h('label', { class: 'calc-f' }, h('span', { class: 'lbl', text: 'Quantity' }), ks), field('x', 'Value', kind)];
+  } else fields = tool.fields.map(([k, l, kind]) => field(k, l, kind));
+  const body = h('div', { class: 'sheet-body' },
+    h('div', { class: 'nb-chips', role: 'group', 'aria-label': 'Tool' }, TOOLS.map(t => h('button', {
+      class: 'nb-chip tpl', type: 'button', 'data-tool': t.id, 'aria-pressed': String(t.id === tool.id), onclick: () => { s.tool = t.id; drawTools(); },
+    }, t.name))),
+    h('p', { class: 'muted', text: tool.hint }),
+    h('div', { class: 'calc-grid' }, fields),
+    h('div', { class: 'calc-out nb-ctx', id: 'calc-out', 'aria-live': 'polite' }),
+    h('button', { class: 'link-btn plain', type: 'button', onclick: () => { toolVals[tool.id] = tool.id === 'unit' ? { kind: tv.kind } : {}; drawTools(); } }, 'Clear'));
+  const foot = h('div', { class: 'sheet-foot', id: 'calc-acts' },
+    h('span', { class: 'grow' }),
+    h('button', { class: 'btn', type: 'button', onclick: async () => { const r = s.result; if (!r) return; try { await navigator.clipboard.writeText(r.note); toast('Copied'); } catch (e) { toast("Couldn't copy on this device."); } } }, 'Copy'),
+    h('button', { class: 'btn primary', id: 'calc-pad', type: 'button', onclick: () => {
+      const r = s.result;
+      if (!r) return;
+      els.input.value = (els.input.value.trim() ? els.input.value.trim() + '\n' : '') + r.note;
+      closeSheet();
+      els.input.focus();
+      drawWhen();
+      toast('Added to the pad. Press Enter to save it.');
+    } }, 'Add to pad'));
+  showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Lab tools' }, head('LAB TOOLS', tool.name), body, foot));
+  drawToolOut(tool);
+}
+
+/* ---------- plan my day ---------- */
+function planCandidates() {
+  const now = Date.now();
+  const nextActs = new Map((state.projects || []).filter(p => !p.archived).map(p => [(projStats(p).open[0] || {}).id, p]).filter(([id]) => id));
+  return state.items.filter(i => !i.done && !i.example && !isNow(i) && (i.bucket === 'make' || i.today) && (!i.today || i.today <= addDays(TODAY, 14)))
+    .map(i => {
+      let sc = 1;
+      const why = [];
+      if (i.today) {
+        const days = Math.round((parseDay(i.today) - parseDay(TODAY)) / 86400000);
+        sc += days <= 1 ? 5 : days <= 3 ? 3.5 : days <= 7 ? 1.5 : 0.5;
+        why.push('due ' + futureLabel(i.today));
+      }
+      if (knownTags(i).includes('imp')) { sc += 3; why.push('marked important'); }
+      if (knownTags(i).includes('fup')) { sc += 1; why.push('a follow-up'); }
+      const p = nextActs.get(i.id);
+      if (p) { sc += 2; why.push(`next action for #${p.name}`); }
+      const age = (now - (i.createdAt || now)) / 86400000;
+      sc += Math.min(2, age * 0.07);
+      if (age >= 7) why.push(`waiting ${Math.round(age)} days`);
+      if (i.focusMin) { sc += 1; why.push(`already started (${fmtMin(i.focusMin)})`); }
+      const st = stepsOf(i.text);
+      if (st.length && st.some(x => x.done)) { sc += 1; why.push(`${st.filter(x => x.done).length}/${st.length} steps done`); }
+      return { it: i, sc, why: why.join(' · ') || 'in MAKE' };
+    })
+    .sort((a, b) => b.sc - a.sc);
+}
+function openPlan() {
+  const cands = planCandidates();
+  const openToday = state.items.filter(i => inToday(i) && !i.done).length;
+  const want = Math.max(1, 3 - openToday);
+  const top = cands.slice(0, 5);
+  state.sheet = { kind: 'plan', picks: top.map((c, i) => ({ id: c.it.id, why: c.why, on: i < want })), ai: false, busy: false, note: '' };
+  drawPlan();
+}
+function drawPlan() {
+  const s = state.sheet;
+  if (!s || s.kind !== 'plan') return;
+  const inT = state.items.filter(i => inToday(i) && !i.done);
+  const overdue = inT.filter(i => i.today < TODAY).length;
+  const picks = s.picks.filter(p => byId(p.id) && !byId(p.id).done);
+  const n = picks.filter(p => p.on).length;
+  const body = h('div', { class: 'sheet-body' },
+    h('p', { class: 'muted', text: `TODAY has ${inT.length} open task${inT.length === 1 ? '' : 's'}${overdue ? ` (${overdue} carried over)` : ''}. Pick a few more; three good ones beat ten half-done.` }),
+    s.busy ? h('div', { class: 'status' }, h('span', { class: 'scanline' }), h('span', { text: 'Planning…' })) : null,
+    s.note ? h('p', { class: 'nb-sum', text: s.note }) : null,
+    h('span', { class: 'lbl', text: s.ai ? 'Suggested by AI from your open tasks' : 'Suggested from due dates, importance, projects and age' }),
+    picks.length ? picks.map(p => {
+      const it = byId(p.id);
+      const cb = h('input', { type: 'checkbox', 'aria-label': rowText(it) });
+      cb.checked = p.on;
+      cb.addEventListener('change', () => { p.on = cb.checked; drawPlan(); });
+      return h('label', { class: 'nb-pick plan-pick', 'data-id': it.id }, cb, h('span', {},
+        h('b', { text: rowText(it).split('\n')[0] }), h('br'), h('span', { class: 'muted', text: p.why })));
+    }) : h('p', { class: 'muted', text: 'Nothing waiting in MAKE. Add tasks with dates, or enjoy the quiet.' }));
+  const foot = h('div', { class: 'sheet-foot' },
+    state.sample ? h('button', { class: 'btn', id: 'plan-ai', type: 'button', disabled: s.busy, onclick: () => planWithAi() }, s.ai ? 'Ask AI again' : 'Ask AI') : null,
+    h('span', { class: 'grow' }),
+    h('button', { class: 'btn primary', id: 'plan-go', type: 'button', disabled: !n, onclick: async () => {
+      const chosen = picks.filter(p => p.on).map(p => byId(p.id)).filter(Boolean);
+      const before = chosen.map(it => [it.id, it.today || null]);
+      for (const it of chosen) await patch(it.id, { today: TODAY, done: false, doneAt: null, pending: false, gtaskGone: false });
+      closeSheet();
+      if (innerWidth < 720) setTab('today');
+      play('swipe');
+      toast(`${chosen.length} added to TODAY`, { label: 'Undo', fn: async () => { for (const [id, t] of before) await patch(id, { today: t }); } });
+    } }, n ? `Add ${n} to TODAY` : 'Pick some'));
+  showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Plan my day' }, head('PLAN MY DAY', parseDay(TODAY).toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'short' })), body, foot));
+}
+async function planWithAi() {
+  const s = state.sheet;
+  if (!s || s.kind !== 'plan' || !state.sample) return;
+  const cands = planCandidates().slice(0, 25);
+  if (!cands.length) { toast('No open tasks to plan.'); return; }
+  const inT = state.items.filter(i => inToday(i) && !i.done);
+  const line = i => `${rowText(i).split('\n')[0]}${i.today ? ' | due ' + i.today : ''}${projOf(i) ? ' | #' + projOf(i).name : ''}${knownTags(i).length ? ' | ' + knownTags(i).map(t => symById(t).name).join(', ') : ''}`;
+  const prompt = `You help the user plan today in their task app. Today is ${parseDay(TODAY).toLocaleDateString('en-AU', { weekday: 'long' })} ${TODAY}. ${state.field ? "The user's field: " + state.field + '.' : ''}
+Already in TODAY (${inT.length}):
+${inT.map(i => '- ' + line(i)).join('\n') || '(none)'}
+
+Candidates (id | task | details):
+${cands.map(c => `- ${c.it.id} | ${line(c.it)} | ${c.why}`).join('\n')}
+
+Pick up to ${Math.max(1, 5 - inT.length)} candidates to add to TODAY, most important first. Prefer near deadlines, important items and project next actions, and keep the day realistic given what is already in TODAY. Use only the ids above. Never invent tasks.
+Reply with only this JSON: {"picks": [{"id": "...", "why": "under 12 words"}], "note": "one short sentence about the plan"}`;
+  s.busy = true;
+  drawPlan();
+  try {
+    const r = await state.sample.json(prompt, {});
+    if (state.sheet !== s) return;
+    const ok = new Set(cands.map(c => c.it.id));
+    const picks = (Array.isArray(r && r.picks) ? r.picks : []).filter(p => p && ok.has(String(p.id))).slice(0, 6)
+      .map(p => ({ id: String(p.id), why: String(p.why || '').slice(0, 120), on: true }));
+    if (!picks.length) throw { code: 'invalid_request', message: 'The AI did not pick any of your tasks.' };
+    s.picks = picks;
+    s.ai = true;
+    s.note = String((r && r.note) || '').slice(0, 200);
+    setAiStatus(null);
+  } catch (e) {
+    toast("Couldn't plan with AI: " + sampleMsg(e));
+  }
+  s.busy = false;
+  drawPlan();
+}
+
+/* ---------- share into Kura (Android share sheet) + app icon shortcuts ---------- */
+function openShared(d) {
+  let { title, text, url } = d;
+  if (!url) { const m = /https?:\/\/\S+/.exec(text || ''); if (m) { url = m[0]; text = (text || '').replace(m[0], '').trim(); } }
+  state.sheet = { kind: 'shared', title: (title || '').trim(), text: (text || '').trim(), url: (url || '').trim(), proj: null };
+  drawShared();
+}
+function drawShared() {
+  const s = state.sheet;
+  if (!s || s.kind !== 'shared') return;
+  const all = [s.title, s.text, s.url].filter(Boolean);
+  const first = s.title || s.text.split('\n')[0] || s.url;
+  const body = h('div', { class: 'sheet-body' },
+    h('div', { class: 'nb-ctx' }, s.title ? h('b', { text: s.title }) : null, s.text ? h('p', { class: 'nb-a', text: s.text }) : null, s.url ? h('p', { class: 'muted', style: 'overflow-wrap:anywhere', text: s.url }) : null),
+    (state.projects || []).length ? h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'Project (optional)' }), projPicker(null, v => { s.proj = v; }, () => guessCat(all.join(' ')))) : null,
+    h('span', { class: 'lbl', text: 'Save it as' }),
+    h('div', { class: 'more-grid' },
+      h('button', { class: 'tile-btn', id: 'share-note', type: 'button', onclick: () => saveShared('stock') }, icon('pen', 1.8), h('span', { class: 'nm', text: 'Quick note' }), h('span', { class: 'lbl', text: 'STOCK' })),
+      h('button', { class: 'tile-btn', id: 'share-task', type: 'button', onclick: () => saveShared('make') }, icon('check', 1.8), h('span', { class: 'nm', text: 'Task' }), h('span', { class: 'lbl', text: 'MAKE' })),
+      h('button', { class: 'tile-btn', id: 'share-paper', type: 'button', onclick: () => sharedToNotebook('paper') }, icon('page', 1.8), h('span', { class: 'nm', text: 'Paper note' }), h('span', { class: 'lbl', text: 'notebook' })),
+      h('button', { class: 'tile-btn', id: 'share-nb', type: 'button', onclick: () => sharedToNotebook('blank') }, icon('plan', 1.8), h('span', { class: 'nm', text: 'Notebook note' }), h('span', { class: 'lbl', text: 'blank' }))));
+  showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Shared to Kura' }, head('SHARED TO KURA', first.slice(0, 40)), body));
+}
+async function saveShared(bucket) {
+  const s = state.sheet;
+  const lines = [s.title || s.text.split('\n')[0] || s.url];
+  if (s.title && s.text) lines.push(s.text);
+  if (!s.title && s.text.includes('\n')) lines.push(...s.text.split('\n').slice(1));
+  if (s.url && !lines.includes(s.url)) lines.push(s.url);
+  const text = (bucket === 'make' && !/^(read|watch|check|look)/i.test(lines[0]) && s.url ? 'Read: ' : '') + lines.join('\n').trim();
+  const p = projById(s.proj);
+  const now = Date.now();
+  await store.set(store.newId(), {
+    text, tags: [], bucket, today: null, done: false, doneAt: null, createdAt: now, updatedAt: now, source: 'shared', photo: null, page: null, pending: false,
+    cat: p ? p.cat : guessCat(text), proj: p ? p.id : null,
+  }).catch(onWriteError);
+  closeSheet();
+  if (innerWidth < 720) setTab(bucket);
+  toast(`Saved to ${LABEL[bucket]}${p ? ' · #' + p.name : ''}`);
+}
+function sharedToNotebook(tpl) {
+  const s = state.sheet;
+  const t = tplById(tpl);
+  let raw;
+  if (tpl === 'paper') raw = t.sections.map(sec => `## ${sec}\n${sec === 'Citation' ? [s.title, s.url].filter(Boolean).join('\n') + '\n' : sec === 'Objective' && s.text ? s.text + '\n' : ''}`).join('\n');
+  else raw = [s.title, s.text, s.url].filter(Boolean).join('\n\n');
+  const proj = s.proj;
+  closeSheet();
+  openNotebook();
+  Object.assign(state.nb, { tab: 'bank', mode: 'edit', pane: 'main', draft: { id: null, title: tpl === 'paper' ? '' : (s.title || '').slice(0, 120), raw, result: null, cat: null, tpl, ...(proj ? { proj } : {}) } });
+  drawNotebook();
+}
+function handleLaunch() {
+  const q = new URLSearchParams(location.search);
+  const title = q.get('share_title') || '', text = q.get('share_text') || '', url = q.get('share_url') || '';
+  const act = q.get('do');
+  if (!(title || text || url || act)) return;
+  try { history.replaceState(null, '', location.pathname); } catch (e) {}
+  if (title || text || url) { openShared({ title, text, url }); return; }
+  if (act === 'note') { els.input.focus(); }
+  else if (act === 'scan') {
+    if (!(state.sample && state.canImages)) { openPaste(); return; }
+    state.sheet = { kind: 'scanask' };
+    showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Scan a page' }, head('BRAIN CAMERA', ''),
+      h('div', { class: 'sheet-body' }, h('p', { class: 'muted', text: 'Point the camera at one page (or a two-page spread) with good light.' })),
+      h('div', { class: 'sheet-foot' }, h('span', { class: 'grow' }), h('button', { class: 'btn primary', type: 'button', onclick: () => { closeSheet(); els.fileCam.click(); } }, 'Open camera'))));
+  } else if (act === 'focus') { state.focus ? openFocusView() : openFocusPicker(); }
+  else if (act === 'plan') openPlan();
+  else if (act === 'review') openReview();
+}
+
+// v14 wiring
+$('#btn-more').addEventListener('click', () => openMore());
+$('#score').addEventListener('click', () => openTrophies());
+$('#streak').addEventListener('click', () => openStats());
+$('#focus-pill').addEventListener('click', () => openFocusView());
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible' || !state.focus) return;
+  focusTick();
+  if (state.focus && state.focus.phase === 'focus' && !state.focus.paused) holdWake(true);
+});
+initSwipes($('.work'));
 
 /* ---------- capabilities ---------- */
 function syncClaudeUI() {
@@ -3492,6 +5460,12 @@ function drawSettings() {
     h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'Model for Auto sort' }), sort),
     h('p', { class: 'muted', text: s.provider === 'gemini' ? 'Leave the model boxes as they are. Kura picks the newest Gemini Flash for reading pages and Flash-Lite for sorting when you save the key.' : 'Leave the model boxes as they are. Kura picks the newest Sonnet for reading pages and the newest Haiku for sorting when you save the key.' }),
     h('hr', { class: 'rule' }),
+    h('span', { class: 'lbl', text: 'Effects' }),
+    h('div', { class: 'row' },
+      h('label', { class: 'keep', for: 'fx-sound' }, (() => { const c = h('input', { type: 'checkbox', id: 'fx-sound' }); c.checked = fx.sound; c.addEventListener('change', async () => { fx.sound = c.checked; await saveFx(); play('done'); }); return c; })(), '8-bit sounds'),
+      h('label', { class: 'keep', for: 'fx-haptics' }, (() => { const c = h('input', { type: 'checkbox', id: 'fx-haptics' }); c.checked = fx.haptics; c.addEventListener('change', async () => { fx.haptics = c.checked; await saveFx(); buzz(30); }); return c; })(), 'Vibration')),
+    h('p', { class: 'muted', text: 'Sounds play through the media volume, even when the phone is on silent, so they start switched off.' }),
+    h('hr', { class: 'rule' }),
     h('span', { class: 'lbl', text: 'Backup' }),
     h('p', { class: 'muted', text: `Your ${state.items.length} notes are stored on this phone only. Export a backup now and then. Photos are not included.` }),
     h('div', { class: 'row' },
@@ -3525,7 +5499,7 @@ $('#gt-stat').addEventListener('click', () => openDiag());
 $('#ai-stat').addEventListener('click', () => openDiag());
 
 function exportBackup() {
-  const data = { app: 'kura', version: 1, exportedAt: new Date().toISOString(), symbols: state.symbols, obsidian: state.obs || null, items: state.items, notes: state.notes || [], glossary: state.glossary || [] };
+  const data = { app: 'kura', version: 1, exportedAt: new Date().toISOString(), symbols: state.symbols, obsidian: state.obs || null, items: state.items, notes: state.notes || [], glossary: state.glossary || [], projects: state.projects || [], doneLog: state.doneLog || {}, focusSessions: state.focusSessions || [], trophies: state.trophies || {} };
   const blob = new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = h('a', { href: url, download: `kura-backup-${dayStr()}.json` });
@@ -3557,6 +5531,24 @@ async function doImport(data) {
   const syms = cleanSymbols(data.symbols);
   if (syms) await store.setSettings({ symbols: syms, updatedAt: Date.now() }).catch(() => {});
   if (Array.isArray(data.notes) && store.putNote) { for (const nt of data.notes) if (nt && typeof nt.id === 'string') await store.putNote(nt).catch(() => {}); state.notes = await store.listNotes(); }
+  if (data.doneLog && typeof data.doneLog === 'object') {
+    for (const [d, ids] of Object.entries(data.doneLog)) if (Array.isArray(ids)) state.doneLog[d] = [...new Set([...(state.doneLog[d] || []), ...ids])];
+    if (store.kvSet) await store.kvSet('doneLog', state.doneLog).catch(() => {});
+  }
+  if (Array.isArray(data.focusSessions)) {
+    const have = new Set((state.focusSessions || []).map(x => x.t));
+    state.focusSessions = [...(state.focusSessions || []), ...data.focusSessions.filter(x => x && x.t && !have.has(x.t))].sort((a, b) => a.t - b.t).slice(-3000);
+    if (store.kvSet) await store.kvSet('focusSessions', state.focusSessions).catch(() => {});
+  }
+  if (data.trophies && typeof data.trophies === 'object') {
+    state.trophies = { ...data.trophies, ...(state.trophies || {}) };
+    if (store.kvSet) await store.kvSet('trophies', state.trophies).catch(() => {});
+  }
+  if (Array.isArray(data.projects)) {
+    const have = new Set((state.projects || []).map(x => x.id));
+    state.projects = [...(state.projects || []), ...data.projects.filter(x => x && typeof x.id === 'string' && x.name && !have.has(x.id))];
+    await saveProjects();
+  }
   if (Array.isArray(data.glossary) && store.putTerm) { for (const g of data.glossary) if (g && typeof g.id === 'string' && g.term && Array.isArray(g.noteIds)) await store.putTerm(g).catch(() => {}); state.glossary = await store.listTerms(); await markGloss(); }
   if (!state.obs && data.obsidian && data.obsidian.vault && store.kvSet) { await store.kvSet('obsidian', { ...DEFAULT_OBS, ...data.obsidian }).catch(() => {}); await loadObs(); }
   if (state.sheet && state.sheet.kind === 'settings') { state.sheet.confirmImport = null; state.sheet.status = `Imported ${n} notes.`; drawSettings(); }
@@ -3585,7 +5577,24 @@ async function boot() {
       await store.kvSet('seeded', true).catch(() => {});
     }
   }
+  state.projects = store.kvGet ? ((await store.kvGet('projects').catch(() => null)) || []) : [];
+  state.lastReview = store.kvGet ? ((await store.kvGet('lastReview').catch(() => '')) || '') : '';
+  try { state.dayView = localStorage.getItem('kura.dayview') === 'week' ? 'week' : 'today'; } catch (e) { state.dayView = 'today'; }
+  if (store.kvGet) {
+    Object.assign(fx, (await store.kvGet('fx').catch(() => null)) || {});
+    state.doneLog = (await store.kvGet('doneLog').catch(() => null)) || {};
+    state.focusSessions = (await store.kvGet('focusSessions').catch(() => null)) || [];
+    state.flags = (await store.kvGet('flags').catch(() => null)) || {};
+    const tr = await store.kvGet('trophies').catch(() => null);
+    state.trophies = tr || {};
+    if (!tr) state.trophyQuietUntil = Date.now() + 4000; // first run: count your history without fanfare
+  } else Object.assign(state, { doneLog: {}, focusSessions: [], flags: {}, trophies: {} });
+  try {
+    const f = JSON.parse(localStorage.getItem('kura.focus') || 'null');
+    if (f && f.endsAt) { state.focus = f; runFocusTimer(); if (f.phase === 'focus' && !f.paused) holdWake(true); }
+  } catch (e) {}
   unsub = store.subscribe(onItems);
+  setDayView(state.dayView);
   unsubS = store.subscribeSettings(onSettings);
   await loadGt();
   const rawRemove = store.remove.bind(store);
@@ -3613,6 +5622,9 @@ async function boot() {
   }
   await loadApi();
   scheduleGtSync(1500);
+  drawStreak();
+  checkTrophies();
+  handleLaunch();
   try { els.input.focus({ preventScroll: true }); } catch (e) {}
   if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
   if ('serviceWorker' in navigator && location.protocol !== 'file:') {
