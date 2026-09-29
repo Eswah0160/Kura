@@ -518,6 +518,7 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
 (() => {
 'use strict';
 
+const APP_VERSION = 'v6';
 /* ---------- helpers ---------- */
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -810,6 +811,7 @@ let unsub = null, unsubS = null;
 function onItems(list) {
   state.items = list;
   render();
+  scheduleGtSync();
   if (state.sheet && state.sheet.kind === 'log') drawLog();
 }
 function onSettings(d) {
@@ -1134,9 +1136,117 @@ async function loadObs() {
   render();
 }
 
+/* ---------- Google Tasks (two-way, through a small Apps Script in your own account) ---------- */
+const BRIDGE = "/* Kura <-> Google Tasks bridge. Setup steps are in Kura: Settings > Google Tasks. */\nvar SECRET = '__SECRET__';\n\nfunction doPost(e) {\n  var out;\n  try {\n    var req = JSON.parse(e.postData.contents);\n    if (req.secret !== SECRET) throw new Error('bad_secret');\n    out = handle_(req);\n  } catch (err) {\n    out = { ok: false, error: String((err && err.message) || err) };\n  }\n  return ContentService.createTextOutput(JSON.stringify(out)).setMimeType(ContentService.MimeType.JSON);\n}\n\nfunction doGet() {\n  return ContentService.createTextOutput('Kura bridge is running.');\n}\n\nfunction listId_(name) {\n  var lists = Tasks.Tasklists.list({ maxResults: 100 }).items || [];\n  for (var i = 0; i < lists.length; i++) if (lists[i].title === name) return lists[i].id;\n  return Tasks.Tasklists.insert({ title: name }).id;\n}\n\nfunction handle_(req) {\n  var list = listId_(req.list || 'Kura');\n  var created = {};\n  (req.upserts || []).forEach(function (u) {\n    var body = { title: u.title, notes: u.notes || '', status: u.completed ? 'completed' : 'needsAction' };\n    if (u.due) body.due = u.due + 'T00:00:00.000Z';\n    if (u.gid) {\n      if (!u.completed) body.completed = null;\n      try {\n        Tasks.Tasks.patch(body, list, u.gid);\n      } catch (err) {\n        var exists = true;\n        try { if (Tasks.Tasks.get(list, u.gid).deleted) exists = false; } catch (e2) { exists = false; }\n        created[u.kuraId] = exists ? { error: String((err && err.message) || err) } : { gone: true };\n      }\n    } else {\n      created[u.kuraId] = { gid: Tasks.Tasks.insert(body, list).id };\n    }\n  });\n  (req.deletes || []).forEach(function (gid) {\n    try { Tasks.Tasks.remove(list, gid); } catch (err) {}\n  });\n  var state = {};\n  var watch = req.watch || [];\n  if (watch.length) {\n    var seen = {};\n    var token = null;\n    do {\n      var opts = { showCompleted: true, showHidden: true, showDeleted: true, maxResults: 100 };\n      if (token) opts.pageToken = token;\n      var page = Tasks.Tasks.list(list, opts);\n      (page.items || []).forEach(function (t) { seen[t.id] = t; });\n      token = page.nextPageToken;\n    } while (token);\n    watch.forEach(function (gid) {\n      var t = seen[gid];\n      state[gid] = t && !t.deleted ? { completed: t.status === 'completed' } : { deleted: true };\n    });\n  }\n  return { ok: true, created: created, state: state };\n}\n";
+let gtSyncing = false, gtTimer = null, gtLastPull = 0, gtErrShown = false;
+const gtEligible = it => !!state.gt && !it.example && !it.gtaskGone && (!!it.today || (!!state.gt.includeMake && it.bucket === 'make'));
+function gtFields(it) {
+  const lines = String(it.text || '').trim().split(/\r?\n/);
+  const tags = knownTags(it).map(id => symById(id).mark + ' ' + symById(id).name);
+  const notes = [lines.slice(1).join('\n').trim(), tags.join(' · '), it.page ? 'Page: ' + it.page : '', 'From Kura · ' + (LABEL[it.bucket] || '')]
+    .filter(Boolean).join('\n');
+  return { title: lines[0].slice(0, 1000), notes, due: it.today || null, completed: !!it.done };
+}
+const gtSig = it => JSON.stringify(gtFields(it));
+async function gtCall(cfg, payload) {
+  let r;
+  try { r = await fetch(cfg.url, { method: 'POST', body: JSON.stringify({ ...payload, secret: cfg.secret, list: cfg.list || 'Kura' }) }); }
+  catch (e) { throw { code: 'network' }; }
+  let j = null;
+  try { j = await r.json(); } catch (e) { throw { code: 'bad_reply', message: 'HTTP ' + r.status }; }
+  if (!j || !j.ok) throw { code: j && j.error === 'bad_secret' ? 'bad_secret' : 'bridge', message: (j && j.error) || 'unknown error' };
+  return j;
+}
+function gtMsg(e) {
+  switch (e && e.code) {
+    case 'network': return "Couldn't reach your Google Tasks bridge. Check your connection.";
+    case 'bad_secret': return "The bridge rejected Kura's secret. Copy the bridge script again, paste it over the old one and deploy a new version.";
+    case 'bad_reply': return "That URL didn't answer like Kura's bridge. Use the Web app URL ending in /exec, with access set to Anyone.";
+    default: return 'Google Tasks said: ' + ((e && e.message) || 'unknown error');
+  }
+}
+async function saveGtMeta(p) {
+  state.gtMeta = { ...(state.gtMeta || {}), ...p };
+  if (store.kvSet) await store.kvSet('gtmeta', state.gtMeta).catch(() => {});
+}
+function scheduleGtSync(delay) {
+  if (!state.gt) return;
+  clearTimeout(gtTimer);
+  gtTimer = setTimeout(() => { gtSync().catch(() => {}); }, delay == null ? 4000 : delay);
+}
+async function gtSync(opts = {}) {
+  const cfg = state.gt;
+  if (!cfg || !cfg.url || gtSyncing) return;
+  const items = state.items;
+  const dirty = items.filter(it => gtEligible(it) && (!it.gtask || it.gSig !== gtSig(it)));
+  const orphans = items.filter(it => it.gtask && !gtEligible(it));
+  const queued = (store.kvGet ? await store.kvGet('gdeletes').catch(() => null) : null) || [];
+  if (!opts.force && !dirty.length && !orphans.length && !queued.length && Date.now() - gtLastPull < 60000) return;
+  gtSyncing = true;
+  const sigs = {};
+  dirty.forEach(it => { sigs[it.id] = gtSig(it); });
+  const dirtyIds = new Set(dirty.map(it => it.id));
+  const watched = items.filter(it => it.gtask && gtEligible(it) && !dirtyIds.has(it.id));
+  try {
+    const res = await gtCall(cfg, {
+      action: 'sync',
+      upserts: dirty.map(it => ({ kuraId: it.id, gid: it.gtask || null, ...gtFields(it) })),
+      deletes: [...queued, ...orphans.map(it => it.gtask)],
+      watch: watched.map(it => it.gtask),
+    });
+    gtLastPull = Date.now();
+    const created = res.created || {};
+    for (const it of dirty) {
+      const c = created[it.id];
+      if (c && c.gone) await store.update(it.id, { gtask: null, gSig: null, gtaskGone: true }).catch(() => {});
+      else if (c && c.error) continue;
+      else await store.update(it.id, { gtask: (c && c.gid) || it.gtask, gSig: sigs[it.id] }).catch(() => {});
+    }
+    for (const it of orphans) await store.update(it.id, { gtask: null, gSig: null }).catch(() => {});
+    if (queued.length && store.kvSet) await store.kvSet('gdeletes', []).catch(() => {});
+    let pulled = 0;
+    for (const it of watched) {
+      const r = (res.state || {})[it.gtask];
+      const cur = byId(it.id);
+      if (!r || !cur || cur.gSig !== gtSig(cur)) continue;
+      if (r.deleted) { await store.update(it.id, { gtask: null, gSig: null, gtaskGone: true }).catch(() => {}); continue; }
+      if (!!r.completed !== !!cur.done) {
+        const next = { ...cur, done: !!r.completed, doneAt: r.completed ? Date.now() : null };
+        await store.update(it.id, { done: next.done, doneAt: next.doneAt, gSig: gtSig(next), updatedAt: Date.now() }).catch(() => {});
+        pulled++;
+      }
+    }
+    if (pulled) toast(`${pulled} task${pulled === 1 ? '' : 's'} updated from Google Tasks`);
+    gtErrShown = false;
+    await saveGtMeta({ lastSync: Date.now(), lastError: '' });
+  } catch (e) {
+    await saveGtMeta({ lastError: gtMsg(e) });
+    if (opts.manual || !gtErrShown) { toast(gtMsg(e)); gtErrShown = true; }
+    if (opts.manual) throw e;
+  } finally {
+    gtSyncing = false;
+  }
+}
+async function loadGt() {
+  if (!store.kvGet) return;
+  let secret = await store.kvGet('gsecret').catch(() => null);
+  if (!secret) {
+    const bytes = new Uint8Array(18);
+    (window.crypto || {}).getRandomValues ? crypto.getRandomValues(bytes) : bytes.forEach((_, i) => { bytes[i] = Math.random() * 256; });
+    secret = Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+    await store.kvSet('gsecret', secret).catch(() => {});
+  }
+  state.gsecret = secret;
+  const cfg = await store.kvGet('gtasks').catch(() => null);
+  state.gt = cfg && cfg.url ? { list: 'Kura', includeMake: false, ...cfg, secret } : null;
+  state.gtMeta = (await store.kvGet('gtmeta').catch(() => null)) || {};
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') scheduleGtSync(600); });
+setInterval(() => { if (document.visibilityState === 'visible') gtSync().catch(() => {}); }, 5 * 60000);
+
 /* ---------- actions ---------- */
 function patch(id, p) { return store.update(id, { ...p, updatedAt: Date.now() }).catch(onWriteError); }
-function sendToday(id) { patch(id, { today: TODAY, done: false, doneAt: null, pending: false }); toast('Sent to TODAY'); }
+function sendToday(id) { patch(id, { today: TODAY, done: false, doneAt: null, pending: false, gtaskGone: false }); toast('Sent to TODAY'); }
 
 const busy = new Set();
 async function shoot(id) {
@@ -1404,7 +1514,7 @@ function drawItem() {
       const cur = byId(s.id);
       if (!cur) return;
       const on = !cur.today;
-      patch(s.id, on ? { today: TODAY, done: false, doneAt: null, pending: false } : { today: null, done: false, doneAt: null });
+      patch(s.id, on ? { today: TODAY, done: false, doneAt: null, pending: false, gtaskGone: false } : { today: null, done: false, doneAt: null });
       todayBtn.setAttribute('aria-pressed', String(on));
       todayBtn.textContent = on ? 'In TODAY ✓' : '+ TODAY';
     },
@@ -1438,6 +1548,7 @@ function drawItem() {
         h('button', { class: 'btn', type: 'button', onclick: () => { commitItemText(); sendToObsidian([byId(s.id)], true); } },
           it.sentAt ? 'Send to Obsidian again' : 'Send to Obsidian'),
         it.sentAt ? h('span', { class: 'lbl', text: 'In Obsidian · sent ' + rel(it.sentAt) }) : null) : null,
+      it.gtask ? h('span', { class: 'lbl', text: 'Linked to Google Tasks' }) : null,
       it.example ? h('p', { class: 'muted', text: 'This is an example note. Delete it, or clear all examples from the banner.' }) : null,
       src),
     h('div', { class: 'sheet-foot' }, del, h('span', { class: 'grow' }),
@@ -1803,6 +1914,7 @@ function openSettings(section) {
   state.sheet = {
     kind: 'settings', key: a.key || '', scan: a.scan || '', sort: a.sort || '', status: '', busy: false, confirmImport: null,
     vault: o.vault, target: o.target, note: o.note, tasksDates: o.tasksDates, includeDrop: o.includeDrop, obsStatus: '',
+    gurl: (state.gt && state.gt.url) || '', glist: (state.gt && state.gt.list) || 'Kura', gmake: !!(state.gt && state.gt.includeMake), gstatus: '', gbusy: false, showScript: false,
   };
   drawSettings();
   if (section === 'obsidian') { const v = $('#obs-vault'); if (v) v.focus(); }
@@ -1901,8 +2013,81 @@ function drawSettings() {
     h('hr', { class: 'rule' }),
   ];
 
+  const gurl = h('input', { class: 'field-in', id: 'gt-url', type: 'url', autocomplete: 'off', placeholder: 'https://script.google.com/macros/s/…/exec', 'aria-label': 'Bridge web app URL' });
+  gurl.value = s.gurl;
+  gurl.addEventListener('input', () => { s.gurl = gurl.value; });
+  const glist = h('input', { class: 'field-in', id: 'gt-list', type: 'text', autocomplete: 'off', placeholder: 'Kura', 'aria-label': 'Google Tasks list name' });
+  glist.value = s.glist;
+  glist.addEventListener('input', () => { s.glist = glist.value; });
+  const gmake = h('input', { type: 'checkbox', id: 'gt-make' });
+  gmake.checked = s.gmake;
+  gmake.addEventListener('change', () => { s.gmake = gmake.checked; });
+  const bridgeText = () => BRIDGE.replace('__SECRET__', state.gsecret || '');
+  const copyBridge = async () => {
+    try { await navigator.clipboard.writeText(bridgeText()); s.gstatus = 'Bridge script copied. Paste it into a new Apps Script project.'; }
+    catch (e) { s.showScript = true; s.gstatus = "Couldn't copy, so the script is shown below. Select all of it and copy."; }
+    drawSettings();
+  };
+  const shareBridge = async () => {
+    try { await navigator.share({ title: 'Kura bridge script', text: bridgeText() }); } catch (e) {}
+  };
+  const saveGt = async () => {
+    const url = String(s.gurl || '').trim();
+    if (!/^https:\/\/script\.google\.com\/.+\/exec$/.test(url)) { s.gstatus = 'Paste the Web app URL from Apps Script. It starts with https://script.google.com/ and ends in /exec.'; drawSettings(); return; }
+    const cfg = { url, secret: state.gsecret, list: String(s.glist || '').trim() || 'Kura', includeMake: !!s.gmake };
+    s.gbusy = true; s.gstatus = 'Testing the bridge…'; drawSettings();
+    try {
+      await gtCall(cfg, { action: 'sync', upserts: [], deletes: [], watch: [] });
+      if (store.kvSet) await store.kvSet('gtasks', { url: cfg.url, list: cfg.list, includeMake: cfg.includeMake });
+      state.gt = cfg;
+      s.gstatus = `Connected. Kura keeps the "${cfg.list}" list in Google Tasks in step with TODAY${cfg.includeMake ? ' and MAKE' : ''}.`;
+      gtSync({ force: true }).catch(() => {});
+    } catch (e) { s.gstatus = gtMsg(e); }
+    s.gbusy = false;
+    drawSettings();
+  };
+  const syncNow = async () => {
+    s.gbusy = true; s.gstatus = 'Syncing…'; drawSettings();
+    try { await gtSync({ force: true, manual: true }); s.gstatus = 'Synced just now.'; } catch (e) { s.gstatus = gtMsg(e); }
+    s.gbusy = false;
+    drawSettings();
+  };
+  const disconnectGt = async () => {
+    if (store.kvDel) await store.kvDel('gtasks').catch(() => {});
+    state.gt = null;
+    s.gstatus = 'Disconnected. Tasks already in Google Tasks stay there.';
+    drawSettings();
+  };
+  const meta = state.gtMeta || {};
+  const gtSection = [
+    h('span', { class: 'lbl', text: 'Google Tasks' }),
+    h('p', { class: 'muted', text: 'Kura keeps a list in Google Tasks in step with TODAY. Tasks you plan in Kura appear there with a due date, and ticking one off on either side ticks it off on the other. It works through a small script that runs in your own Google account.' }),
+    state.gt
+      ? h('p', { class: 'muted ok', text: (meta.lastError ? meta.lastError : (meta.lastSync ? 'Last synced ' + rel(meta.lastSync) + ' ago.' : 'Connected.')).replace('now ago', 'just now') })
+      : h('ol', { class: 'muted', style: 'margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px' },
+          h('li', {}, 'Tap Copy bridge script (or Share it to your Mac).'),
+          h('li', {}, 'Go to script.google.com, start a New project, delete what is there and paste the script.'),
+          h('li', {}, 'Next to Services, tap +, choose Google Tasks API and Add.'),
+          h('li', {}, 'Deploy → New deployment → type Web app. Execute as: Me. Who has access: Anyone. Deploy, then allow access (choose Advanced → Go to project if Google warns you).'),
+          h('li', {}, 'Copy the Web app URL, paste it below and tap Save and test.')),
+    h('div', { class: 'row' },
+      h('button', { class: 'btn', id: 'gt-copy', type: 'button', onclick: copyBridge }, 'Copy bridge script'),
+      navigator.share ? h('button', { class: 'btn', type: 'button', onclick: shareBridge }, 'Share it') : null),
+    s.showScript ? h('textarea', { class: 'field-in', readonly: true, style: 'min-height:160px;font-family:var(--f-mono);font-size:11px' }, bridgeText()) : null,
+    gurl,
+    h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'List name in Google Tasks' }), glist),
+    h('label', { class: 'keep', for: 'gt-make' }, gmake, 'Also send MAKE notes (without a date)'),
+    h('div', { class: 'row' },
+      h('button', { class: 'btn primary', id: 'gt-save', type: 'button', disabled: s.gbusy, onclick: saveGt }, s.gbusy ? 'Working…' : 'Save and test'),
+      state.gt ? h('button', { class: 'btn', id: 'gt-sync', type: 'button', disabled: s.gbusy, onclick: syncNow }, 'Sync now') : null,
+      state.gt ? h('button', { class: 'btn danger', type: 'button', onclick: disconnectGt }, 'Disconnect') : null),
+    s.gstatus ? h('p', { class: 'muted ok', text: s.gstatus }) : null,
+    h('hr', { class: 'rule' }),
+  ];
+
   const body = h('div', { class: 'sheet-body' },
     obsSection,
+    gtSection,
     h('span', { class: 'lbl', text: 'Anthropic API key' }),
     h('p', { class: 'muted', text: 'Brain Camera and Auto sort call Claude with your own API key. It is stored only on this phone and sent only to api.anthropic.com. Usage is billed to your Anthropic API account, separately from a Claude subscription.' }),
     h('div', { class: 'set-row' }, key),
@@ -1928,7 +2113,7 @@ function drawSettings() {
   const prev = $('.sheet-body', els.sheet);
   const scroll = prev ? prev.scrollTop : 0;
   showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Settings' },
-    head('SETTINGS', ''), body,
+    head('SETTINGS', 'KURA ' + APP_VERSION + ' · bar ' + ((document.getElementById('theme-color') || {}).content || '?')), body,
     h('div', { class: 'sheet-foot' }, h('span', { class: 'grow' }),
       h('button', { class: 'btn', type: 'button', onclick: async () => {
         const o = state.obs || DEFAULT_OBS;
@@ -2005,12 +2190,31 @@ async function boot() {
   }
   unsub = store.subscribe(onItems);
   unsubS = store.subscribeSettings(onSettings);
+  await loadGt();
+  const rawRemove = store.remove.bind(store);
+  store.remove = async id => {
+    const it = byId(id);
+    if (it && it.gtask && store.kvGet) {
+      const q = (await store.kvGet('gdeletes').catch(() => null)) || [];
+      q.push(it.gtask);
+      await store.kvSet('gdeletes', q).catch(() => {});
+    }
+    return rawRemove(id);
+  };
   await loadObs();
   await loadApi();
+  scheduleGtSync(1500);
   try { els.input.focus({ preventScroll: true }); } catch (e) {}
   if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
   if ('serviceWorker' in navigator && location.protocol !== 'file:') {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
+    const hadController = !!navigator.serviceWorker.controller;
+    let reloaded = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (!hadController || reloaded || state.sheet) return;
+      reloaded = true;
+      location.reload();
+    });
+    navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).then(r => r.update()).catch(() => {});
   }
 }
 
