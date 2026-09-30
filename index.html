@@ -754,6 +754,72 @@ body[data-skin="pets"] .friends:not([hidden]) {
   .short .capture { max-height: calc(var(--vvh, 100vh) * 0.42); }
   .app.capturing .pad textarea { height: 48px; }
 }
+/* v19: LabArchives section */
+@media (max-width: 719px) { .lab-btn .vl { display: none; } }
+.sheet.lab { width: min(880px, 100%); height: 100%; }
+@media (min-width: 720px) { .sheet.lab { height: calc(100% - 24px); } }
+.sheet.lab .sheet-body { flex: 1; }
+.lab-day { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.lab-day .btn { padding: 6px 13px; font-size: 16px; letter-spacing: 0; }
+.lab-date { font-size: 14.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.lab-status { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--red); white-space: nowrap; }
+.lab-status.ok { color: var(--ink-2); }
+.lab-grow { flex: 1 0 auto; display: flex; flex-direction: column; }
+.lab-grow > textarea { flex: 1 0 auto; }
+.lab-text { min-height: 260px; font-family: var(--f-mono); font-size: 13px; line-height: 1.6; }
+.lab-extra-row { display: flex; gap: 8px; align-items: flex-start; }
+textarea.lab-extra { min-height: 64px; height: 64px; font-size: 15px; }
+.lab-lbl-row { flex-wrap: nowrap; }
+.lab-back { align-self: flex-start; }
+.lab-foot .btn { flex: none; }
+.exp-list { display: flex; flex-direction: column; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
+.exp-list .nb-row { border-radius: 0; }
+.exp-title { font-weight: 700; flex: 1 1 240px; }
+.exp-area { min-height: 76px; font-size: 15px; }
+.obs-list { display: flex; flex-direction: column; }
+.obs { display: grid; grid-template-columns: 46px minmax(0, 1fr) auto; gap: 10px; align-items: start; padding: 8px 0; border-bottom: 1px solid var(--rule); }
+.obs:last-child { border-bottom: 0; }
+.obs time { font-family: var(--f-mono); font-size: 12px; color: var(--ink-2); padding-top: 2px; font-variant-numeric: tabular-nums; }
+.obs .ot { font-size: 14.5px; line-height: 1.45; overflow-wrap: anywhere; min-width: 0; }
+.obs.timer .ot { color: var(--ink-2); font-style: italic; font-size: 13.5px; }
+.obs img, .exp-photos img { display: block; margin-top: 6px; max-width: 170px; max-height: 128px; border-radius: 6px; border: 1px solid var(--rule); object-fit: cover; cursor: zoom-in; }
+.obs img.big, .exp-photos img.big { max-width: 100%; max-height: none; cursor: zoom-out; }
+.obs-del { height: 26px; min-width: 26px; font-size: 16px; }
+.obs-del.armed { color: var(--red); font-size: 10px; }
+.obs-day { margin: 8px 0 0; }
+.obs-add { display: flex; flex-direction: column; gap: 8px; }
+.obs-in { min-height: 56px; font-size: 15px; }
+.exp-photos { display: flex; gap: 10px; flex-wrap: wrap; }
+.exp-photos figure { margin: 0; }
+.exp-photos figcaption { font-family: var(--f-mono); font-size: 10.5px; color: var(--ink-2); margin-top: 3px; }
+.bench-top { display: flex; align-items: center; gap: 12px; }
+.bench-exp { flex: 1; min-width: 0; font-size: 15px; font-weight: 600; }
+.bench-in { font-size: 18px; min-height: 84px; line-height: 1.45; }
+.bench-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.bench-btn { min-height: 76px; border: 1px solid var(--rule); border-radius: 12px; background: var(--paper); color: var(--ink); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; font-size: 16px; font-weight: 700; padding: 8px; }
+.bench-btn svg { width: 26px; height: 26px; }
+.bench-btn.primary { background: var(--ink); border-color: var(--ink); color: var(--sheet); }
+.bench-btn.on { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.bench-btn.rec { background: var(--red); border-color: var(--red); color: var(--sheet); }
+.timer-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px 8px 12px; border: 1px solid var(--rule); border-radius: 10px; background: var(--paper); }
+.timer-row .tt { font-family: var(--f-mono); font-size: 30px; font-weight: 300; font-variant-numeric: tabular-nums; min-width: 4.4ch; line-height: 1; }
+.timer-row .tl { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.timer-row .tl b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.timer-row .btn { padding: 8px 10px; }
+.timer-row.done { border-color: var(--red); }
+.timer-row.done .tt { color: var(--red); font-size: 20px; font-weight: 500; }
+.timer-panel { padding: 10px; border: 1px dashed var(--rule); border-radius: 10px; }
+.timer-presets { display: flex; flex-wrap: wrap; gap: 6px; }
+.timer-presets button { min-width: 58px; height: 46px; font-family: var(--f-mono); font-size: 15px; border: 1px solid var(--rule); border-radius: 8px; background: var(--sheet); color: var(--ink); }
+#timer-mins { width: 7em; }
+.bench-side .obs-list { border-top: 1px solid var(--rule); }
+@media (min-width: 720px) { .bench-cols { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 18px; align-items: start; } }
+@media (max-width: 719px) { .bench-cols { display: flex; flex-direction: column; gap: 14px; } }
+.bench-pill { border-color: var(--ink); }
+.bench-pill svg { color: var(--ink); }
+body.focusing .bench-pill { top: calc(var(--vvt, 0px) + var(--vvh, 100vh) - env(safe-area-inset-bottom, 0px) - 106px); }
+body.timing .toast { top: calc(var(--vvt, 0px) + var(--vvh, 100vh) - env(safe-area-inset-bottom, 0px) - 108px); }
+body.timing.focusing .toast { top: calc(var(--vvt, 0px) + var(--vvh, 100vh) - env(safe-area-inset-bottom, 0px) - 156px); }
 /* short screens: keyboard up on the Fold leaves roughly a 4:3 area */
 .short .field, .short .wordmark, .short .tags-lbl { display: none; }
 .short .widget { padding-block: 4px; }
@@ -836,6 +902,10 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
         <button class="ghost nb-btn" id="btn-nb" type="button" aria-label="Open notebook">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/><path d="M9 8h6"/></svg>
           <span class="vl">Notebook</span>
+        </button>
+        <button class="ghost lab-btn" id="btn-lab" type="button" aria-label="LabArchives: daily log, experiments, bench mode">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v13.5a2 2 0 0 0 4 0V3"/><path d="M10 11h4"/><path d="M17.5 8.5h3M19 7v3"/></svg>
+          <span class="vl">Lab</span>
         </button>
         <button class="ghost vault-btn" id="btn-vault" type="button" aria-label="Send new notes to Obsidian">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18v3H3z"/><path d="M4.5 8v11h15V8"/><path d="M12 10.5v5.5M9.5 13.5L12 16l2.5-2.5"/></svg>
@@ -944,13 +1014,14 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
 <div class="nb fit" id="nb" hidden></div>
 <div class="sheet-wrap fit" id="sheet" hidden></div>
 <button class="focus-pill" id="focus-pill" type="button" hidden aria-label="Open focus timer"></button>
+<button class="focus-pill bench-pill" id="bench-pill" type="button" hidden aria-label="Open bench timers"></button>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
 <script>
 (() => {
 'use strict';
 
-const APP_VERSION = 'v18.1';
+const APP_VERSION = 'v19';
 /* ---------- helpers ---------- */
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -992,6 +1063,8 @@ const ICONS = {
   palette: '<path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.6-.8 1.6-1.6 0-.5-.2-.8-.5-1.2-.3-.3-.5-.7-.5-1.2 0-.9.7-1.6 1.6-1.6H16a5 5 0 0 0 5-5c0-4-4-7.4-9-7.4z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7.5" r="1"/><circle cx="14.5" cy="7.5" r="1"/>',
   heart: '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
   vault: '<path d="M3 5h18v3H3z"/><path d="M4.5 8v11h15V8"/><path d="M12 10.5v5.5M9.5 13.5L12 16l2.5-2.5"/>',
+  cam: '<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
+  tube: '<path d="M9 3h6M10 3v13.5a2 2 0 0 0 4 0V3"/><path d="M10 11h4"/><path d="M17.5 8.5h3M19 7v3"/>',
   dots: '<circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/>',
   mic: '<path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3z"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/>',
 };
@@ -2411,6 +2484,7 @@ function closeSheet(fromPop) {
   const s = state.sheet;
   if (s && s.kind === 'item') commitItemText();
   if (s && s.kind === 'focus') setTimeout(focusTick);
+  if (s && s.kind === 'lab') { stopDictation(); benchWake(false); saveExps(true); setTimeout(drawTimerBits); }
   if (s && s.kind === 'scan' && state.scan) {
     state.scan.ctl && state.scan.ctl.abort();
     if (state.scan.url) URL.revokeObjectURL(state.scan.url);
@@ -4705,6 +4779,7 @@ function drawMore() {
     tile('guide', 'help', 'User guide', 'how it all works', () => openGuide()),
     tile('theme', 'palette', 'Theme', (THEMES.find(t => t.id === (state.theme || 'invaders')) || THEMES[0]).name + ' · tap to switch', async () => { await setTheme(state.theme === 'pets' ? 'invaders' : 'pets'); drawMore(); }),
     state.theme === 'pets' ? tile('critters', 'heart', 'Critter Log', `${PETS.filter(p => critterStats()[p.id]).length}/${PETS.length} met`, () => openCritters()) : null,
+    tile('lab', 'tube', 'LabArchives', (state.labLogs || {})[TODAY] ? 'today logged ✓' : 'log · experiments · bench', () => openLab()),
     tile('settings', 'gear', 'Settings', null, () => openSettings()));
   showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'More' },
     head('MORE', 'KURA ' + APP_VERSION, 'home'), h('div', { class: 'sheet-body' }, grid)));
@@ -5427,6 +5502,8 @@ function handleLaunch() {
       h('div', { class: 'sheet-foot' }, h('span', { class: 'grow' }), h('button', { class: 'btn primary', type: 'button', onclick: () => { closeSheet(); els.fileCam.click(); } }, 'Open camera'))));
   } else if (act === 'focus') { state.focus ? openFocusView() : openFocusPicker(); }
   else if (act === 'plan') openPlan();
+  else if (act === 'lab' || act === 'log') openLab('log');
+  else if (act === 'bench') openLab('bench');
   else if (act === 'guide') openGuide(q.get('topic') || 'start');
   else if (act === 'review') openReview();
 }
@@ -5819,6 +5896,9 @@ function drawNlm() {
 // Block types: p (paragraph), h (small heading), steps (numbered), list (bullets), table ([left, right] rows), note (aside), try ([label, action] buttons)
 const GUIDE = [
   { id: 'new', icon: 'trophy', title: "What's new", blocks: [
+    { h: 'v19' }, { list: [
+      '**LabArchives section**: tap **Lab** at the top of the home screen. A **Daily log** built from your day, **Experiments** written as Project, Aims, Methods and Results with photos, and **Bench** mode with big buttons, timestamped observations and timers. Send to your LabArchives Inbox by email, or copy and paste.',
+    ] },
     { h: 'v18.1' }, { list: [
       '**Sturdier AI**: when Google\'s (or Anthropic\'s) servers are busy, Kura tries again, then uses another current model. If a saved model has been retired, Kura switches to a current one by itself and tells you.',
       '**Save and test** now picks today\'s best models and actually tests them. **Check connections** tests both the quick model and the page-reading model.',
@@ -5857,6 +5937,7 @@ const GUIDE = [
       ['AI ! · TASKS !', 'Only appear when AI or Google Tasks has a problem. Tap one to see what to fix.'],
       ['Search', 'Filters every list as you type. On the cover screen, tap the magnifier first.'],
       ['Notebook', 'Opens the Notebook (Bank, Projects, Glossary, Ask). The K U R A → wordmark does the same.'],
+      ['Lab', 'The LabArchives section: daily log, experiments, bench mode and setup.'],
       ['Vault + number', 'Appears when notes are waiting to go to Obsidian. Tap it to send them.'],
       ['⋯ More', 'Focus, Plan my day, Stats, Trophies, Lab tools, Weekly review, Done log, Send to Obsidian, NotebookLM, sound, theme, this guide and **Settings**.'],
     ] },
@@ -6091,6 +6172,38 @@ const GUIDE = [
     { note: 'Pick units from the menus next to each box. Commas work as decimal points.' },
     { try: [['Open Lab tools', 'tools']] },
   ] },
+  { id: 'labarchives', icon: 'tube', title: 'LabArchives: daily log, experiments, bench', blocks: [
+    { p: 'Everything for LabArchives lives in one place: tap **Lab** at the top of the home screen (or ⋯ More → LabArchives). It has four tabs.' },
+    { table: [
+      ['Daily log', 'A log of the day built from what Kura already knows: tasks you ticked off, focus time, experiments and notes, grouped by project.'],
+      ['Experiments', 'One entry per experiment: Project, Aims, Methods and timestamped Results, with photos.'],
+      ['Bench', 'Big buttons for the bench: add observations by typing or speaking, take photos and run timers. The screen stays on.'],
+      ['Setup', 'Your LabArchives Inbox address and what the daily log includes.'],
+    ] },
+    { h: 'Set up once' },
+    { steps: ['In LabArchives, open your Inbox and copy its email address.', 'Kura → Lab → **Setup**: paste it and tap **Save**.', 'Tap **Send a test email**, send it, and check it arrives in your LabArchives Inbox.'] },
+    { note: 'Send from the email address your LabArchives account uses. Emails land in the LabArchives Inbox; use **Move to page** there to file them in a notebook.' },
+    { h: 'Daily log' },
+    { steps: ['At the end of the day open Lab → **Daily log**.', 'Add anything Kura doesn\'t know about (meetings, reading) as dot points under **Add anything else**.', 'Optional: **Tidy with AI** puts it in the past tense and expands shorthand without adding anything.', 'Tap **Email to LabArchives**, **Copy** (then paste into a page) or **Share**. The day is marked as logged.'] },
+    { p: 'Use ‹ › to log an earlier day. You can edit the log before sending; **Rebuild from Kura** starts again. Setup chooses what goes in (focus time, notes, next tasks, Work only).' },
+    { h: 'Experiments' },
+    { list: [
+      'Start one with a name (and a project). Write **Aims** and **Methods** as rough dot points.',
+      'Add **Results** as you go: each gets the time automatically. The camera button adds a photo.',
+      'Tap **Entry →** to see the LabArchives entry. **Format with AI** tidies the wording but keeps every number, unit and sample ID; **Use my wording** undoes it.',
+      '**Email to LabArchives** sends the text. **Share + photos** sends the text and photos through your email app; Kura copies the Inbox address so you can paste it into To.',
+      'An experiment can run over several days: results are grouped by day. **Finish** moves it out of the open list.',
+    ] },
+    { h: 'Bench mode' },
+    { list: [
+      'Pick the experiment at the top. Type, or tap **Speak**, then **Add**: each observation is timestamped.',
+      '**Photo** takes a picture straight into the results.',
+      '**Timer**: pick a length (1 min to 2 h) or type the minutes, with an optional label. The start and the finish are logged in the experiment. Several timers can run at once.',
+      'While a timer runs, a pill at the bottom of the home screen shows the time left. Tap it to come back.',
+    ] },
+    { note: 'Keep Kura open for the alarm: phones pause web apps in the background. A timer that ends while Kura is in the background is logged at the right time when you come back. The alarm sounds even when 8-bit sounds are off.' },
+    { try: [['Open LabArchives', 'lab'], ['Bench mode', 'bench'], ['Setup', 'labsetup']] },
+  ] },
   { id: 'obsidian', icon: 'page', title: 'Obsidian', blocks: [
     { h: 'Set up' },
     { steps: ['Install Obsidian on this phone and open your vault once.', '⋯ More → Settings → **Obsidian** tab: type the vault name exactly, then Save.', 'Choose where quick notes go: **DAILY NOTE** (needs the Daily notes core plugin) or **ONE NOTE** (e.g. Kura/Inbox).'] },
@@ -6200,6 +6313,9 @@ const GUIDE_ACTIONS = {
   settings: () => openSettings(),
   obsidian: () => openSettings('obsidian'),
   aisettings: () => openSettings('ai'),
+  lab: () => openLab('log'),
+  bench: () => openLab('bench'),
+  labsetup: () => openLab('setup'),
   diag: () => openDiag(),
   pad: () => { closeSheet(); if (state.nb) closeNotebook(); setTimeout(() => els.input.focus(), 80); },
   log: () => openLog(),
@@ -6918,7 +7034,7 @@ function bannerMsgs() {
   if (reviewDue() && !state.reviewDismissed) out.push({ id: 'review', text: 'Weekly review time: tidy loose ends and plan next week.', act: ['Start review', () => openReview()], later: () => { state.reviewDismissed = true; } });
   if (state.seenVersion !== undefined && state.seenVersion !== APP_VERSION) {
     const fresh = !state.seenVersion && !state.items.some(i => !i.example);
-    out.push({ id: 'ver', text: fresh ? 'New to Kura? The user guide shows how everything works.' : /^v18/.test(state.seenVersion || '') ? `Updated to ${APP_VERSION}: AI calls now retry and switch models when Google's servers are busy.` : `Updated to ${APP_VERSION}: smarter capture, a tidier home and a new icon.`,
+    out.push({ id: 'ver', text: fresh ? 'New to Kura? The user guide shows how everything works.' : `Updated to ${APP_VERSION}: a LabArchives section (tap Lab at the top) for daily logs, experiments and bench work.`,
       act: [fresh ? 'Open the guide' : "What's new", () => openGuide(fresh ? 'start' : 'new'), 'banner-guide'], later: () => markSeen(), laterLabel: 'Got it' });
   }
   const missing = [!state.sample && 'a free AI key', !state.obs && 'your Obsidian vault'].filter(Boolean);
@@ -6945,6 +7061,647 @@ function drawBanner() {
 const SET_TABS = [['basics', 'Basics'], ['ai', 'AI'], ['obsidian', 'Obsidian'], ['tasks', 'Google Tasks'], ['look', 'Look'], ['backup', 'Backup']];
 const SET_TAB_OF = { ai: 'ai', obsidian: 'obsidian', tasks: 'tasks', gtasks: 'tasks', look: 'look', theme: 'look', backup: 'backup' };
 const SET_HELP = { basics: 'start', ai: 'ai', obsidian: 'obsidian', tasks: 'gtasks', look: 'themes', backup: 'backup' };
+
+/* ---------- v19: LabArchives section — daily log, experiments, bench mode ---------- */
+const LAB_DEFAULT = { inbox: '', focus: true, notes: true, next: true, workOnly: true };
+const labCfg = () => ({ ...LAB_DEFAULT, ...(state.lab || {}) });
+const labInbox = () => String(labCfg().inbox || '').trim().replace(/[^\w.@+-]/g, '');
+async function saveLab() { if (store.kvSet) await store.kvSet('labarchives', { ...labCfg() }).catch(() => {}); }
+let expSaveT = null;
+function saveExps(now) {
+  clearTimeout(expSaveT);
+  const go = () => (store.kvSet ? store.kvSet('experiments', state.exps || []).catch(onWriteError) : null);
+  if (now) return go();
+  expSaveT = setTimeout(go, 400);
+}
+let draftT = null;
+function saveLabDrafts() {
+  clearTimeout(draftT);
+  draftT = setTimeout(() => {
+    const keep = addDays(TODAY, -14);
+    const d = {};
+    for (const [k, v] of Object.entries(state.labDrafts || {})) if (k >= keep && String(v).trim()) d[k] = v;
+    state.labDrafts = d;
+    if (store.kvSet) store.kvSet('labDrafts', d).catch(() => {});
+  }, 500);
+}
+async function saveLabLogs() { if (store.kvSet) await store.kvSet('labLogs', state.labLogs || {}).catch(() => {}); }
+const uid = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+const expById = id => (state.exps || []).find(x => x.id === id) || null;
+const newSince = x => (x.sentAt ? x.obs.filter(o => o.t > x.sentAt && o.kind !== 'timer').length : 0);
+const openExps = () => (state.exps || []).filter(x => x.status !== 'done');
+const hhmm = ms => { const d = new Date(ms); return pad2(d.getHours()) + ':' + pad2(d.getMinutes()); };
+const longDay = ds => parseDay(ds).toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+const fmtDur = m => (m < 1 ? `${Math.round(m * 60)} s` : fmtMin(Math.round(m)));
+const firstLine = t => String(t || '').split('\n')[0].trim();
+const memPhotos = new Map();
+async function keepPhoto(blob) {
+  if (store.putPhoto) return store.putPhoto(blob);
+  const id = 'mp' + Date.now().toString(36);
+  memPhotos.set(id, blob);
+  return id;
+}
+async function loadPhoto(id) { if (memPhotos.has(id)) return memPhotos.get(id); return store.getPhoto ? store.getPhoto(id) : null; }
+function labThumb(id, alt) {
+  const img = h('img', { alt: alt || 'Photo', loading: 'lazy', onclick: e => e.currentTarget.classList.toggle('big') });
+  loadPhoto(id).then(b => {
+    if (!b) { img.remove(); return; }
+    const u = URL.createObjectURL(b);
+    img.src = u;
+    img.addEventListener('load', () => setTimeout(() => URL.revokeObjectURL(u), 1500), { once: true });
+  }).catch(() => img.remove());
+  return img;
+}
+function pickPhoto(cb) {
+  const inp = h('input', { type: 'file', accept: 'image/*', capture: 'environment', hidden: true });
+  inp.addEventListener('change', async () => {
+    const f = inp.files && inp.files[0];
+    inp.remove();
+    if (!f) return;
+    try {
+      const b = await downscale(f, 1600, 0.84).catch(() => f);
+      cb(await keepPhoto(b));
+    } catch (e) { toast("Couldn't keep that photo. If it's from the Samsung camera, turn off High efficiency pictures."); }
+  });
+  inp.addEventListener('cancel', () => inp.remove());
+  document.body.append(inp);
+  inp.click();
+}
+
+/* ---------- getting entries into LabArchives: copy, email to the Inbox, or share ---------- */
+async function labCopy(text, what) {
+  try { await navigator.clipboard.writeText(text); toast(`${what} copied. Paste it into a LabArchives page.`); return true; }
+  catch (e) { toast("Couldn't copy. Long-press the text, Select all, then Copy."); return false; }
+}
+function labEmail(subject, body) {
+  const to = labInbox();
+  if (!to) { toast('Add your LabArchives Inbox address in Setup first.'); openLab('setup'); return false; }
+  let b = body;
+  if (b.length > 6000) {
+    if (navigator.clipboard) navigator.clipboard.writeText(body).catch(() => {});
+    b = 'The entry is on your clipboard because it was too long for an email link. Paste it here.';
+  }
+  openExternal(`mailto:${to}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(b)}`);
+  return true;
+}
+async function labShare(subject, text, files) {
+  const to = labInbox();
+  if (to) { try { await navigator.clipboard.writeText(to); } catch (e) {} }
+  const withFiles = !!(files && files.length && navigator.canShare && navigator.canShare({ files }));
+  if (navigator.share) {
+    if (to) toast('Inbox address copied: pick your email app, then paste it into To.');
+    try { await navigator.share(withFiles ? { title: subject, text, files } : { title: subject, text }); return true; }
+    catch (e) { if (e && e.name === 'AbortError') return false; }
+  }
+  return labCopy(text, 'The entry');
+}
+function markLogged(day, via) {
+  state.labLogs = { ...(state.labLogs || {}), [day]: { at: Date.now(), via } };
+  saveLabLogs();
+}
+
+/* ---------- 1. daily log, built from what Kura already knows about the day ---------- */
+function dayData(day) {
+  const cfg = labCfg();
+  const inDay = ms => !!ms && dayStr(new Date(ms)) === day;
+  const workish = x => !cfg.workOnly || catOf(x) === 'work';
+  const items = state.items.filter(i => !i.example);
+  const sessions = (state.focusSessions || []).filter(f => f.d === day);
+  const mins = new Map();
+  for (const f of sessions) if (f.item) mins.set(f.item, (mins.get(f.item) || 0) + f.m);
+  const done = items.filter(i => i.done && inDay(i.doneAt) && workish(i)).sort((a, b) => a.doneAt - b.doneAt);
+  const doneIds = new Set(done.map(i => i.id));
+  const worked = [...mins.keys()].filter(id => !doneIds.has(id)).map(byId).filter(i => i && !i.example && workish(i));
+  const workedIds = new Set(worked.map(i => i.id));
+  const notes = items.filter(i => inDay(i.createdAt) && i.bucket === 'stock' && !doneIds.has(i.id) && !workedIds.has(i.id) && i.source !== 'note' && workish(i)).slice(0, 12);
+  const nb = (state.notes || []).filter(n => inDay(n.created) && workish(n));
+  const exps = (state.exps || []).map(x => ({ x, obs: x.obs.filter(o => inDay(o.t)) })).filter(e => e.obs.length);
+  const next = items.filter(i => !i.done && i.today && i.today > day && i.today <= addDays(day, 3) && workish(i)).sort((a, b) => (a.today < b.today ? -1 : a.today > b.today ? 1 : 0)).slice(0, 8);
+  const total = sessions.filter(f => !f.item || workish(byId(f.item) || { cat: 'work' })).reduce((a, f) => a + f.m, 0);
+  return { done, worked, notes, nb, exps, next, mins, total, sessions: sessions.length };
+}
+function buildLog(day, extra) {
+  const cfg = labCfg();
+  const d = dayData(day);
+  const groups = new Map();
+  const add = (pid, line) => { const k = pid && projById(pid) ? pid : ''; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(line); };
+  const m = id => (cfg.focus && d.mins.get(id) ? ` (${fmtMin(d.mins.get(id))})` : '');
+  for (const it of d.done) add(it.proj, `✓ ${firstLine(rowText(it))}${m(it.id)}`);
+  for (const it of d.worked) add(it.proj, `• ${firstLine(rowText(it))}${cfg.focus && d.mins.get(it.id) ? ` (${fmtMin(d.mins.get(it.id))}, ongoing)` : ' (ongoing)'}`);
+  for (const e of d.exps) {
+    const n = e.obs.filter(o => o.kind !== 'timer').length, ph = e.obs.filter(o => o.photo).length;
+    add(e.x.proj, `• Experiment: ${e.x.title} (${n} result${n === 1 ? '' : 's'}${ph ? `, ${ph} photo${ph === 1 ? '' : 's'}` : ''}, ${hhmm(e.obs[0].t)}–${hhmm(e.obs[e.obs.length - 1].t)})`);
+  }
+  if (cfg.notes) {
+    for (const it of d.notes) add(it.proj, `• Note: ${firstLine(rowText(it))}`);
+    for (const n of d.nb) add(n.proj, `• Notebook: ${n.title}`);
+  }
+  const extraLines = String(extra || '').split('\n').map(l => l.replace(/^\s*(?:[-*•]\s*)?/, '').trim()).filter(Boolean);
+  const L = [`Daily log · ${longDay(day)}`];
+  if (cfg.focus && d.total) L.push(`Focus time: ${fmtMin(d.total)}`);
+  const keys = [...groups.keys()].sort((a, b) => ((a === '') - (b === '')) || String((projById(a) || {}).name || '').localeCompare(String((projById(b) || {}).name || '')));
+  const named = keys.some(Boolean);
+  for (const k of keys) L.push('', k ? projById(k).name : named ? 'Other' : 'Tasks', ...groups.get(k));
+  if (extraLines.length) L.push('', 'Also', ...extraLines.map(x => '• ' + x));
+  if (!keys.length && !extraLines.length) L.push('', 'Nothing recorded in Kura for this day. Add dot points above.');
+  if (cfg.next && d.next.length) L.push('', 'Next', ...d.next.map(it => `• ${firstLine(rowText(it))} (${parseDay(it.today).toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' })})`));
+  return L.join('\n');
+}
+async function tidyLogAI(s) {
+  if (!state.sample) { toast('Add an AI key in Settings to tidy the log with AI.'); return; }
+  const src = s.text || buildLog(s.day, (state.labDrafts || {})[s.day]);
+  s.busy = 'Tidying with AI…';
+  drawLab();
+  const prompt = `You tidy a researcher's daily log for their electronic lab notebook (LabArchives). Keep it short and factual.${state.field ? `\nTheir field: ${String(state.field).slice(0, 200)}.` : ''}
+Rules:
+- Keep the same layout: the first line, the section headings, and one line per item.
+- Keep the ✓ and • at the start of lines. Put finished work in the past tense ("Calibrated the impedance analyser"). Keep ongoing items as ongoing.
+- Keep every fact, name, number, time and duration. Expand obvious shorthand. Never add anything that is not in the log.
+
+Log:
+"""${src.slice(0, 6000)}"""
+
+Reply with only JSON: {"log": "the tidied log as plain text with \\n line breaks"}`;
+  try {
+    const r = await state.sample.json(prompt, { modelTier: 'quick' });
+    const t = r && typeof r.log === 'string' ? r.log.replace(/\r/g, '').trim() : '';
+    if (!t) throw { code: 'invalid_json' };
+    setAiStatus(null);
+    if (state.sheet === s) { s.text = t; s.edited = true; toast('Tidied. Check it, then send.'); }
+  } catch (e) { toast(sampleMsg(e)); }
+  s.busy = '';
+  if (state.sheet === s) drawLab();
+}
+
+/* ---------- 2. experiments: Project / Aims / Methods / Results ---------- */
+function newExp(title, proj) {
+  const x = {
+    id: uid('ex'), title: String(title || '').trim().slice(0, 120) || `Experiment ${shortDay(TODAY)}`, proj: proj || null,
+    aims: '', methods: '', obs: [], created: Date.now(), updated: Date.now(), status: 'open', sentAt: 0, sentN: 0, fmt: null,
+  };
+  state.exps = [x, ...(state.exps || [])];
+  saveExps(true);
+  return x;
+}
+function addObs(x, text, extra = {}) {
+  const o = { id: uid('o'), t: Date.now(), text: String(text || '').trim(), photo: null, kind: 'note', ...extra };
+  x.obs.push(o);
+  x.obs.sort((a, b) => a.t - b.t);
+  x.updated = Date.now();
+  x.status = 'open';
+  saveExps(true);
+  return o;
+}
+const dotLines = s => String(s || '').split('\n').map(l => l.trim()).filter(Boolean).map(l => '- ' + l.replace(/^(?:[-•*]|\d{1,2}[.)])\s+/, ''));
+function expEntry(x) {
+  const days = [...new Set(x.obs.map(o => dayStr(new Date(o.t))))].sort();
+  const p = projById(x.proj);
+  const f = x.fmt || null;
+  const aims = f && f.aims.length ? f.aims.map(a => '- ' + a) : dotLines(x.aims);
+  const methods = f && f.methods.length ? f.methods.map(a => '- ' + a) : dotLines(x.methods);
+  const L = [];
+  if (p) L.push(`Project: ${p.name}`);
+  L.push(`Experiment: ${x.title}`);
+  L.push(`Date: ${days.length > 1 ? `${longDay(days[0])} to ${longDay(days[days.length - 1])}` : longDay(days[0] || dayStr(new Date(x.created)))}`);
+  L.push('', 'Aims', ...(aims.length ? aims : ['- (not written yet)']));
+  L.push('', 'Methods', ...(methods.length ? methods : ['- (not written yet)']));
+  L.push('', 'Results');
+  if (!x.obs.length) L.push('- (no results yet)');
+  let n = 0;
+  for (const day of days) {
+    if (days.length > 1) L.push(longDay(day));
+    for (const o of x.obs.filter(o => dayStr(new Date(o.t)) === day)) {
+      const text = (f && f.results && f.results[o.id]) || o.text || 'Photo';
+      L.push(`- ${hhmm(o.t)} ${text}${o.photo ? ` [photo ${++n} attached]` : ''}`);
+    }
+  }
+  if (f && f.summary) L.push(`- Summary: ${f.summary}`);
+  return L.join('\n');
+}
+async function expFiles(x) {
+  const out = [];
+  let n = 0;
+  for (const o of x.obs) {
+    if (!o.photo) continue;
+    n++;
+    const b = await loadPhoto(o.photo).catch(() => null);
+    if (b) out.push(new File([b], `${x.title.replace(/[^\w-]+/g, '-').slice(0, 40)}-photo-${n}-${hhmm(o.t).replace(':', '')}.jpg`, { type: b.type || 'image/jpeg' }));
+  }
+  return out;
+}
+async function formatExpAI(s, x) {
+  if (!state.sample) { toast('Add an AI key in Settings to format with AI.'); return; }
+  const obs = x.obs.map((o, i) => `${i + 1}. [${hhmm(o.t)}] ${o.text || 'Photo'}`).join('\n');
+  const prompt = `You format a researcher's rough notes into a concise electronic lab notebook entry (LabArchives) with the headings Aims, Methods and Results.${state.field ? `\nTheir field: ${String(state.field).slice(0, 200)}.` : ''}
+Experiment: ${x.title}${projById(x.proj) ? ` (project ${projById(x.proj).name})` : ''}
+
+Aims, as written:
+"""${String(x.aims).slice(0, 2000)}"""
+Methods, as written:
+"""${String(x.methods).slice(0, 4000)}"""
+Results, numbered observations with times:
+"""${obs.slice(0, 6000)}"""
+
+Rules:
+- Keep every fact, number, unit, setting, sample ID and name exactly. Never add steps, values or conclusions that are not in the notes.
+- "aims": 1 to 4 short dot points. "methods": short dot points in the order written, past tense.
+- "results": exactly one string per numbered observation, same order and count, cleaned up but with the same facts. Leave out the time.
+- "summary": one sentence summarising the results only if the observations clearly support it, else "".
+
+Reply with only JSON: {"aims": [], "methods": [], "results": [], "summary": ""}`;
+  s.busy = 'Formatting with AI…';
+  drawLab();
+  try {
+    const r = await state.sample.json(prompt, { modelTier: 'quick' });
+    const arr = v => (Array.isArray(v) ? v.map(z => String(z || '').replace(/^\s*[-•*]\s*/, '').trim()).filter(Boolean) : []);
+    const res = arr(r && r.results);
+    const results = {};
+    if (res.length === x.obs.length) x.obs.forEach((o, i) => { if (o.kind !== 'timer') results[o.id] = res[i]; });
+    x.fmt = { aims: arr(r && r.aims).slice(0, 6), methods: arr(r && r.methods).slice(0, 30), results, summary: String((r && r.summary) || '').trim().slice(0, 300), at: Date.now() };
+    saveExps(true);
+    setAiStatus(null);
+    s.entry = null;
+    toast(res.length === x.obs.length ? 'Formatted. Check it, then send.' : 'Formatted the aims and methods. Results are kept as written.');
+  } catch (e) { toast(sampleMsg(e)); }
+  s.busy = '';
+  if (state.sheet === s) drawLab();
+}
+
+/* ---------- 3. bench timers (work across the app; logged into the experiment) ---------- */
+const runningTimers = () => (state.timers || []).filter(t => !t.doneAt);
+function saveTimers() { try { localStorage.setItem('kura.timers', JSON.stringify(state.timers || [])); } catch (e) {} }
+function alarm() {
+  try { const a = audio(); if (a) { SFX.chime(a); setTimeout(() => { try { SFX.chime(a); } catch (e) {} }, 650); } } catch (e) {}
+  try { if (navigator.vibrate && (!navigator.userActivation || navigator.userActivation.hasBeenActive)) navigator.vibrate([250, 120, 250, 120, 500]); } catch (e) {}
+}
+function startTimer(label, mins, expId) {
+  const m = Math.max(0.25, Math.min(24 * 60, Number(mins) || 0));
+  const t = { id: uid('t'), label: String(label || '').trim().slice(0, 60) || `${fmtDur(m)} timer`, dur: m * 60000, ends: Date.now() + m * 60000, exp: expId || null, doneAt: 0, seen: false };
+  state.timers = [...(state.timers || []).filter(x => !(x.doneAt && x.seen)), t];
+  saveTimers();
+  try { audio(); } catch (e) {}   // unlock sound now, while there's a tap
+  const x = expById(expId);
+  if (x) addObs(x, `Timer started: ${t.label} (${fmtDur(m)})`, { kind: 'timer' });
+  runTimers();
+  toast(`Timer set: ${t.label}, ends ${hhmm(t.ends)}`);
+}
+function timerDone(t) {
+  t.doneAt = t.ends;
+  const late = Date.now() - t.ends > 60000;
+  const x = expById(t.exp);
+  if (x) {
+    x.obs.push({ id: uid('o'), t: t.ends, text: `Timer done: ${t.label}`, photo: null, kind: 'timer' });
+    x.obs.sort((a, b) => a.t - b.t);
+    x.updated = Date.now();
+    saveExps(true);
+  }
+  saveTimers();
+  if (late) toast(`Timer "${t.label}" finished at ${hhmm(t.ends)} while Kura was in the background`);
+  else { alarm(); toast(`Timer done: ${t.label}`); }
+  if (state.sheet && state.sheet.kind === 'lab') setTimeout(drawLab);
+}
+let timerIv = null;
+function runTimers() {
+  clearInterval(timerIv);
+  timerIv = null;
+  if (runningTimers().length) timerIv = setInterval(tickTimers, 1000);
+  tickTimers();
+}
+function tickTimers() {
+  const now = Date.now();
+  for (const t of runningTimers()) if (now >= t.ends) timerDone(t);
+  if (!runningTimers().length && timerIv) { clearInterval(timerIv); timerIv = null; }
+  drawTimerBits();
+}
+function drawTimerBits() {
+  for (const el of document.querySelectorAll('[data-timer]')) {
+    const t = (state.timers || []).find(x => x.id === el.dataset.timer);
+    if (t) el.textContent = t.doneAt ? 'DONE' : fmtClock(t.ends - Date.now());
+  }
+  const pill = document.getElementById('bench-pill');
+  if (!pill) return;
+  const run = runningTimers().sort((a, b) => a.ends - b.ends);
+  const onBench = !!(state.sheet && state.sheet.kind === 'lab' && state.sheet.tab === 'bench');
+  pill.hidden = !run.length || onBench;
+  document.body.classList.toggle('timing', !!run.length && !onBench);
+  if (run.length && !onBench) pill.replaceChildren(icon('timer', 2), h('b', { text: fmtClock(run[0].ends - Date.now()) }), h('span', { text: run[0].label + (run.length > 1 ? ` +${run.length - 1}` : '') }));
+}
+function benchWake(on) {
+  if (on) holdWake(true);
+  else if (!(state.focus && state.focus.phase === 'focus' && !state.focus.paused)) holdWake(false);
+}
+
+/* ---------- the LabArchives section ---------- */
+const LAB_TABS = [['log', 'Daily log'], ['exps', 'Experiments'], ['bench', 'Bench'], ['setup', 'Setup']];
+function openLab(tab, extra = {}) {
+  const prev = state.sheet && state.sheet.kind === 'lab' ? state.sheet : null;
+  if (prev) { Object.assign(prev, { tab: tab || prev.tab }, extra); drawLab(); return; }
+  state.sheet = {
+    kind: 'lab', tab: tab || 'log', day: TODAY, text: null, edited: false, busy: '',
+    exp: state.benchExp || null, expView: 'list', entry: null, entryFor: null, newTitle: '', newProj: null, showDone: false, delArmed: null, timerPanel: false, tLabel: '', tMins: '',
+    ...extra,
+  };
+  drawLab();
+}
+function drawLab() {
+  const s = state.sheet;
+  if (!s || s.kind !== 'lab') return;
+  const act = document.activeElement;
+  const key = act && els.sheet.contains(act) ? act.dataset.k : null;
+  const sel = key && typeof act.selectionStart === 'number' ? [act.selectionStart, act.selectionEnd] : null;
+  const viewKey = s.tab + ':' + (s.tab === 'exps' ? s.expView + ':' + (s.exp || '') : s.tab === 'log' ? s.day : s.exp || '');
+  const prevBody = $('.sheet-body', els.sheet);
+  const scroll = prevBody && s.viewKey === viewKey ? prevBody.scrollTop : 0;
+  const nRun = runningTimers().length;
+  const tabs = h('div', { class: 'set-tabs', role: 'tablist', 'aria-label': 'LabArchives sections' }, LAB_TABS.map(([k, label]) => h('button', {
+    type: 'button', role: 'tab', id: 'lab-tab-' + k, 'aria-selected': String(s.tab === k),
+    onclick: () => { if (s.tab !== k) { s.tab = k; drawLab(); } },
+  }, label, k === 'bench' && nRun ? h('i', { class: 'warn', text: '⏱' + nRun }) : k === 'setup' && !labInbox() ? h('i', { class: 'warn', text: '!' }) : null)));
+  const [body, foot] = s.tab === 'log' ? labLogView(s) : s.tab === 'exps' ? labExpView(s) : s.tab === 'bench' ? labBenchView(s) : labSetupView(s);
+  body.classList.add('sheet-body');
+  body.setAttribute('role', 'tabpanel');
+  const logged = (state.labLogs || {})[s.day];
+  const stamp = s.tab === 'log' ? (logged ? 'logged ✓' : 'not logged yet') : s.tab === 'exps' ? `${openExps().length} open` : s.tab === 'bench' ? (nRun ? `${nRun} timer${nRun === 1 ? '' : 's'}` : 'bench mode') : labInbox() ? 'inbox set' : 'inbox not set';
+  showSheet(h('div', { class: 'sheet lab' + (s.tab === 'bench' ? ' bench' : ''), role: 'dialog', 'aria-modal': 'true', 'aria-label': 'LabArchives' },
+    head('LABARCHIVES', stamp, 'labarchives'), tabs, body, foot));
+  body.scrollTop = scroll;
+  s.viewKey = viewKey;
+  if (key) {
+    const el = els.sheet.querySelector(`[data-k="${CSS.escape(key)}"]`);
+    if (el) { el.focus({ preventScroll: true }); if (sel && el.setSelectionRange) try { el.setSelectionRange(sel[0], sel[1]); } catch (e) {} }
+  }
+  const tb = document.getElementById('lab-tab-' + s.tab);
+  if (tb) tb.parentNode.scrollLeft = Math.max(0, tb.offsetLeft - 40);
+  benchWake(s.tab === 'bench');
+  drawTimerBits();
+}
+const labBtns = (onCopy, onShare, onEmail, shareLabel) => h('div', { class: 'sheet-foot lab-foot' },
+  h('button', { class: 'btn', type: 'button', id: 'lab-copy', onclick: onCopy }, 'Copy'),
+  h('button', { class: 'btn', type: 'button', id: 'lab-share', onclick: onShare }, shareLabel || 'Share'),
+  h('span', { class: 'grow' }),
+  h('button', { class: 'btn primary', type: 'button', id: 'lab-email', onclick: onEmail }, 'Email to LabArchives'));
+
+function labLogView(s) {
+  const logged = (state.labLogs || {})[s.day];
+  const extras = state.labDrafts || (state.labDrafts = {});
+  if (!s.edited || s.text == null) s.text = buildLog(s.day, extras[s.day]);
+  const ta = h('textarea', { class: 'field-in lab-text', id: 'lab-log', 'data-k': 'log', 'aria-label': 'Daily log', spellcheck: 'true' });
+  ta.value = s.text;
+  ta.addEventListener('input', () => { s.text = ta.value; s.edited = true; });
+  const extra = h('textarea', { class: 'field-in lab-extra', id: 'lab-extra', 'data-k': 'extra', 'aria-label': 'Anything else today', placeholder: 'Anything else, as dot points: meetings, reading, lab jobs…' });
+  extra.value = extras[s.day] || '';
+  extra.addEventListener('input', () => { extras[s.day] = extra.value; saveLabDrafts(); if (!s.edited) { s.text = buildLog(s.day, extra.value); ta.value = s.text; } });
+  const go = n => { s.day = addDays(s.day, n); s.text = null; s.edited = false; drawLab(); };
+  const body = h('div', {},
+    h('div', { class: 'lab-day' },
+      h('button', { class: 'btn', type: 'button', id: 'lab-prev', 'aria-label': 'Previous day', onclick: () => go(-1) }, '‹'),
+      h('b', { class: 'lab-date', text: (s.day === TODAY ? 'Today · ' : '') + longDay(s.day) }),
+      h('button', { class: 'btn', type: 'button', id: 'lab-next', 'aria-label': 'Next day', disabled: s.day >= TODAY, onclick: () => go(1) }, '›'),
+      h('span', { class: 'grow' }),
+      h('span', { class: 'lab-status' + (logged ? ' ok' : ''), id: 'lab-status', text: logged ? `Logged ✓ · ${logged.via} ${hhmm(logged.at)}` : 'Not logged yet' })),
+    h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'Add anything else' }),
+      h('div', { class: 'lab-extra-row' }, extra, micButton(() => extra, { cls: 'icon-btn', keepFocus: true }))),
+    h('div', { class: 'stack lab-grow' }, h('span', { class: 'lbl', text: s.edited ? 'Log · edited' : 'Log · built from Kura' }), ta),
+    h('div', { class: 'row' },
+      s.edited ? h('button', { class: 'btn', type: 'button', id: 'lab-rebuild', onclick: () => { s.edited = false; s.text = null; drawLab(); } }, 'Rebuild from Kura') : null,
+      state.sample ? h('button', { class: 'btn', type: 'button', id: 'lab-tidy', disabled: !!s.busy, onclick: () => tidyLogAI(s) }, s.busy || 'Tidy with AI') : null,
+      logged ? null : h('button', { class: 'link-btn plain', type: 'button', id: 'lab-mark', onclick: () => { markLogged(s.day, 'marked'); drawLab(); } }, 'Mark as logged')),
+    h('p', { class: 'muted', text: `Built from the tasks you ticked off, focus time, experiments${labCfg().notes ? ' and notes' : ''} for this day${labCfg().workOnly ? ', Work category only' : ''}. Change what goes in under Setup.` }));
+  const text = () => (s.text || '').trim();
+  const foot = labBtns(
+    async () => { if (await labCopy(text(), 'Log')) { markLogged(s.day, 'copied'); drawLab(); } },
+    async () => { if (await labShare(`Daily log ${s.day}`, text(), [])) { markLogged(s.day, 'shared'); drawLab(); } },
+    () => { if (labEmail(`Daily log ${s.day}`, text())) { markLogged(s.day, 'emailed'); drawLab(); } });
+  return [body, foot];
+}
+
+function labExpView(s) {
+  const x = s.exp && expById(s.exp);
+  if (x && s.expView === 'edit') return expEditor(s, x);
+  if (x && s.expView === 'entry') return expEntryView(s, x);
+  const title = h('input', { class: 'field-in', type: 'text', id: 'exp-new', 'data-k': 'newtitle', maxlength: '120', autocomplete: 'off', placeholder: 'New experiment, e.g. Saline soak test, foam batch F-12', 'aria-label': 'New experiment name' });
+  title.value = s.newTitle || '';
+  const create = () => { const nx = newExp(title.value, s.newProj); s.newTitle = ''; s.exp = nx.id; s.expView = 'edit'; state.benchExp = nx.id; drawLab(); };
+  title.addEventListener('input', () => { s.newTitle = title.value; });
+  title.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); create(); } });
+  const card = x => h('button', { class: 'nb-row exp-row', type: 'button', 'data-id': x.id, onclick: () => { s.exp = x.id; s.expView = 'edit'; state.benchExp = x.id; drawLab(); } },
+    h('span', { class: 'x', text: x.title }),
+    h('span', { class: 'meta' },
+      projById(x.proj) ? h('span', { class: 'tg', text: '#' + projById(x.proj).name }) : null,
+      h('span', { text: `${x.obs.filter(o => o.kind !== 'timer').length} results` }),
+      x.obs.length ? h('span', { text: 'last ' + rel(x.obs[x.obs.length - 1].t) }) : h('span', { text: 'started ' + rel(x.created) }),
+      x.sentAt ? h('span', { class: 'tg', text: newSince(x) ? `sent · ${newSince(x)} new` : 'sent ✓' }) : null));
+  const open = openExps(), done = (state.exps || []).filter(x => x.status === 'done');
+  const body = h('div', {},
+    h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'Start an experiment' }),
+      h('div', { class: 'row' }, title,
+        (state.projects || []).some(p => !p.archived) ? projPicker(s.newProj, v => { s.newProj = v; }, () => 'work') : null,
+        h('button', { class: 'btn primary', type: 'button', id: 'exp-create', onclick: create }, 'Start'))),
+    h('span', { class: 'lbl', text: open.length ? `Open · ${open.length}` : 'Open' }),
+    open.length ? h('div', { class: 'exp-list' }, open.map(card)) : h('p', { class: 'muted', text: 'Each experiment collects its aims, methods and timestamped results (from here or Bench mode), then goes to LabArchives as one entry: Project, Aims, Methods, Results.' }),
+    done.length ? h('button', { class: 'link-btn plain', type: 'button', id: 'exp-show-done', onclick: () => { s.showDone = !s.showDone; drawLab(); } }, (s.showDone ? 'Hide' : 'Show') + ` finished (${done.length})`) : null,
+    s.showDone && done.length ? h('div', { class: 'exp-list' }, done.map(card)) : null);
+  return [body, null];
+}
+function obsList(s, x, newestFirst, onlyDay) {
+  let list = x.obs.slice();
+  if (onlyDay) list = list.filter(o => dayStr(new Date(o.t)) === onlyDay);
+  if (newestFirst) list.reverse();
+  const days = new Set(x.obs.map(o => dayStr(new Date(o.t))));
+  const nodes = [];
+  let last = '';
+  for (const o of list) {
+    const d = dayStr(new Date(o.t));
+    if (!onlyDay && days.size > 1 && d !== last) { last = d; nodes.push(h('p', { class: 'lbl obs-day', text: longDay(d) })); }
+    const armed = s.delArmed === o.id;
+    nodes.push(h('div', { class: 'obs' + (o.kind === 'timer' ? ' timer' : ''), 'data-id': o.id },
+      h('time', { text: hhmm(o.t) }),
+      h('div', { class: 'ot' }, h('span', { text: o.text || 'Photo' }), o.photo ? labThumb(o.photo, 'Photo at ' + hhmm(o.t)) : null),
+      h('button', { class: 'ghost obs-del' + (armed ? ' armed' : ''), type: 'button', 'aria-label': armed ? 'Tap again to delete' : 'Delete', onclick: () => {
+        if (!armed) { s.delArmed = o.id; drawLab(); return; }
+        x.obs = x.obs.filter(z => z.id !== o.id); x.updated = Date.now(); s.delArmed = null; s.entry = null; saveExps(true); drawLab();
+      } }, armed ? 'Delete?' : '×')));
+  }
+  return nodes.length ? h('div', { class: 'obs-list' }, nodes) : h('p', { class: 'muted', text: onlyDay ? 'Nothing logged here today yet.' : 'No results yet. Add them below or from Bench mode.' });
+}
+function obsAdder(s, x, big) {
+  const inp = h('textarea', { class: 'field-in ' + (big ? 'bench-in' : 'obs-in'), id: big ? 'bench-in' : 'obs-in', 'data-k': big ? 'bench-in' : 'obs-in', rows: big ? '3' : '2', enterkeyhint: 'done', placeholder: big ? 'What did you see? e.g. impedance 212 Ω at 10 kHz, bubbles at the tip' : 'Add a result or observation (the time is added)', 'aria-label': 'New observation' });
+  inp.value = s.obsDraft || '';
+  inp.addEventListener('input', () => { s.obsDraft = inp.value; });
+  const add = () => {
+    const v = inp.value.trim();
+    if (!v) { inp.focus(); return; }
+    addObs(x, tidyShort(v));
+    s.obsDraft = ''; s.entry = null;
+    play('tick'); buzz(15);
+    drawLab();
+  };
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && e.keyCode !== 229) { e.preventDefault(); add(); } });
+  const photo = () => pickPhoto(id => { addObs(x, tidyShort(inp.value.trim()) || 'Photo', { photo: id, kind: 'photo' }); s.obsDraft = ''; s.entry = null; drawLab(); toast('Photo added'); });
+  return { inp, add, photo };
+}
+function expEditor(s, x) {
+  const touch = () => { x.updated = Date.now(); s.entry = null; saveExps(); };
+  const title = h('input', { class: 'field-in exp-title', type: 'text', id: 'exp-title', 'data-k': 'ex-title', maxlength: '120', 'aria-label': 'Experiment name' });
+  title.value = x.title;
+  title.addEventListener('input', () => { x.title = title.value.trim() || x.title; touch(); });
+  const area = (k, label, ph) => {
+    const a = h('textarea', { class: 'field-in exp-area', id: 'exp-' + k, 'data-k': 'ex-' + k, 'aria-label': label, placeholder: ph, rows: '3' });
+    a.value = x[k] || '';
+    a.addEventListener('input', () => { x[k] = a.value; if (x.fmt) x.fmt = { ...x.fmt, [k]: [] }; touch(); });
+    return h('div', { class: 'stack' }, h('div', { class: 'row lab-lbl-row' }, h('span', { class: 'lbl', text: label }), h('span', { class: 'grow' }), micButton(() => a, { cls: 'icon-btn', keepFocus: true })), a);
+  };
+  const { inp, add, photo } = obsAdder(s, x, false);
+  const delArmed = s.delArmed === 'exp:' + x.id;
+  const body = h('div', {},
+    h('button', { class: 'link-btn plain lab-back', type: 'button', onclick: () => { s.expView = 'list'; drawLab(); } }, '‹ All experiments'),
+    h('div', { class: 'row' }, title, (state.projects || []).length ? projPicker(x.proj, v => { x.proj = v; touch(); }, () => 'work') : null),
+    area('aims', 'Aims', 'Dot points: what this experiment should show'),
+    area('methods', 'Methods', 'Dot points: setup, materials, settings, steps'),
+    h('div', { class: 'row lab-lbl-row' }, h('span', { class: 'lbl', text: `Results · ${x.obs.filter(o => o.kind !== 'timer').length}` }), h('span', { class: 'grow' }),
+      h('button', { class: 'btn', type: 'button', id: 'exp-bench', onclick: () => { state.benchExp = x.id; s.tab = 'bench'; drawLab(); } }, icon('timer', 1.8), 'Bench mode')),
+    obsList(s, x, false),
+    h('div', { class: 'obs-add' }, inp,
+      h('div', { class: 'row' },
+        micButton(() => inp, { cls: 'icon-btn', keepFocus: true }),
+        h('button', { class: 'icon-btn', type: 'button', id: 'obs-photo', 'aria-label': 'Add a photo', title: 'Add a photo', onclick: photo }, icon('cam', 1.8)),
+        h('span', { class: 'grow' }),
+        h('button', { class: 'btn', type: 'button', id: 'obs-add', onclick: add }, 'Add result'))));
+  const foot = h('div', { class: 'sheet-foot' },
+    h('button', { class: 'btn danger', type: 'button', id: 'exp-del', onclick: () => {
+      if (!delArmed) { s.delArmed = 'exp:' + x.id; drawLab(); return; }
+      state.exps = state.exps.filter(z => z.id !== x.id); saveExps(true); s.exp = null; s.expView = 'list'; s.delArmed = null; toast('Experiment deleted'); drawLab();
+    } }, delArmed ? 'Tap again to delete' : 'Delete'),
+    h('button', { class: 'btn', type: 'button', id: 'exp-finish', onclick: () => { x.status = x.status === 'done' ? 'open' : 'done'; x.updated = Date.now(); saveExps(true); toast(x.status === 'done' ? 'Marked finished' : 'Reopened'); drawLab(); } }, x.status === 'done' ? 'Reopen' : 'Finish'),
+    h('span', { class: 'grow' }),
+    h('button', { class: 'btn primary', type: 'button', id: 'exp-entry', onclick: () => { s.expView = 'entry'; s.entry = null; drawLab(); } }, 'Entry →'));
+  return [body, foot];
+}
+function expEntryView(s, x) {
+  if (s.entryFor !== x.id) { s.entry = null; s.entryFor = x.id; }
+  const text = s.entry != null ? s.entry : expEntry(x);
+  const ta = h('textarea', { class: 'field-in lab-text', id: 'exp-text', 'data-k': 'entry', 'aria-label': 'LabArchives entry' });
+  ta.value = text;
+  ta.addEventListener('input', () => { s.entry = ta.value; });
+  const photos = x.obs.filter(o => o.photo);
+  const sent = x.sentAt ? `Sent ${rel(x.sentAt)} ago`.replace('now ago', 'just now') + (newSince(x) ? ` · ${newSince(x)} new since` : '') : 'Not sent yet';
+  const body = h('div', {},
+    h('div', { class: 'row' }, h('button', { class: 'link-btn plain lab-back', type: 'button', onclick: () => { s.expView = 'edit'; drawLab(); } }, '‹ Edit'), h('span', { class: 'grow' }), h('span', { class: 'lab-status' + (x.sentAt ? ' ok' : ''), id: 'exp-sent', text: sent })),
+    h('div', { class: 'stack lab-grow' }, h('span', { class: 'lbl', text: x.fmt ? 'Entry · worded by AI' : s.entry != null ? 'Entry · edited' : 'Entry · as written' }), ta),
+    photos.length ? h('div', { class: 'stack' }, h('span', { class: 'lbl', text: `Photos · ${photos.length}` }), h('div', { class: 'exp-photos' }, photos.map((o, i) => h('figure', {}, labThumb(o.photo, `Photo ${i + 1}`), h('figcaption', { text: `${i + 1} · ${hhmm(o.t)}` }))))) : null,
+    h('div', { class: 'row' },
+      state.sample ? h('button', { class: 'btn', type: 'button', id: 'exp-ai', disabled: !!s.busy, onclick: () => formatExpAI(s, x) }, s.busy || (x.fmt ? 'Format again with AI' : 'Format with AI')) : null,
+      x.fmt ? h('button', { class: 'link-btn plain', type: 'button', id: 'exp-mine', onclick: () => { x.fmt = null; s.entry = null; saveExps(true); drawLab(); } }, 'Use my wording') : null),
+    h('p', { class: 'muted', text: photos.length ? 'Email sends the text. To attach the photos too, use Share and pick your email app: Kura copies the Inbox address so you can paste it into To.' : 'Email sends this to your LabArchives Inbox as a text entry. Then use Move to page in LabArchives.' }));
+  const doneSend = via => { x.sentAt = Date.now(); x.sentN = x.obs.length; x.sentVia = via; saveExps(true); drawLab(); };
+  const subject = `${projById(x.proj) ? projById(x.proj).name + ' · ' : ''}${x.title}`;
+  const foot = labBtns(
+    async () => { if (await labCopy(ta.value.trim(), 'Entry')) doneSend('copied'); },
+    async () => { const files = await expFiles(x); if (await labShare(subject, ta.value.trim(), files)) doneSend('shared'); },
+    () => { if (labEmail(subject, ta.value.trim())) doneSend('emailed'); },
+    photos.length ? `Share + ${photos.length} photo${photos.length === 1 ? '' : 's'}` : 'Share');
+  return [body, foot];
+}
+
+function labBenchView(s) {
+  let x = s.exp && expById(s.exp);
+  const opens = openExps();
+  if (!x || x.status === 'done') { x = opens[0] || null; s.exp = x ? x.id : null; }
+  state.benchExp = s.exp;
+  if (!x) {
+    const t = h('input', { class: 'field-in bench-in', type: 'text', id: 'bench-new', 'data-k': 'bench-new', placeholder: 'What are you running? e.g. Saline soak test', 'aria-label': 'Experiment name' });
+    const go = () => { const nx = newExp(t.value, null); s.exp = nx.id; drawLab(); };
+    t.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); go(); } });
+    return [h('div', {},
+      h('p', { class: 'muted', text: 'Bench mode is for the bench: big buttons, timestamped observations, photos and timers, with the screen kept on. Start an experiment to begin.' }),
+      t, h('button', { class: 'bench-btn primary', type: 'button', id: 'bench-start', onclick: go }, icon('check', 2), 'Start')), null];
+  }
+  const picker = h('select', { class: 'field-in bench-exp', id: 'bench-exp', 'aria-label': 'Experiment' },
+    opens.map(o => h('option', { value: o.id, text: o.title + (projById(o.proj) ? ' · #' + projById(o.proj).name : '') })),
+    h('option', { value: '__new', text: '+ New experiment…' }));
+  picker.value = x.id;
+  picker.addEventListener('change', () => {
+    if (picker.value === '__new') { s.tab = 'exps'; s.expView = 'list'; drawLab(); const n = document.getElementById('exp-new'); if (n) n.focus(); return; }
+    s.exp = picker.value; state.benchExp = s.exp; drawLab();
+  });
+  const { inp, add, photo } = obsAdder(s, x, true);
+  const speak = h('button', { class: 'bench-btn', type: 'button', id: 'bench-speak', onclick: e => { if (!SpeechRec) { toast("Voice input isn't available in this browser."); return; } dictate(inp, e.currentTarget); } }, icon('mic', 1.8), 'Speak');
+  speak.addEventListener('pointerdown', e => { if (document.activeElement === inp) e.preventDefault(); });
+  const timers = (state.timers || []).filter(t => !t.doneAt || !t.seen).sort((a, b) => (a.doneAt ? 1 : 0) - (b.doneAt ? 1 : 0) || a.ends - b.ends);
+  const tLabel = h('input', { class: 'field-in', type: 'text', id: 'timer-label', 'data-k': 'tlabel', maxlength: '60', placeholder: 'Label, e.g. soak foam in saline', 'aria-label': 'Timer label' });
+  tLabel.value = s.tLabel || '';
+  tLabel.addEventListener('input', () => { s.tLabel = tLabel.value; });
+  const tMins = h('input', { class: 'field-in', type: 'number', id: 'timer-mins', 'data-k': 'tmins', min: '1', max: '1440', inputmode: 'numeric', placeholder: 'min', 'aria-label': 'Minutes' });
+  tMins.value = s.tMins || '';
+  tMins.addEventListener('input', () => { s.tMins = tMins.value; });
+  const go = m => { startTimer(s.tLabel || firstLine(inp.value) || '', m, x.id); s.tLabel = ''; s.tMins = ''; s.timerPanel = false; drawLab(); };
+  const panel = s.timerPanel ? h('div', { class: 'timer-panel stack', id: 'timer-panel' },
+    tLabel,
+    h('div', { class: 'timer-presets' }, [1, 2, 5, 10, 15, 20, 30, 45, 60, 90, 120].map(m => h('button', { type: 'button', 'data-m': String(m), onclick: () => go(m) }, m >= 60 ? `${m / 60 % 1 ? (m / 60).toFixed(1) : m / 60} h` : `${m}′`))),
+    h('div', { class: 'row' }, tMins, h('button', { class: 'btn primary', type: 'button', id: 'timer-go', onclick: () => { const m = Number(s.tMins); if (!(m > 0)) { tMins.focus(); return; } go(m); } }, 'Start timer'))) : null;
+  const timerRows = timers.length ? h('div', { class: 'stack' }, timers.map(t => h('div', { class: 'timer-row' + (t.doneAt ? ' done' : ''), 'data-id': t.id },
+    h('span', { class: 'tt', 'data-timer': t.id, text: t.doneAt ? 'DONE' : fmtClock(t.ends - Date.now()) }),
+    h('span', { class: 'tl' }, h('b', { text: t.label }), h('span', { class: 'lbl', text: t.doneAt ? `finished ${hhmm(t.doneAt)}` : `ends ${hhmm(t.ends)}${expById(t.exp) && t.exp !== x.id ? ' · ' + expById(t.exp).title : ''}` })),
+    t.doneAt ? h('button', { class: 'btn', type: 'button', onclick: () => { t.seen = true; saveTimers(); drawLab(); } }, 'OK')
+      : [h('button', { class: 'btn', type: 'button', 'aria-label': 'Add one minute', onclick: () => { t.ends += 60000; t.dur += 60000; saveTimers(); drawTimerBits(); } }, '+1′'),
+        h('button', { class: 'btn', type: 'button', 'aria-label': 'Stop timer', onclick: () => { t.doneAt = Date.now(); t.seen = true; saveTimers(); const ex = expById(t.exp); if (ex) addObs(ex, `Timer stopped early: ${t.label}`, { kind: 'timer' }); runTimers(); drawLab(); } }, 'Stop')]))) : null;
+  const body = h('div', { class: 'bench-body' },
+    h('div', { class: 'bench-top' }, picker,
+      h('button', { class: 'link-btn plain', type: 'button', id: 'bench-entry', onclick: () => { s.tab = 'exps'; s.expView = 'entry'; drawLab(); } }, 'Entry →')),
+    h('div', { class: 'bench-cols' },
+      h('div', { class: 'stack bench-main' },
+        timerRows,
+        inp,
+        h('div', { class: 'bench-grid', onpointerdown: e => { if (document.activeElement === inp && e.target.closest('button')) e.preventDefault(); } },
+          h('button', { class: 'bench-btn primary', type: 'button', id: 'bench-add', onclick: add }, icon('check', 2), 'Add'),
+          speak,
+          h('button', { class: 'bench-btn', type: 'button', id: 'bench-photo', onclick: photo }, icon('cam', 1.8), 'Photo'),
+          h('button', { class: 'bench-btn' + (s.timerPanel ? ' on' : ''), type: 'button', id: 'bench-timer', 'aria-expanded': String(!!s.timerPanel), onclick: () => { s.timerPanel = !s.timerPanel; drawLab(); } }, icon('timer', 1.8), 'Timer')),
+        panel),
+      h('div', { class: 'stack bench-side' }, h('span', { class: 'lbl', text: `Today · ${x.title}` }), obsList(s, x, true, TODAY))),
+    h('p', { class: 'muted', text: 'The screen stays on in Bench mode. Timers keep running if you leave Kura, but the alarm only sounds while Kura is open; a timer that ends in the background is logged at the right time when you come back.' }));
+  return [body, null];
+}
+
+function labSetupView(s) {
+  const cfg = labCfg();
+  const inbox = h('input', { class: 'field-in', type: 'email', id: 'lab-inbox', 'data-k': 'inbox', autocomplete: 'off', inputmode: 'email', placeholder: 'Your LabArchives Inbox address', 'aria-label': 'LabArchives Inbox address' });
+  inbox.value = cfg.inbox;
+  const saveInbox = async () => { state.lab = { ...labCfg(), inbox: inbox.value.trim() }; await saveLab(); };
+  inbox.addEventListener('change', async () => { await saveInbox(); drawLab(); });
+  const chk = (id, key, label) => {
+    const c = h('input', { type: 'checkbox', id });
+    c.checked = !!cfg[key];
+    c.addEventListener('change', async () => { state.lab = { ...labCfg(), [key]: c.checked }; await saveLab(); s.text = null; s.edited = false; });
+    return h('label', { class: 'keep', for: id }, c, label);
+  };
+  const body = h('div', {},
+    h('span', { class: 'lbl', text: 'LabArchives Inbox' }),
+    h('p', { class: 'muted', text: 'LabArchives turns an email sent to your Inbox address into entries: the email text becomes a text entry and each attached photo becomes an attachment. They wait in your LabArchives Inbox until you use Move to page.' }),
+    h('div', { class: 'row' }, inbox, h('button', { class: 'btn', type: 'button', id: 'lab-inbox-save', onclick: async () => { await saveInbox(); toast(labInbox() ? 'Inbox address saved' : 'Inbox address cleared'); drawLab(); } }, 'Save')),
+    h('p', { class: 'muted', text: 'Copy the address from your Inbox in LabArchives: accounts in Australia use a regional address, so don\'t guess it. Send from the email address your LabArchives account uses.' }),
+    h('div', { class: 'row' }, h('button', { class: 'btn', type: 'button', id: 'lab-test', onclick: async () => { await saveInbox(); labEmail('Kura test', `Kura is connected to LabArchives ✓ (${new Date().toLocaleString('en-AU')})`); } }, 'Send a test email'),
+      h('span', { class: 'muted', text: 'It should appear in your LabArchives Inbox within a minute or two.' })),
+    h('hr', { class: 'rule' }),
+    h('span', { class: 'lbl', text: 'What goes in the daily log' }),
+    chk('lab-focus', 'focus', 'Focus time (per task and in total)'),
+    chk('lab-notes', 'notes', 'Notes captured that day and new notebook notes'),
+    chk('lab-next', 'next', 'Next: tasks planned for the next few days'),
+    chk('lab-work', 'workOnly', 'Work category only (leave out Personal and Fun)'),
+    h('hr', { class: 'rule' }),
+    h('span', { class: 'lbl', text: 'Photos' }),
+    h('p', { class: 'muted', text: "An email link can't carry attachments. For an experiment with photos, tap Share and pick Gmail: the text and photos go in, and Kura copies the Inbox address so you can paste it into To." }));
+  return [body, null];
+}
+
+$('#btn-lab').addEventListener('click', () => openLab());
+$('#bench-pill').addEventListener('click', () => openLab('bench'));
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible') return;
+  tickTimers();
+  const ls = state.sheet;
+  if (ls && ls.kind === 'lab' && ls.tab === 'bench') holdWake(true);
+});
 
 // v14 wiring
 $('#friends').addEventListener('click', () => openCritters());
@@ -7226,7 +7983,9 @@ function drawSettings() {
     h('div', { class: 'set-conns' },
       conn('AI', !!state.sample, !!(state.sample && state.aiErr), state.sample ? `${providerName(state.api && state.api.provider)} · ${state.aiErr ? 'has a problem' : 'ready'}` : 'Optional · free Gemini key', 'ai'),
       conn('Obsidian', !!state.obs, false, state.obs ? `Vault "${state.obs.vault}"` : 'Optional · not connected', 'obsidian'),
-      conn('Google Tasks', !!state.gt, !!gErr, state.gt ? (gErr ? 'Sync problem' : `List "${state.gt.list || 'Kura'}"`) : 'Optional · not connected', 'tasks')),
+      conn('Google Tasks', !!state.gt, !!gErr, state.gt ? (gErr ? 'Sync problem' : `List "${state.gt.list || 'Kura'}"`) : 'Optional · not connected', 'tasks'),
+      h('button', { class: 'set-conn', type: 'button', id: 'set-conn-lab', onclick: () => openLab('setup') },
+        h('span', { class: 'dot' + (labInbox() ? ' on' : ''), 'aria-hidden': 'true' }), h('b', { text: 'LabArchives' }), h('span', { class: 'muted', text: labInbox() ? 'Inbox ' + labInbox() : 'Optional · add your Inbox address' }), h('span', { class: 'arr', 'aria-hidden': 'true', text: '›' }))),
     h('hr', { class: 'rule' }),
     h('span', { class: 'lbl', text: 'Smart capture' }),
     capChk('cap-preview', 'preview', 'Preview before saving (with AUTO)'),
@@ -7327,7 +8086,7 @@ $('#gt-stat').addEventListener('click', () => openDiag());
 $('#ai-stat').addEventListener('click', () => openDiag());
 
 function exportBackup() {
-  const data = { app: 'kura', version: 1, exportedAt: new Date().toISOString(), symbols: state.symbols, obsidian: state.obs || null, items: state.items, notes: state.notes || [], glossary: state.glossary || [], projects: state.projects || [], doneLog: state.doneLog || {}, focusSessions: state.focusSessions || [], trophies: state.trophies || {} };
+  const data = { app: 'kura', version: 1, exportedAt: new Date().toISOString(), symbols: state.symbols, obsidian: state.obs || null, items: state.items, notes: state.notes || [], glossary: state.glossary || [], projects: state.projects || [], doneLog: state.doneLog || {}, focusSessions: state.focusSessions || [], trophies: state.trophies || {}, experiments: state.exps || [], labLogs: state.labLogs || {}, labarchives: state.lab || {} };
   const blob = new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = h('a', { href: url, download: `kura-backup-${dayStr()}.json` });
@@ -7373,6 +8132,14 @@ async function doImport(data) {
     state.trophies = { ...data.trophies, ...(state.trophies || {}) };
     if (store.kvSet) await store.kvSet('trophies', state.trophies).catch(() => {});
   }
+  if (Array.isArray(data.experiments)) {
+    const mine = new Map((state.exps || []).map(x => [x.id, x]));
+    for (const x of data.experiments) if (x && typeof x.id === 'string' && Array.isArray(x.obs) && (!mine.has(x.id) || (x.updated || 0) > (mine.get(x.id).updated || 0))) mine.set(x.id, x);
+    state.exps = [...mine.values()].sort((a, b) => (b.created || 0) - (a.created || 0));
+    saveExps(true);
+  }
+  if (data.labLogs && typeof data.labLogs === 'object') { state.labLogs = { ...data.labLogs, ...(state.labLogs || {}) }; await saveLabLogs(); }
+  if (data.labarchives && data.labarchives.inbox && !labInbox()) { state.lab = { ...labCfg(), ...data.labarchives }; await saveLab(); }
   if (Array.isArray(data.projects)) {
     const have = new Set((state.projects || []).map(x => x.id));
     state.projects = [...(state.projects || []), ...data.projects.filter(x => x && typeof x.id === 'string' && x.name && !have.has(x.id))];
@@ -7412,6 +8179,12 @@ async function boot() {
   state.nlmNotebook = store.kvGet ? ((await store.kvGet('nlmNotebook').catch(() => '')) || '') : '';
   state.lastReview = store.kvGet ? ((await store.kvGet('lastReview').catch(() => '')) || '') : '';
   if (store.kvGet) Object.assign(capPrefs, (await store.kvGet('capture').catch(() => null)) || {});
+  state.lab = store.kvGet ? ((await store.kvGet('labarchives').catch(() => null)) || {}) : {};
+  state.exps = store.kvGet ? ((await store.kvGet('experiments').catch(() => null)) || []) : [];
+  state.labLogs = store.kvGet ? ((await store.kvGet('labLogs').catch(() => null)) || {}) : {};
+  state.labDrafts = store.kvGet ? ((await store.kvGet('labDrafts').catch(() => null)) || {}) : {};
+  try { state.timers = JSON.parse(localStorage.getItem('kura.timers') || '[]') || []; } catch (e) { state.timers = []; }
+  runTimers();
   syncCapUI();
   try { state.dayView = localStorage.getItem('kura.dayview') === 'week' ? 'week' : 'today'; } catch (e) { state.dayView = 'today'; }
   if (store.kvGet) {
