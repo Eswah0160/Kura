@@ -773,7 +773,7 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
 (() => {
 'use strict';
 
-const APP_VERSION = 'v14';
+const APP_VERSION = 'v15';
 /* ---------- helpers ---------- */
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -810,6 +810,7 @@ const ICONS = {
   sound: '<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 9a4 4 0 0 1 0 6M19 6.5a7.5 7.5 0 0 1 0 11"/>',
   mute: '<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M17 9.5l5 5M22 9.5l-5 5"/>',
   gear: '<circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/>',
+  nlm: '<path d="M4 4.5h8.5A3.5 3.5 0 0 1 16 8v12.5a2.5 2.5 0 0 0-2.5-2.5H4z"/><path d="M19.5 3l.7 1.6 1.6.7-1.6.7-.7 1.6-.7-1.6-1.6-.7 1.6-.7z"/><path d="M7.5 9h5M7.5 12.5h5"/>',
   dots: '<circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/>',
   mic: '<path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3z"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/>',
 };
@@ -2803,7 +2804,8 @@ async function nbTranscribe(file) {
 }
 
 function noteMarkdown(n) {
-  const lines = ['---', `created: ${dayStr(new Date(n.created || Date.now()))}`, 'source: kura', `category: ${CAT_NAME[catOf(n)]}`, ...(projOf(n) ? [`project: ${projOf(n).name}`] : []), ...(n.tpl && n.tpl !== 'blank' ? [`type: ${n.tpl}`] : []), `tags: [${['kura/note', 'kura/' + catOf(n), ...(projOf(n) ? ['project/' + projSlug(projOf(n).name)] : []), ...(n.tpl && n.tpl !== 'blank' ? ['kura/' + n.tpl] : []), ...(n.tags || [])].join(', ')}]`, '---', '', `# ${n.title}`, ''];
+  const lines = ['---', `created: ${dayStr(new Date(n.created || Date.now()))}`, (isNlmNote(n) ? 'source: notebooklm' : 'source: kura'), ...(isNlmNote(n) && n.src.notebook ? [`notebooklm_notebook: "${n.src.notebook.replace(/"/g, '')}"`] : []), `category: ${CAT_NAME[catOf(n)]}`, ...(projOf(n) ? [`project: ${projOf(n).name}`] : []), ...(n.tpl && n.tpl !== 'blank' ? [`type: ${n.tpl}`] : []), `tags: [${['kura/note', 'kura/' + catOf(n), ...(projOf(n) ? ['project/' + projSlug(projOf(n).name)] : []), ...(n.tpl && n.tpl !== 'blank' ? ['kura/' + n.tpl] : []), ...(n.tags || [])].join(', ')}]`, '---', '', `# ${n.title}`, ''];
+  if (isNlmNote(n) && n.src.question) lines.push(`**Asked in NotebookLM:** ${n.src.question}`, '');
   if (n.summary) lines.push(`> ${n.summary}`, '');
   if ((n.points || []).length) lines.push('## Key points', ...n.points.map(p => `- ${p}`), '');
   lines.push('## Notes', n.note || n.raw || '', '');
@@ -2847,7 +2849,7 @@ async function nbSave(sendObs) {
     context: r.context, tags: r.tags, ai: r.ai, cat: CATS.includes(d.cat) ? d.cat : (r.cat || guessCat(d.raw)),
     tpl: d.tpl || (prev && prev.tpl) || 'blank', proj: d.proj !== undefined ? (d.proj || null) : (r.proj || null), obsPath: prev ? prev.obsPath || null : null,
     tasks: r.tasks.filter(t => t.keep).map(t => t.text), questions: r.questions.filter(q => q.keep).map(q => q.text),
-    itemIds: prev ? (prev.itemIds || []).slice() : [], sentAt: prev ? prev.sentAt : null,
+    itemIds: prev ? (prev.itemIds || []).slice() : [], sentAt: prev ? prev.sentAt : null, src: prev ? prev.src || null : null,
   };
   // tasks → MAKE (or TODAY), questions → STOCK with ? Unresolved; skip ones this note already created
   const existing = new Set(state.items.filter(it => it.noteId === n.id).map(it => String(it.text).trim().toLowerCase()));
@@ -3144,7 +3146,7 @@ function bankRow(e, nb) {
       onclick: () => openNoteInBank(n.id),
     },
       h('span', { class: 't', text: n.title }),
-      h('span', { class: 'meta' }, h('span', { class: 'cdot' }), h('span', { class: 'cn', text: CAT_NAME[e.cat] }), h('span', { text: '· ' + (n.tpl && n.tpl !== 'blank' ? tplById(n.tpl).name : 'note') + ' · ' + rel(e.t) }),
+      h('span', { class: 'meta' }, h('span', { class: 'cdot' }), h('span', { class: 'cn', text: CAT_NAME[e.cat] }), h('span', { text: '· ' + (isNlmNote(n) ? 'NotebookLM' : n.tpl && n.tpl !== 'blank' ? tplById(n.tpl).name : 'note') + ' · ' + rel(e.t) }),
         projOf(n) ? h('span', { class: 'tg', text: '#' + projOf(n).name }) : null,
         n.ai ? h('span', { text: '· AI' }) : null,
         (n.tags || []).slice(0, 2).map(t => h('span', { class: 'tg', text: '#' + t }))));
@@ -3234,7 +3236,11 @@ function drawNotebook() {
     const list = h('div', { class: 'list', style: 'padding:0' }, shown.slice(0, nb.limit).map(e => bankRow(e, nb)));
     if (shown.length > nb.limit) list.append(h('button', { class: 'btn', type: 'button', style: 'margin:10px 12px', onclick: () => { nb.limit += 150; drawNotebook(); } }, `Show more (${shown.length - nb.limit})`));
     if (!shown.length) list.append(h('p', { class: 'empty', text: q || cat !== 'all' || kind !== 'all' ? 'Nothing matches.' : 'Your bank is empty. Tap + New to write a note, or add quick notes on the home screen.' }));
-    listCol = h('aside', { class: 'nb-list card-box' }, search, kindSeg, list);
+    const nlmFoot = nb.tab === 'bank' ? h('div', { class: 'nb-foot' },
+      h('button', { class: 'btn', id: 'nlm-bank', type: 'button', onclick: () => openNlm({ scope: cat !== 'all' ? 'cat:' + cat : 'all' }) }, icon('nlm', 1.8), 'NotebookLM'),
+      h('span', { class: 'grow' }),
+      h('button', { class: 'btn', id: 'nlm-bank-save', type: 'button', onclick: () => openNlm({ tab: 'save' }) }, 'Save an answer')) : null;
+    listCol = h('aside', { class: 'nb-list card-box' }, search, kindSeg, list, nlmFoot);
   }
 
   // main column
@@ -3390,10 +3396,11 @@ function drawNotebook() {
       const c = catOf(n);
       const staleObs = n.sentAt && n.obsPath && state.obs && n.obsPath !== noteFilePath(n, state.obs);
       scroll.append(
-        h('span', { class: 'lbl', text: `${new Date(n.created).toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}${n.tpl && n.tpl !== 'blank' ? ' · ' + tplById(n.tpl).name : ''}${n.ai ? ' · comprehended' : ''}${n.sentAt ? ' · in Obsidian' : ''}` }),
+        h('span', { class: 'lbl', text: `${new Date(n.created).toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}${n.tpl && n.tpl !== 'blank' ? ' · ' + tplById(n.tpl).name : ''}${isNlmNote(n) ? ' · from NotebookLM' + (n.src.notebook ? ' (' + n.src.notebook + ')' : '') : ''}${n.ai ? ' · comprehended' : ''}${n.sentAt ? ' · in Obsidian' : ''}` }),
         h('h3', { class: 'nb-title', text: n.title }),
         h('div', { class: 'row', id: 'nb-cat' }, catSeg(c, v => setNoteCat(n, v)), projPicker(n.proj || null, v => setNoteProj(n, v), () => catOf(n))),
         staleObs ? h('p', { class: 'muted', text: `In Obsidian this note is still at ${n.obsPath}. Tap Send again to file it under ${CAT_NAME[c]}, then delete the old copy in Obsidian.` }) : null,
+        isNlmNote(n) && n.src.question ? h('div', { class: 'nb-sec' }, h('span', { class: 'lbl', text: 'Asked in NotebookLM' }), h('p', { class: 'nb-sum', text: n.src.question })) : null,
         n.summary ? h('p', { class: 'nb-sum', text: n.summary }) : null,
         (n.points || []).length ? h('div', { class: 'nb-sec' }, h('span', { class: 'lbl', text: 'Key points' }), mdNodes(n.points.map(p => '- ' + p).join('\n'))) : null,
         h('div', { class: 'nb-sec' }, h('span', { class: 'lbl', text: 'Note' }), mdNodes(n.note || n.raw)),
@@ -3401,7 +3408,7 @@ function drawNotebook() {
         linked.length ? h('div', { class: 'nb-sec' }, h('span', { class: 'lbl', text: 'Tasks & questions from this note' }),
           h('div', { class: 'nb-chips' }, linked.map(it => h('button', { class: 'nb-chip', type: 'button', onclick: () => openItem(it.id) }, (it.done ? '✓ ' : '') + String(it.text).slice(0, 50))))) : null,
         (n.tags || []).length ? h('div', { class: 'nb-chips' }, n.tags.map(t => h('span', { class: 'nb-chip', text: '#' + t }))) : null,
-        n.raw && n.raw.trim() !== (n.note || '').trim() ? h('details', {}, h('summary', { class: 'lbl', text: 'Your original words' }), h('p', { class: 'nb-a', text: n.raw })) : null);
+        n.raw && !isNlmNote(n) && n.raw.trim() !== (n.note || '').trim() ? h('details', {}, h('summary', { class: 'lbl', text: 'Your original words' }), h('p', { class: 'nb-a', text: n.raw })) : null);
       const del = h('button', { class: 'btn danger', type: 'button', onclick: async () => {
         if (!nb.confirmDel) { nb.confirmDel = true; del.textContent = 'Tap again to delete'; return; }
         await store.deleteNote(n.id).catch(onWriteError);
@@ -3421,6 +3428,7 @@ function drawNotebook() {
       } }, 'Delete');
       foot.append(del, h('span', { class: 'grow' }),
         h('button', { class: 'btn', id: 'nb-share', type: 'button', onclick: () => shareOut(n.title, noteShareText(n)) }, 'Share'),
+        h('button', { class: 'btn', id: 'nb-nlm', type: 'button', onclick: () => openNlm({ scope: 'note:' + n.id }) }, 'NotebookLM'),
         state.obs ? h('button', { class: 'btn', type: 'button', onclick: () => sendNoteToObsidian(n) }, n.sentAt ? 'Send again' : 'Send to Obsidian') : null,
         h('button', { class: 'btn', type: 'button', onclick: () => { nb.draft = { id: n.id, title: n.title, raw: n.raw || n.note, result: null, cat: catOf(n), proj: n.proj || null, tpl: n.tpl || 'blank' }; nb.mode = 'edit'; drawNotebook(); } }, 'Edit'),
         h('button', { class: 'btn primary', type: 'button', onclick: () => { nb.draft = { id: n.id, title: '', raw: n.raw || n.note, result: null, cat: catOf(n), proj: n.proj || null, tpl: n.tpl || 'blank' }; nb.mode = 'edit'; nbComprehend(); } }, state.sample ? 'Re-comprehend' : 'Re-tidy'));
@@ -3931,6 +3939,7 @@ function projectMain(nb, scroll, foot) {
   } }, 'Delete');
   foot.append(del, h('span', { class: 'grow' }),
     h('button', { class: 'btn', type: 'button', onclick: async () => { p.archived = !p.archived; await saveProjects(); drawNotebook(); toast(p.archived ? 'Archived' : 'Back in your projects'); } }, p.archived ? 'Unarchive' : 'Archive'),
+    h('button', { class: 'btn', id: 'pj-nlm', type: 'button', onclick: () => openNlm({ scope: 'proj:' + p.id }) }, 'NotebookLM'),
     h('button', { class: 'btn', type: 'button', onclick: () => shareOut('#' + p.name, projectShareText(p)) }, 'Share'),
     h('button', { class: 'btn', type: 'button', onclick: () => { nb.pedit = { name: p.name }; drawNotebook(); } }, 'Rename'));
 }
@@ -4459,6 +4468,7 @@ function drawMore() {
     tile('review', 'cal', 'Weekly review', state.lastReview ? 'last ' + dayName(state.lastReview) : 'not done yet', () => openReview()),
     tile('log', 'list', 'Done log', null, () => openLog()),
     tile('sound', fx.sound ? 'sound' : 'mute', fx.sound ? 'Sound on' : 'Sound off', 'tap to switch', async () => { fx.sound = !fx.sound; await saveFx(); play('trophy'); drawMore(); }),
+    tile('nlm', 'nlm', 'NotebookLM', 'send · save', () => openNlm()),
     tile('settings', 'gear', 'Settings', null, () => openSettings()));
   showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'More' },
     head('MORE', 'KURA ' + APP_VERSION), h('div', { class: 'sheet-body' }, grid)));
@@ -5122,11 +5132,14 @@ function drawShared() {
   if (!s || s.kind !== 'shared') return;
   const all = [s.title, s.text, s.url].filter(Boolean);
   const first = s.title || s.text.split('\n')[0] || s.url;
+  const fromNlm = /notebooklm/i.test(all.join(' '));
   const body = h('div', { class: 'sheet-body' },
+    fromNlm ? h('p', { class: 'muted', text: 'This looks like it came from NotebookLM. Save it as a NotebookLM answer to keep the question and notebook with it.' }) : null,
     h('div', { class: 'nb-ctx' }, s.title ? h('b', { text: s.title }) : null, s.text ? h('p', { class: 'nb-a', text: s.text }) : null, s.url ? h('p', { class: 'muted', style: 'overflow-wrap:anywhere', text: s.url }) : null),
     (state.projects || []).length ? h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'Project (optional)' }), projPicker(null, v => { s.proj = v; }, () => guessCat(all.join(' ')))) : null,
     h('span', { class: 'lbl', text: 'Save it as' }),
     h('div', { class: 'more-grid' },
+      h('button', { class: 'tile-btn', id: 'share-nlm', type: 'button', onclick: () => openNlm({ tab: 'save', a: [/^\s*notebooklm\s*$/i.test(s.title) ? '' : s.title, s.text].filter(Boolean).join('\n\n'), link: s.url }) }, icon('nlm', 1.8), h('span', { class: 'nm', text: 'NotebookLM answer' }), h('span', { class: 'lbl', text: 'notebook note' })),
       h('button', { class: 'tile-btn', id: 'share-note', type: 'button', onclick: () => saveShared('stock') }, icon('pen', 1.8), h('span', { class: 'nm', text: 'Quick note' }), h('span', { class: 'lbl', text: 'STOCK' })),
       h('button', { class: 'tile-btn', id: 'share-task', type: 'button', onclick: () => saveShared('make') }, icon('check', 1.8), h('span', { class: 'nm', text: 'Task' }), h('span', { class: 'lbl', text: 'MAKE' })),
       h('button', { class: 'tile-btn', id: 'share-paper', type: 'button', onclick: () => sharedToNotebook('paper') }, icon('page', 1.8), h('span', { class: 'nm', text: 'Paper note' }), h('span', { class: 'lbl', text: 'notebook' })),
@@ -5179,6 +5192,390 @@ function handleLaunch() {
   } else if (act === 'focus') { state.focus ? openFocusView() : openFocusPicker(); }
   else if (act === 'plan') openPlan();
   else if (act === 'review') openReview();
+}
+
+const HELV_W = [278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584,761,556,0,222,556,333,1000,556,556,333,1000,667,333,1000,0,611,0,0,222,222,333,333,350,556,1000,333,1000,500,333,944,0,500,667,278,333,556,556,556,556,260,556,333,737,370,556,584,333,737,333,400,584,333,333,333,556,537,278,333,333,365,556,834,834,834,611,667,667,667,667,667,667,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,500,556,556,556,556,278,278,278,278,556,556,556,556,556,556,556,584,611,556,556,556,556,500,556,500];
+const HELVB_W = [278,333,474,556,556,889,722,238,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,333,333,584,584,584,611,975,722,722,722,722,667,611,778,722,278,556,722,611,833,722,778,667,778,722,667,611,722,667,944,667,667,611,333,278,333,584,556,333,556,611,556,611,556,333,611,611,278,278,556,278,889,611,611,611,611,389,556,333,611,556,778,556,556,500,389,280,389,584,761,556,0,278,556,500,1000,556,556,333,1000,667,333,1000,0,611,0,0,278,278,500,500,350,556,1000,333,1000,556,333,944,0,500,667,278,333,556,556,556,556,280,556,333,737,370,556,584,333,737,333,400,584,333,333,333,611,556,278,333,333,365,556,834,834,834,611,722,722,722,722,722,722,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,556,556,556,556,556,278,278,278,278,611,611,611,611,611,611,611,584,611,611,611,611,611,556,611,556];
+/* ---------- tiny PDF writer (standard fonts, text only) for NotebookLM source packs ---------- */
+const PDF_W_EXTRA = { 0x20AC: 0x80, 0x201A: 0x82, 0x0192: 0x83, 0x201E: 0x84, 0x2026: 0x85, 0x2020: 0x86, 0x2021: 0x87, 0x02C6: 0x88, 0x2030: 0x89, 0x0160: 0x8A, 0x2039: 0x8B, 0x0152: 0x8C, 0x017D: 0x8E,
+  0x2018: 0x91, 0x2019: 0x92, 0x201C: 0x93, 0x201D: 0x94, 0x2022: 0x95, 0x2013: 0x96, 0x2014: 0x97, 0x02DC: 0x98, 0x2122: 0x99, 0x0161: 0x9A, 0x203A: 0x9B, 0x0153: 0x9C, 0x017E: 0x9E, 0x0178: 0x9F };
+const PDF_TRANSLIT = {
+  'α': 'alpha', 'β': 'beta', 'γ': 'gamma', 'δ': 'delta', 'ε': 'epsilon', 'ζ': 'zeta', 'η': 'eta', 'θ': 'theta', 'ι': 'iota', 'κ': 'kappa', 'λ': 'lambda', 'μ': 'µ', 'ν': 'nu', 'ξ': 'xi', 'ο': 'o', 'π': 'pi', 'ρ': 'rho', 'σ': 'sigma', 'ς': 'sigma', 'τ': 'tau', 'υ': 'upsilon', 'φ': 'phi', 'χ': 'chi', 'ψ': 'psi', 'ω': 'omega',
+  'Γ': 'Gamma', 'Δ': 'Delta', 'Θ': 'Theta', 'Λ': 'Lambda', 'Ξ': 'Xi', 'Π': 'Pi', 'Σ': 'Sigma', 'Φ': 'Phi', 'Ψ': 'Psi', '\u03A9': 'Ohm', '\u2126': 'Ohm', '∆': 'Delta',
+  '→': '->', '←': '<-', '↔': '<->', '⇒': '=>', '⇐': '<=', '↑': '(up)', '↓': '(down)', '↻': '(repeats)', '↺': '(repeats)',
+  '≈': '~', '≃': '~', '≤': '<=', '≥': '>=', '≠': '!=', '√': 'sqrt', '∞': 'infinity', '∑': 'sum', '∫': 'integral', '∂': 'd', '−': '-', '∼': '~', '⋅': '·', '∙': '·', '∝': 'proportional to', '∈': 'in',
+  '⁰': '^0', '⁴': '^4', '⁵': '^5', '⁶': '^6', '⁷': '^7', '⁸': '^8', '⁹': '^9', '⁻': '^-', '⁺': '^+', 'ⁿ': '^n',
+  '₀': '0', '₁': '1', '₂': '2', '₃': '3', '₄': '4', '₅': '5', '₆': '6', '₇': '7', '₈': '8', '₉': '9', '꜀': 'c',
+  '☐': '[ ]', '☑': '[x]', '☒': '[x]', '✓': 'v', '✔': 'v', '✗': 'x', '★': '*', '☆': '*', '▶': '>', '●': '•', '◆': '•', '▲': '^', '′': "'", '″': '"', '℃': '°C', '№': 'No.', ' ': ' ', ' ': ' ', ' ': ' ', '​': '',
+};
+function pdfText(str) {
+  let out = '';
+  for (const ch of String(str == null ? '' : str).normalize('NFC')) {
+    const c = ch.codePointAt(0);
+    if (c === 9) { out += '    '; continue; }
+    if (c < 32 || c === 127) continue;
+    if (c < 127 || (c >= 0xA0 && c <= 0xFF)) { out += ch; continue; }
+    if (PDF_W_EXTRA[c]) { out += String.fromCharCode(PDF_W_EXTRA[c]); continue; }
+    if (PDF_TRANSLIT[ch] != null) { out += pdfText(PDF_TRANSLIT[ch]); continue; }
+    const base = ch.normalize('NFKD').replace(/[̀-ͯ]/g, '');
+    if (base && base !== ch && [...base].every(x => x.charCodeAt(0) < 127)) { out += base; continue; }
+    if (/\p{Extended_Pictographic}/u.test(ch) || /[️‍]/.test(ch)) continue;
+    out += '?';
+  }
+  return out;
+}
+const PDF_FONTS = { R: ['F1', 'Helvetica'], B: ['F2', 'Helvetica-Bold'], I: ['F3', 'Helvetica-Oblique'], M: ['F4', 'Courier'] };
+function pdfWidth(s, font, size) {
+  if (font === 'M') return s.length * 600 * size / 1000;
+  const tbl = font === 'B' ? HELVB_W : HELV_W;
+  let w = 0;
+  for (let i = 0; i < s.length; i++) { const c = s.charCodeAt(i); w += (c >= 32 && c <= 255 ? tbl[c - 32] : 0) || 556; }
+  return w * size / 1000;
+}
+function pdfWrap(s, font, size, maxW) {
+  const lines = [];
+  const fit = w => { // longest prefix of w that fits
+    let lo = 1, hi = w.length;
+    while (lo < hi) { const mid = Math.ceil((lo + hi) / 2); if (pdfWidth(w.slice(0, mid), font, size) <= maxW) lo = mid; else hi = mid - 1; }
+    return lo;
+  };
+  for (const para of String(s).split('\n')) {
+    let line = '';
+    for (let w of para.split(/ +/)) {
+      if (pdfWidth(w, font, size) > maxW) {
+        if (line) { lines.push(line); line = ''; }
+        while (pdfWidth(w, font, size) > maxW) { const k = fit(w); lines.push(w.slice(0, k)); w = w.slice(k); }
+      }
+      const t = line ? line + ' ' + w : w;
+      if (pdfWidth(t, font, size) <= maxW) line = t;
+      else { lines.push(line); line = w; }
+    }
+    lines.push(line);
+  }
+  return lines;
+}
+// A small layout engine: A4 pages, text ops, footer with page numbers.
+function pdfDoc(title) {
+  const W = 595.28, H = 841.89, M = 56, FOOT = 40;
+  const doc = { title, pages: [], y: 0, page: null, W, H, M, maxW: W - 2 * M };
+  const newPage = () => { doc.page = []; doc.pages.push(doc.page); doc.y = H - M; };
+  newPage();
+  const need = h2 => { if (doc.y - h2 < M + FOOT - 10) newPage(); };
+  doc.text = (s, o = {}) => {
+    const font = o.font || 'R', size = o.size || 10.5, lead = o.lead || size * 1.38, indent = o.indent || 0, gray = o.gray || 0;
+    const hang = o.hang || 0;
+    const lines = pdfWrap(pdfText(s), font, size, doc.maxW - indent - hang);
+    if (o.before) doc.y -= o.before;
+    if (o.keep) need(lead * Math.min(lines.length, 1) + (o.keep || 0));
+    lines.forEach((ln, i) => {
+      need(lead);
+      doc.y -= lead;
+      if (i === 0 && o.bullet) doc.page.push({ t: pdfText(o.bullet), font: 'R', size, x: M + indent, y: doc.y, gray });
+      doc.page.push({ t: ln, font, size, x: M + indent + hang, y: doc.y, gray });
+    });
+    if (o.after) doc.y -= o.after;
+  };
+  doc.rule = (gap = 8) => { need(gap * 2); doc.y -= gap; doc.page.push({ line: [M, doc.y, W - M, doc.y] }); doc.y -= gap; };
+  doc.space = n => { doc.y -= n; };
+  doc.newPage = newPage;
+  return doc;
+}
+function pdfEsc(s) { return s.replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)'); }
+function pdfBytes(doc) {
+  const n = doc.pages.length;
+  const objs = [];
+  const fontIds = {};
+  // 1 catalog, 2 pages, 3-6 fonts, then page + content pairs, then info
+  objs[1] = '<< /Type /Catalog /Pages 2 0 R >>';
+  let id = 3;
+  for (const k of ['R', 'B', 'I', 'M']) { fontIds[k] = id; objs[id++] = `<< /Type /Font /Subtype /Type1 /BaseFont /${PDF_FONTS[k][1]} /Encoding /WinAnsiEncoding >>`; }
+  const fontRes = '<< ' + ['R', 'B', 'I', 'M'].map(k => `/${PDF_FONTS[k][0]} ${fontIds[k]} 0 R`).join(' ') + ' >>';
+  const kids = [];
+  doc.pages.forEach((ops, i) => {
+    let cs = '';
+    for (const op of ops) {
+      if (op.line) cs += `0.8 G 0.6 w ${op.line[0].toFixed(2)} ${op.line[1].toFixed(2)} m ${op.line[2].toFixed(2)} ${op.line[3].toFixed(2)} l S\n`;
+      else cs += `BT /${PDF_FONTS[op.font][0]} ${op.size} Tf ${op.gray ? op.gray + ' g' : '0 g'} ${op.x.toFixed(2)} ${op.y.toFixed(2)} Td (${pdfEsc(op.t)}) Tj ET\n`;
+    }
+    const foot = pdfText(`${doc.title} · page ${i + 1} of ${n}`);
+    cs += `BT /F1 8 Tf 0.45 g ${doc.M} 30 Td (${pdfEsc(foot)}) Tj ET\n`;
+    const contentId = id++, pageId = id++;
+    objs[contentId] = `<< /Length ${cs.length} >>\nstream\n${cs}endstream`;
+    objs[pageId] = `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${doc.W} ${doc.H}] /Resources << /Font ${fontRes} >> /Contents ${contentId} 0 R >>`;
+    kids.push(pageId);
+  });
+  objs[2] = `<< /Type /Pages /Kids [${kids.map(k => k + ' 0 R').join(' ')}] /Count ${n} >>`;
+  const d = new Date();
+  const ts = `D:${d.getFullYear()}${pad2(d.getMonth() + 1)}${pad2(d.getDate())}${pad2(d.getHours())}${pad2(d.getMinutes())}${pad2(d.getSeconds())}`;
+  const infoId = id++;
+  objs[infoId] = `<< /Title (${pdfEsc(pdfText(doc.title).replace(/\xB7/g, '-').replace(/[^\x20-\x7e]/g, ''))}) /Producer (Kura) /Creator (Kura notebook) /CreationDate (${ts}) >>`;
+  let out = '%PDF-1.4\n%\xE2\xE3\xCF\xD3\n';
+  const offs = [];
+  for (let k = 1; k < objs.length; k++) { offs[k] = out.length; out += `${k} 0 obj\n${objs[k]}\nendobj\n`; }
+  const xref = out.length;
+  out += `xref\n0 ${objs.length}\n0000000000 65535 f \n`;
+  for (let k = 1; k < objs.length; k++) out += String(offs[k]).padStart(10, '0') + ' 00000 n \n';
+  out += `trailer\n<< /Size ${objs.length} /Root 1 0 R /Info ${infoId} 0 R >>\nstartxref\n${xref}\n%%EOF\n`;
+  const bytes = new Uint8Array(out.length);
+  for (let k = 0; k < out.length; k++) bytes[k] = out.charCodeAt(k) & 255;
+  return bytes;
+}
+// Markdown-ish note body → PDF blocks
+function pdfMarkdown(doc, md, base = {}) {
+  let para = [];
+  const flush = () => { if (para.length) { doc.text(para.join(' '), { ...base, after: 4 }); para = []; } };
+  for (const raw of String(md || '').split('\n')) {
+    const line = raw.replace(/\*\*([^*]+)\*\*/g, '$1').replace(/`([^`]+)`/g, '$1').trimEnd();
+    const hd = /^#{1,6}\s+(.*)$/.exec(line);
+    const step = /^\s*(?:[-*•]\s*)?\[( |x|X)?\]\s*(.+)$/.exec(line);
+    const bl = /^\s*(?:[-*•]|\d+[.)])\s+(.*)$/.exec(line);
+    if (hd) { flush(); doc.text(hd[1], { font: 'B', size: 10.5, before: 4, after: 1, keep: 30 }); continue; }
+    if (step) { flush(); doc.text(step[2], { ...base, bullet: step[1] && step[1].trim() ? '[x]' : '[ ]', hang: 18, indent: 4 }); continue; }
+    if (bl) { flush(); doc.text(bl[1], { ...base, bullet: '•', hang: 12, indent: 4 }); continue; }
+    if (!line.trim()) { flush(); continue; }
+    para.push(line.trim());
+  }
+  flush();
+}
+
+/* ---------- NotebookLM: send packs of notebook notes as PDF sources, save answers back as notes ---------- */
+const isNlmNote = n => !!(n && n.src && n.src.kind === 'notebooklm');
+function nlmScopeName(key) {
+  if (key === 'all') return 'All notes';
+  if (key.startsWith('cat:')) return (CAT_NAME[key.slice(4)] || 'Some') + ' notes';
+  if (key.startsWith('proj:')) { const p = projById(key.slice(5)); return p ? '#' + p.name : 'Project'; }
+  if (key.startsWith('note:')) { const n = noteById(key.slice(5)); return n ? n.title : 'Note'; }
+  return 'Notes';
+}
+function nlmNotes(s) {
+  const k = s.scope;
+  let list = (state.notes || []).slice();
+  if (k.startsWith('note:')) return list.filter(n => n.id === k.slice(5));
+  if (k.startsWith('cat:')) list = list.filter(n => catOf(n) === k.slice(4));
+  else if (k.startsWith('proj:')) list = list.filter(n => n.proj === k.slice(5));
+  if (s.skipNlm) list = list.filter(n => !isNlmNote(n));
+  if (s.period === 'since') { const at = (state.nlmPacks || {})[k] || 0; list = list.filter(n => (n.updated || n.created || 0) > at); }
+  else if (s.period !== 'all') { const since = Date.now() - Number(s.period) * 86400000; list = list.filter(n => (n.updated || n.created || 0) >= since); }
+  return list.sort((a, b) => (a.created || 0) - (b.created || 0));
+}
+const nlmFileName = s => `Kura - ${nlmScopeName(s.scope).replace(/^#/, '')} - ${TODAY}.pdf`.replace(/[\\/:*?"<>|#]/g, ' ').replace(/\s+/g, ' ').slice(0, 120);
+function nlmMeta(n) {
+  return [dayStr(new Date(n.created || 0)), CAT_NAME[catOf(n)], projOf(n) ? 'project #' + projOf(n).name : '', n.tpl && n.tpl !== 'blank' ? tplById(n.tpl).name + ' note' : '',
+    isNlmNote(n) ? 'from NotebookLM' + (n.src.notebook ? ` (${n.src.notebook})` : '') : '', (n.tags || []).filter(t => t !== 'notebooklm').map(t => '#' + t).join(' ')].filter(Boolean).join(' · ');
+}
+function nlmLinked(n) {
+  const linked = state.items.filter(it => it.noteId === n.id);
+  const tasks = linked.filter(it => it.bucket === 'make' || it.today);
+  const qs = linked.filter(it => !tasks.includes(it) && knownTags(it).includes('unr'));
+  return {
+    tasks: tasks.length ? tasks.map(it => ({ t: rowText(it).split('\n')[0], done: !!it.done, due: it.today })) : (n.tasks || []).map(t => ({ t, done: false })),
+    questions: qs.length ? qs.map(it => it.text) : (n.questions || []),
+  };
+}
+function nlmBuild(s) {
+  const notes = nlmNotes(s);
+  const scopeName = nlmScopeName(s.scope);
+  const title = `Kura · ${scopeName} · ${TODAY}`;
+  const doc = pdfDoc(title);
+  doc.text(`Kura notebook: ${scopeName}`, { font: 'B', size: 20, lead: 26 });
+  doc.text(`${notes.length} note${notes.length === 1 ? '' : 's'} · exported ${parseDay(TODAY).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })}${state.field ? ' · field: ' + state.field : ''}`, { size: 10, gray: 0.4, after: 6 });
+  doc.text('About this source: notes written in Kura, a personal research notebook. Each note has a title, date, category and project. The "Notes" section is the author\'s own record. "Technical context" was added by AI from general textbook knowledge; treat it as background, not as the author\'s findings.', { size: 9.5, gray: 0.3, after: 4 });
+  if (notes.length > 1) {
+    doc.rule(6);
+    doc.text('Contents', { font: 'B', size: 11, after: 2 });
+    notes.forEach((n, i) => doc.text(`${i + 1}. ${n.title} (${dayStr(new Date(n.created || 0))})`, { size: 9.5, indent: 4 }));
+  }
+  notes.forEach((n, i) => {
+    doc.rule(10);
+    doc.text(`${notes.length > 1 ? (i + 1) + '. ' : ''}${n.title}`, { font: 'B', size: 14, lead: 18, keep: 60 });
+    doc.text(nlmMeta(n), { size: 9, gray: 0.42, after: 4 });
+    if (isNlmNote(n) && n.src.question) doc.text('Question asked in NotebookLM: ' + n.src.question, { font: 'I', size: 10.5, after: 3 });
+    if (n.summary) doc.text(n.summary, { font: 'I', size: 10.5, after: 4 });
+    if ((n.points || []).length) {
+      doc.text('Key points', { font: 'B', size: 11, before: 2, keep: 30 });
+      n.points.forEach(p => doc.text(p, { bullet: '•', hang: 12, indent: 4 }));
+      doc.space(4);
+    }
+    doc.text('Notes', { font: 'B', size: 11, before: 2, keep: 30 });
+    pdfMarkdown(doc, n.note || n.raw || '');
+    if (s.ctx && (n.context || []).length) {
+      doc.text('Technical context (added by AI, general knowledge)', { font: 'B', size: 11, before: 4, keep: 30 });
+      n.context.forEach(c => doc.text(`${c.term}: ${c.explain}`, { bullet: '•', hang: 12, indent: 4, gray: 0.2 }));
+    }
+    if (s.tasks) {
+      const L = nlmLinked(n);
+      if (L.tasks.length) {
+        doc.text('Tasks', { font: 'B', size: 11, before: 4, keep: 30 });
+        L.tasks.forEach(x => doc.text(x.t + (x.done ? ' (done)' : x.due ? ` (planned ${x.due})` : ''), { bullet: x.done ? '[x]' : '[ ]', hang: 18, indent: 4 }));
+      }
+      if (L.questions.length) {
+        doc.text('Open questions', { font: 'B', size: 11, before: 4, keep: 30 });
+        L.questions.forEach(q => doc.text(q, { bullet: '?', hang: 12, indent: 4 }));
+      }
+    }
+    if (s.raw && n.raw && n.raw.trim() !== (n.note || '').trim()) {
+      doc.text('Original words', { font: 'B', size: 11, before: 4, keep: 30 });
+      doc.text(n.raw, { font: 'M', size: 8.5, lead: 11, gray: 0.25 });
+    }
+  });
+  if (!notes.length) doc.text('No notes matched this selection.', { size: 11, before: 10 });
+  return { bytes: pdfBytes(doc), pages: doc.pages.length, notes, title };
+}
+function nlmText(s) {
+  const notes = nlmNotes(s);
+  const out = [`Kura notebook: ${nlmScopeName(s.scope)} (${notes.length} notes, exported ${TODAY})`,
+    'The "Notes" sections are the author\'s own record. "Technical context" was added by AI from general knowledge.'];
+  for (const n of notes) {
+    out.push('', '=====', n.title, nlmMeta(n));
+    if (isNlmNote(n) && n.src.question) out.push('Question asked in NotebookLM: ' + n.src.question);
+    if (n.summary) out.push(n.summary);
+    if ((n.points || []).length) out.push('Key points:', ...n.points.map(p => '- ' + p));
+    out.push('Notes:', n.note || n.raw || '');
+    if (s.ctx && (n.context || []).length) out.push('Technical context (added by AI):', ...n.context.map(c => `- ${c.term}: ${c.explain}`));
+    if (s.tasks) {
+      const L = nlmLinked(n);
+      if (L.tasks.length) out.push('Tasks:', ...L.tasks.map(x => `- [${x.done ? 'x' : ' '}] ${x.t}${x.due && !x.done ? ' (planned ' + x.due + ')' : ''}`));
+      if (L.questions.length) out.push('Open questions:', ...L.questions.map(q => '- ' + q));
+    }
+    if (s.raw && n.raw && n.raw.trim() !== (n.note || '').trim()) out.push('Original words:', n.raw);
+  }
+  return out.join('\n');
+}
+function downloadBlob(blob, name) {
+  const url = URL.createObjectURL(blob);
+  const a = h('a', { href: url, download: name });
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
+function nlmRemember(s) {
+  state.nlmPacks = { ...(state.nlmPacks || {}), [s.scope]: Date.now() };
+  if (store.kvSet) store.kvSet('nlmPacks', state.nlmPacks).catch(() => {});
+}
+async function nlmSend(s, mode) {
+  const r = nlmBuild(s);
+  if (!r.notes.length) { toast('No notes match this selection.'); return; }
+  const name = nlmFileName(s);
+  const blob = new Blob([r.bytes], { type: 'application/pdf' });
+  if (mode === 'share') {
+    const file = new File([blob], name, { type: 'application/pdf' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title: r.title });
+        nlmRemember(s);
+        toast(`Pack sent: ${r.notes.length} note${r.notes.length === 1 ? '' : 's'}, ${r.pages} page${r.pages === 1 ? '' : 's'}`);
+        drawNlm();
+        return;
+      } catch (e) { if (e && e.name === 'AbortError') return; }
+    }
+  }
+  downloadBlob(blob, name);
+  nlmRemember(s);
+  toast(mode === 'share' ? `Sharing isn't available here, so the PDF was saved to Downloads. In NotebookLM tap + and pick it.` : `Saved ${name} to Downloads`);
+  drawNlm();
+}
+function tidyAnswer(t) {
+  return String(t || '').replace(/\r\n?/g, '\n').replace(/[ \t]+$/gm, '').replace(/^[ \t]*[•●▪◦][ \t]*/gm, '- ').replace(/\n{3,}/g, '\n\n').trim();
+}
+async function nlmSaveAnswer(s) {
+  const a = tidyAnswer(s.a);
+  if (!a) { toast('Paste the answer first.'); return; }
+  const q = String(s.q || '').trim();
+  const first = (a.split('\n').find(l => l.trim()) || '').replace(/^#+\s*|^-\s*/g, '');
+  const title = (q || first.split(/(?<=[.!?])\s/)[0] || 'NotebookLM answer').slice(0, 120);
+  const now = Date.now();
+  const n = {
+    id: newNoteId(), created: now, updated: now, title, raw: String(s.a).trim(), summary: '', points: [], note: a, context: [], tags: ['notebooklm'], ai: false,
+    cat: CATS.includes(s.cat) ? s.cat : guessCat(q + ' ' + a), proj: s.proj || null, tpl: 'blank', tasks: [], questions: [], itemIds: [], sentAt: null, obsPath: null,
+    src: { kind: 'notebooklm', notebook: String(s.nb || '').trim().slice(0, 80), question: q.slice(0, 600), link: s.link || '' },
+  };
+  await store.putNote(n).catch(onWriteError);
+  state.notes = [...(state.notes || []).filter(x => x.id !== n.id), n];
+  if (n.src.notebook) { state.nlmNotebook = n.src.notebook; if (store.kvSet) store.kvSet('nlmNotebook', n.src.notebook).catch(() => {}); }
+  closeSheet();
+  openNotebook(n.id);
+  toast(state.sample ? 'Saved. Tap Re-comprehend to pull out tasks and glossary terms.' : 'Saved as a notebook note');
+  checkTrophies();
+}
+function openNlm(o = {}) {
+  state.sheet = {
+    kind: 'nlm', tab: o.tab || 'send', scope: o.scope || 'all', period: 'all', ctx: true, tasks: true, raw: false, skipNlm: true,
+    q: o.q || '', a: o.a || '', nb: state.nlmNotebook || '', cat: null, proj: o.proj || null, link: o.link || '', hint: o.hint || '',
+  };
+  drawNlm();
+}
+function drawNlm() {
+  const s = state.sheet;
+  if (!s || s.kind !== 'nlm') return;
+  const tabBtn = (k, l) => h('button', { type: 'button', id: 'nlm-tab-' + k, 'aria-pressed': String(s.tab === k), onclick: () => { s.tab = k; drawNlm(); } }, l);
+  const body = h('div', { class: 'sheet-body' }, h('div', { class: 'seg nb-tabs', role: 'group', 'aria-label': 'Direction' }, tabBtn('send', 'SEND TO NOTEBOOKLM'), tabBtn('save', 'SAVE AN ANSWER')));
+  const foot = h('div', { class: 'sheet-foot' });
+  const chk = (key, label) => {
+    const c = h('input', { type: 'checkbox', id: 'nlm-' + key });
+    c.checked = !!s[key];
+    c.addEventListener('change', () => { s[key] = c.checked; drawNlm(); });
+    return h('label', { class: 'keep', for: 'nlm-' + key }, c, label);
+  };
+  if (s.tab === 'send') {
+    const isNote = s.scope.startsWith('note:');
+    const scopes = [['all', 'All notebook notes'], ...CATS.map(c => ['cat:' + c, CAT_NAME[c] + ' notes']), ...(state.projects || []).filter(p => !p.archived).map(p => ['proj:' + p.id, 'Project #' + p.name])];
+    if (isNote) scopes.unshift([s.scope, 'This note: ' + nlmScopeName(s.scope)]);
+    const sc = h('select', { class: 'field-in', id: 'nlm-scope', 'aria-label': 'Which notes' }, scopes.map(([v, l]) => h('option', { value: v, text: l })));
+    sc.value = s.scope;
+    sc.addEventListener('change', () => { s.scope = sc.value; if (s.period === 'since' && !(state.nlmPacks || {})[s.scope]) s.period = 'all'; drawNlm(); });
+    const last = (state.nlmPacks || {})[s.scope];
+    const periods = [['all', 'Any date'], ['7', 'Last 7 days'], ['30', 'Last 30 days'], ['90', 'Last 90 days'], ...(last ? [['since', `New or changed since last pack (${rel(last)})`]] : [])];
+    const pe = h('select', { class: 'field-in', id: 'nlm-period', 'aria-label': 'Which dates' }, periods.map(([v, l]) => h('option', { value: v, text: l })));
+    pe.value = s.period;
+    pe.addEventListener('change', () => { s.period = pe.value; drawNlm(); });
+    const r = nlmBuild(s);
+    body.append(
+      h('p', { class: 'muted', text: 'Kura turns your notebook notes into a clean PDF. Share it to the NotebookLM app and pick a notebook: it becomes a source you can ask questions of, turn into an Audio Overview, and so on.' }),
+      h('div', { class: 'row' }, h('div', { class: 'stack', style: 'flex:1;min-width:180px' }, h('span', { class: 'lbl', text: 'Notes' }), sc),
+        isNote ? null : h('div', { class: 'stack', style: 'flex:1;min-width:180px' }, h('span', { class: 'lbl', text: 'Dates' }), pe)),
+      h('div', { class: 'row' }, chk('ctx', 'Technical context'), chk('tasks', 'Tasks and open questions'), chk('raw', 'My original words'), isNote ? null : chk('skipNlm', 'Skip notes that came from NotebookLM')),
+      h('div', { class: 'nb-ctx', id: 'nlm-preview' },
+        h('span', { class: 'lbl', text: `${r.notes.length} note${r.notes.length === 1 ? '' : 's'} · ${r.pages} page${r.pages === 1 ? '' : 's'} · ${nlmFileName(s)}` }),
+        r.notes.length ? h('ul', { class: 'rv-done' }, r.notes.slice(0, 8).map(n => h('li', { text: n.title })), r.notes.length > 8 ? h('li', { text: `and ${r.notes.length - 8} more` }) : null)
+          : h('p', { class: 'muted', text: 'No notebook notes match. Try another project, category or date range.' })),
+      last ? h('p', { class: 'muted', text: `Last pack for this selection went out ${rel(last)}. NotebookLM keeps every pack as its own source, so delete the older one there, or send only what's new or changed.` })
+        : h('p', { class: 'muted', text: 'Tip: one pack per project keeps NotebookLM answers focused.' }));
+    foot.append(
+      h('button', { class: 'btn', id: 'nlm-copy', type: 'button', disabled: !r.notes.length, onclick: async () => {
+        try { await navigator.clipboard.writeText(nlmText(s)); nlmRemember(s); toast('Copied. In NotebookLM, add a source, choose Copied text and paste.'); }
+        catch (e) { toast("Couldn't copy on this device. Use Download instead."); }
+      } }, 'Copy as text'),
+      h('button', { class: 'btn', id: 'nlm-download', type: 'button', disabled: !r.notes.length, onclick: () => nlmSend(s, 'download') }, 'Download'),
+      h('span', { class: 'grow' }),
+      h('button', { class: 'btn primary', id: 'nlm-share', type: 'button', disabled: !r.notes.length, onclick: () => nlmSend(s, 'share') }, 'Share PDF'));
+  } else {
+    const q = h('input', { class: 'field-in', id: 'nlm-q', type: 'text', placeholder: 'What you asked (optional, becomes the title)', 'aria-label': 'Your question' });
+    q.value = s.q;
+    q.addEventListener('input', () => { s.q = q.value; });
+    const a = h('textarea', { class: 'field-in', id: 'nlm-a', placeholder: "Paste NotebookLM's answer here", 'aria-label': 'Answer', style: 'min-height:180px' });
+    a.value = s.a;
+    a.addEventListener('input', () => { s.a = a.value; });
+    const nb = h('input', { class: 'field-in', id: 'nlm-nb', type: 'text', placeholder: 'e.g. Catheter tip literature', 'aria-label': 'NotebookLM notebook name' });
+    nb.value = s.nb;
+    nb.addEventListener('input', () => { s.nb = nb.value; });
+    const guess = guessCat(s.q + ' ' + s.a);
+    body.append(
+      s.hint ? h('p', { class: 'muted', text: s.hint }) : null,
+      h('p', { class: 'muted', text: 'In NotebookLM, copy an answer (or a saved note) and paste it here. It becomes a notebook note tagged #notebooklm, with the question and notebook kept alongside it.' }),
+      q, a,
+      navigator.clipboard && navigator.clipboard.readText ? h('div', { class: 'row' }, h('button', { class: 'btn', type: 'button', onclick: async () => {
+        try { s.a = await navigator.clipboard.readText(); drawNlm(); } catch (e) { toast('Long-press the box and choose Paste.'); }
+      } }, 'Paste from clipboard')) : null,
+      h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'Which NotebookLM notebook (optional)' }), nb),
+      h('div', { class: 'stack' }, h('span', { class: 'lbl', text: s.cat ? 'Category · project' : 'Category (guessed) · project' }),
+        h('div', { class: 'row', id: 'nlm-cat' }, catSeg(s.cat || guess, c => { s.cat = c; }), projPicker(s.proj, v => { s.proj = v; }, () => s.cat || guess))));
+    foot.append(h('span', { class: 'grow' }), h('button', { class: 'btn primary', id: 'nlm-save', type: 'button', onclick: () => nlmSaveAnswer(s) }, 'Save as note'));
+  }
+  const prev = $('.sheet-body', els.sheet);
+  const keep = prev && els.sheet.querySelector('[aria-label="NotebookLM"]') ? prev.scrollTop : 0;
+  showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'NotebookLM' }, head('NOTEBOOKLM', s.tab === 'send' ? 'send a source pack' : 'save an answer'), body, foot));
+  body.scrollTop = keep;
 }
 
 // v14 wiring
@@ -5578,6 +5975,8 @@ async function boot() {
     }
   }
   state.projects = store.kvGet ? ((await store.kvGet('projects').catch(() => null)) || []) : [];
+  state.nlmPacks = store.kvGet ? ((await store.kvGet('nlmPacks').catch(() => null)) || {}) : {};
+  state.nlmNotebook = store.kvGet ? ((await store.kvGet('nlmNotebook').catch(() => '')) || '') : '';
   state.lastReview = store.kvGet ? ((await store.kvGet('lastReview').catch(() => '')) || '') : '';
   try { state.dayView = localStorage.getItem('kura.dayview') === 'week' ? 'week' : 'today'; } catch (e) { state.dayView = 'today'; }
   if (store.kvGet) {
