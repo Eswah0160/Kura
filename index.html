@@ -868,12 +868,17 @@ body.timing.focusing .toast { top: calc(var(--vvt, 0px) + var(--vvh, 100vh) - en
   .dayseg button[data-v="month"] { display: none; }
 }
 @media (max-width: 719px) {
-  .work > .cal { grid-area: pane; display: none; }
-  .app[data-tab="today"][data-dayview="month"] .work > .cal { display: flex; overflow: auto; }
-  .app[data-tab="today"][data-dayview="month"] .work > .today { display: none; }
-  .cal-grid { grid-auto-rows: 54px; flex: none; }
+  body .work { grid-template-rows: auto auto auto minmax(0, 1fr); grid-template-areas: "pad" "cal" "tabs" "pane"; }
+  body.short .work, body .app.capturing .work { grid-template-rows: auto auto minmax(0, 1fr); grid-template-areas: "pad" "tabs" "pane"; }
+  .work > .cal { grid-area: cal; display: flex; flex: none; }
+  .cal-head { padding: 6px 10px 5px; }
+  .cal-head .name { font-size: 10.5px; }
+  .cal-grid { grid-auto-rows: 40px; flex: none; padding: 2px 8px 6px; }
+  .cal.week .cal-grid { grid-auto-rows: 44px; }
   .cal-n { font-size: 14px; line-height: 20px; min-width: 22px; }
   .m-open { font-size: 10px; line-height: 14px; }
+  .cal-toggle { margin-left: 2px; }
+  .short .work > .cal, .app.capturing .work > .cal { display: none; }
 }
 .lane-more { list-style: none; padding: 12px 0; text-align: center; }
 .list > .li { -webkit-touch-callout: none; }
@@ -907,6 +912,8 @@ body.timing.focusing .toast { top: calc(var(--vvt, 0px) + var(--vvh, 100vh) - en
 .critter.r-ultra.met b::after, .critter.r-legendary.met b::after { content: " ✦"; }
 .critter.r-legendary.met .critter-art svg { filter: drop-shadow(0 0 2px var(--lcd-ink, var(--ink))); }
 @media (prefers-reduced-motion: reduce) { .pet.ultra::before, .pet.legendary::before { animation: none; opacity: 1; } }
+/* v21: Android app */
+html.native .fit { top: calc(var(--vvt, 0px) + env(safe-area-inset-top, var(--safe-area-inset-top, 0px))); }
 /* short screens: keyboard up on the Fold leaves roughly a 4:3 area */
 .short .field, .short .wordmark, .short .tags-lbl { display: none; }
 .short .widget { padding-block: 4px; }
@@ -1110,7 +1117,7 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
 (() => {
 'use strict';
 
-const APP_VERSION = 'v20';
+const APP_VERSION = 'v21';
 /* ---------- helpers ---------- */
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -1259,6 +1266,120 @@ function parseMarks(text) {
   return rest ? { text: rest, tags } : { text: text.trim(), tags: [] };
 }
 
+/* ---------- v21: running as the Kura Android app (Capacitor) ----------
+   In the app, everything is stored in the app's own storage on the phone, not in Chrome.
+   These shims route the few web features an app WebView lacks to Android itself. */
+const NATIVE = !!(window.Capacitor && typeof window.Capacitor.isNativePlatform === 'function' && window.Capacitor.isNativePlatform());
+const Plug = NATIVE ? (window.Capacitor.Plugins || {}) : {};
+async function nativeSave(name, blob) {
+  const F = Plug.Filesystem;
+  const safe = String(name || 'kura-file').replace(/[^\w.-]+/g, '-');
+  const data = await blobToB64(blob);
+  const share = async () => {
+    try {
+      const c = await F.writeFile({ path: 'share/' + safe, data, directory: 'CACHE', recursive: true });
+      await Plug.Share.share({ title: safe, files: [c.uri], dialogTitle: 'Save or send ' + safe });
+    } catch (e) {}
+  };
+  let saved = false;
+  try { await F.writeFile({ path: 'Kura/' + safe, data, directory: 'DOCUMENTS', recursive: true }); saved = true; } catch (e) {}
+  if (saved) toast(`Saved to Documents/Kura/${safe}`, { label: 'Share', fn: share });
+  else await share();
+}
+class NativeSpeech {
+  constructor() { this.lang = navigator.language || 'en-AU'; this.interimResults = true; this.continuous = false; this.onresult = null; this.onerror = null; this.onend = null; this._subs = []; this._done = false; }
+  async start() {
+    const P = Plug.SpeechRecognition;
+    const emit = t => { if (t && this.onresult) this.onresult({ results: [[{ transcript: t }]] }); };
+    try {
+      const av = await P.available();
+      if (!av || !av.available) throw { error: 'service-not-allowed' };
+      let perm = await P.checkPermissions();
+      if (!perm || perm.speechRecognition !== 'granted') perm = await P.requestPermissions();
+      if (!perm || perm.speechRecognition !== 'granted') throw { error: 'not-allowed' };
+      this._subs.push(await P.addListener('partialResults', d => emit(((d && d.matches) || [])[0])));
+      this._subs.push(await P.addListener('listeningState', d => { if (d && d.status === 'stopped') this._end(); }));
+      const r = await P.start({ language: this.lang, maxResults: 1, partialResults: true, popup: false });
+      if (r && r.matches && r.matches[0]) emit(r.matches[0]);
+    } catch (e) {
+      if (this.onerror) this.onerror({ error: (e && e.error) || (/permission/i.test(String(e && e.message)) ? 'not-allowed' : 'aborted') });
+      this._end();
+    }
+  }
+  stop() { try { Plug.SpeechRecognition.stop(); } catch (e) {} setTimeout(() => this._end(), 400); }
+  abort() { this.stop(); }
+  _end() {
+    if (this._done) return;
+    this._done = true;
+    for (const s of this._subs) { try { s.remove(); } catch (e) {} }
+    if (this.onend) this.onend();
+  }
+}
+if (NATIVE) {
+  document.documentElement.classList.add('native');
+  // links to other apps (Obsidian, email) open through Android
+  if (!window.__kuraOpen) {
+    window.__kuraOpen = u => {
+      if (Plug.AppLauncher) Plug.AppLauncher.openUrl({ url: u }).catch(() => { try { location.href = u; } catch (e) {} });
+      else location.href = u;
+    };
+  }
+  if (Plug.Clipboard) {
+    try {
+      Object.defineProperty(navigator, 'clipboard', { configurable: true, value: {
+        writeText: t => Plug.Clipboard.write({ string: String(t) }),
+        readText: async () => ((await Plug.Clipboard.read()) || {}).value || '',
+      } });
+    } catch (e) {}
+  }
+  if (Plug.Share) {
+    const toCache = async f => (await Plug.Filesystem.writeFile({ path: 'share/' + String(f.name || 'file').replace(/[^\w.-]+/g, '-'), data: await blobToB64(f), directory: 'CACHE', recursive: true })).uri;
+    navigator.canShare = () => true;
+    navigator.share = async d => {
+      const files = [];
+      if (d && d.files && d.files.length && Plug.Filesystem) for (const f of d.files) files.push(await toCache(f));
+      try {
+        await Plug.Share.share({ title: (d && d.title) || undefined, text: (d && d.text) || undefined, url: (d && d.url) || undefined, files: files.length ? files : undefined, dialogTitle: (d && d.title) || 'Share' });
+      } catch (e) {
+        const err = new Error(String((e && e.message) || e));
+        if (/cancel/i.test(err.message)) err.name = 'AbortError';
+        throw err;
+      }
+    };
+  }
+  if (Plug.KeepAwake) {
+    try {
+      Object.defineProperty(navigator, 'wakeLock', { configurable: true, value: {
+        request: async () => {
+          await Plug.KeepAwake.keepAwake();
+          return { released: false, addEventListener() {}, release: async () => { await Plug.KeepAwake.allowSleep(); } };
+        },
+      } });
+    } catch (e) {}
+  }
+  if (Plug.SpeechRecognition) window.SpeechRecognition = NativeSpeech;
+  // downloads (backups, PDFs) are saved to Documents/Kura, with the share sheet one tap away
+  const aClick = HTMLAnchorElement.prototype.click;
+  HTMLAnchorElement.prototype.click = function () {
+    if (this.hasAttribute('download') && /^(blob|data):/.test(this.href) && Plug.Filesystem) {
+      const name = this.getAttribute('download') || 'kura-file';
+      fetch(this.href).then(r => r.blob()).then(b => nativeSave(name, b)).catch(() => toast("Couldn't save that file."));
+      return;
+    }
+    return aClick.call(this);
+  };
+}
+// Android share sheet → Kura (the app's MainActivity calls this)
+let pendingShare = null;
+window.__kuraShareIn = d => {
+  const pay = { title: String((d && d.title) || ''), text: String((d && d.text) || ''), url: '' };
+  const m = /https?:\/\/\S+/.exec(pay.text);
+  if (m && pay.text.trim() === m[0]) { pay.url = m[0]; pay.text = ''; }
+  if (!pay.title && !pay.text && !pay.url) return;
+  if (state.booting || !state.items) { pendingShare = pay; return; }
+  openShared(pay);
+};
+
 /* ---------- state ---------- */
 const state = {
   items: [],
@@ -1353,6 +1474,7 @@ async function localStore() {
       return id;
     },
     getPhoto(id) { return idbReq(db, 'photos', 'readonly', st => st.get(id)); },
+    putPhotoAs(id, blob) { return idbReq(db, 'photos', 'readwrite', st => st.put(blob, id)); },
     kvGet(k) { return idbReq(db, 'kv', 'readonly', st => st.get(k)); },
     kvSet(k, v) { return idbReq(db, 'kv', 'readwrite', st => st.put(v, k)); },
     kvDel(k) { return idbReq(db, 'kv', 'readwrite', st => st.delete(k)); },
@@ -4098,7 +4220,7 @@ function drawWeek(items, filtering) {
   els.todayEmpty.textContent = filtering ? 'No matches.' : 'Nothing planned for the next 7 days. Type a date with a task, like "Submit abstract fri" or "Lab meeting prep every mon".';
 }
 function setDayView(v) {
-  state.dayView = ['today', 'week', 'month'].includes(v) ? v : 'today';
+  state.dayView = v === 'week' ? 'week' : 'today';
   try { localStorage.setItem('kura.dayview', state.dayView); } catch (e) {}
   els.app.dataset.dayview = state.dayView;
   const nm = document.getElementById('today-h');
@@ -4937,7 +5059,7 @@ let focusTimer = null, wakeLock = null;
 const fmtClock = ms => { const s = Math.max(0, Math.ceil(ms / 1000)); return pad2(Math.floor(s / 60)) + ':' + pad2(s % 60); };
 const fmtMin = m => (m >= 60 ? `${Math.floor(m / 60)} h ${m % 60 ? (m % 60) + ' min' : ''}`.trim() : `${m} min`);
 function focusLeft() { const f = state.focus; if (!f) return 0; return f.paused ? f.left : Math.max(0, f.endsAt - Date.now()); }
-function saveFocus() { try { if (state.focus) localStorage.setItem('kura.focus', JSON.stringify(state.focus)); else localStorage.removeItem('kura.focus'); } catch (e) {} }
+function saveFocus() { try { if (state.focus) localStorage.setItem('kura.focus', JSON.stringify(state.focus)); else localStorage.removeItem('kura.focus'); } catch (e) {} nativeFocusSync(); }
 async function holdWake(on) {
   try {
     if (on && !wakeLock && 'wakeLock' in navigator && document.visibilityState === 'visible') {
@@ -6023,6 +6145,11 @@ function drawNlm() {
 // Block types: p (paragraph), h (small heading), steps (numbered), list (bullets), table ([left, right] rows), note (aside), try ([label, action] buttons)
 const GUIDE = [
   { id: 'new', icon: 'trophy', title: "What's new", blocks: [
+    { h: 'v21' }, { list: [
+      '**Kura as an Android app**: a real app with its own storage on the phone, not in Chrome. See the chapter "Kura as an Android app".',
+      '**Calendar on the cover screen**: a week strip under the pad that opens into the full month (**Month ▾**).',
+      '**Backups include photos and settings** (not your AI key), so moving to the app or a new phone brings everything.',
+    ] },
     { h: 'v20' }, { list: [
       '**Calendar** on the home screen: a month beside TODAY on the unfolded screen (the Day · Week · Month switch on the cover screen). Tap a day to see it, add to it, or plan tasks from MAKE onto it.',
       '**Long-press any task** for quick actions: Today, Tomorrow, Next week, pick a day, Done, Focus, Lab, move list or delete.',
@@ -6154,7 +6281,7 @@ const GUIDE = [
     { try: [['Done log', 'log']] },
   ] },
   { id: 'calendar', icon: 'cal', title: 'The calendar', blocks: [
-    { p: 'Unfolded, the month sits between the pad and TODAY. On the cover screen, choose **Month** in the TODAY switch. Swipe the calendar sideways, or use ‹ ›, to change month; **Today** jumps back.' },
+    { p: 'Unfolded, the month sits between the pad and TODAY. On the cover screen, this week sits under the pad; tap **Month ▾** to open the whole month and **Week ▴** to fold it back. Swipe the calendar sideways, or use ‹ ›, to move; **Today** jumps back. It hides while the keyboard is up.' },
     { table: [
       ['Black number', 'Tasks planned for that day'],
       ['Red number', 'Planned tasks that are now overdue'],
@@ -6448,10 +6575,31 @@ const GUIDE = [
     ] },
     { try: [['Critter Log', 'critters']] },
   ] },
+  { id: 'android', icon: 'gear', title: 'Kura as an Android app', blocks: [
+    { p: 'The Kura app is the same Kura, packaged as a normal Android app. Its data lives in the app\'s own storage on your phone, so Chrome is not involved: clearing Chrome, or uninstalling it, does not touch your notes.' },
+    { h: 'What the app adds' },
+    { list: [
+      '**Its own storage**, plus an automatic saved copy after every change and a daily copy in Documents/Kura.',
+      '**Timer alarms that ring when Kura is closed**: bench timers and focus sessions use Android notifications.',
+      '**Works fully offline**: the fonts and the whole app are inside the app.',
+      'Voice input, sharing, photos, Share → Kura, Obsidian and email all go through Android.',
+    ] },
+    { h: 'Moving your notes into the app' },
+    { steps: [
+      'In the old Kura (Chrome): ⋯ More → Settings → Backup → **Export backup**.',
+      'Install the Kura app and open it.',
+      'In the app: ⋯ More → Settings → Backup → **Import backup**, pick the file from Downloads, and tap **Import**.',
+      'Add your AI key again (Settings → AI). It is not in backups, on purpose.',
+      'Check everything is there, then remove the old Kura icon.',
+    ] },
+    { h: 'Updating the app' },
+    { p: 'Updates come as a new app file (APK). Install it over the top of the old one: your notes stay, because each version is signed with the same key.' },
+    { note: 'Keep the signing key file safe. An update signed with a different key cannot replace the app, and you would have to export, uninstall and import.' },
+  ] },
   { id: 'backup', icon: 'list', title: 'Backup, updates and installing', blocks: [
     { h: 'Your data' },
-    { p: 'Notes, the notebook, the glossary, projects, stats and settings are stored in Chrome\'s storage for Kura on this phone. Nothing goes to a Kura server; there isn\'t one.' },
-    { list: ['Settings → Backup → **Export backup** saves a .json file. **Import backup** adds it back on any phone. Photos are not included.', 'Clearing Chrome\'s data for the Kura site, or uninstalling the app, can erase your notes. Export first.'] },
+    { p: 'In the **Kura Android app**, notes, the notebook, the glossary, projects, experiments, photos and settings are stored inside the app on this phone. In the web version they are stored in Chrome\'s storage for the Kura site. Either way nothing goes to a Kura server; there isn\'t one.' },
+    { list: ['Settings → Backup → **Export backup** saves one .json file with everything, including photos and settings (not your AI key). **Import backup** adds it back on any phone or in the app.', 'The app also keeps its own saved copy, updated after every change, and a daily copy of your notes in **Documents/Kura** that stays even if the app is removed: after a reinstall, import the newest one. Photos are only in exported backups, so export one now and then too.', 'Web version only: clearing Chrome\'s data for the Kura site can erase your notes. Export first.'] },
     { h: 'Updating' },
     { steps: ['Upload the new index.html and sw.js (and manifest.webmanifest when included) to your GitHub Pages repository.', 'Open Kura, close it, and open it again. Settings shows the new version number.'] },
     { h: 'Installing' },
@@ -7207,11 +7355,16 @@ els.route.addEventListener('click', e => { if (e.target.closest('.chip') && stat
 /* ---------- v18: home banner, one message at a time ---------- */
 function bannerMsgs() {
   const out = [];
+  if (state.restoreOffer) {
+    const d = state.restoreOffer;
+    out.push({ id: 'restore', text: `Kura found its saved copy from ${new Date(d.exportedAt || Date.now()).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })} with ${(n => n + (n === 1 ? ' note' : ' notes'))(d.items.filter(i => i && !i.example).length)}. Restore it?`,
+      act: ['Restore', async () => { state.restoreOffer = null; drawBanner(); const ex = state.items.filter(i => i.example).map(i => i.id); for (const id of ex) await store.remove(id).catch(() => {}); await doImport({ ...d, items: d.items.filter(i => i && !i.example) }); toast('Restored from the saved copy'); }], later: () => { state.restoreOffer = null; }, laterLabel: 'No' });
+  }
   if (bannerMsg) out.push({ id: 'msg', text: bannerMsg });
   if (reviewDue() && !state.reviewDismissed) out.push({ id: 'review', text: 'Weekly review time: tidy loose ends and plan next week.', act: ['Start review', () => openReview()], later: () => { state.reviewDismissed = true; } });
   if (state.seenVersion !== undefined && state.seenVersion !== APP_VERSION) {
     const fresh = !state.seenVersion && !state.items.some(i => !i.example);
-    out.push({ id: 'ver', text: fresh ? 'New to Kura? The user guide shows how everything works.' : `Updated to ${APP_VERSION}: a calendar on the home screen, long-press menus on tasks, a faster app, and ultra and legendary critters.`,
+    out.push({ id: 'ver', text: fresh ? 'New to Kura? The user guide shows how everything works.' : `Updated to ${APP_VERSION}: the calendar is on the cover screen too, and backups now include photos.`,
       act: [fresh ? 'Open the guide' : "What's new", () => openGuide(fresh ? 'start' : 'new'), 'banner-guide'], later: () => markSeen(), laterLabel: 'Got it' });
   }
   const missing = [!state.sample && 'a free AI key', !state.obs && 'your Obsidian vault'].filter(Boolean);
@@ -7564,7 +7717,7 @@ Reply with only JSON: {"aims": [], "methods": [], "results": [], "summary": ""}`
 
 /* ---------- 3. bench timers (work across the app; logged into the experiment) ---------- */
 const runningTimers = () => (state.timers || []).filter(t => !t.doneAt);
-function saveTimers() { try { localStorage.setItem('kura.timers', JSON.stringify(state.timers || [])); } catch (e) {} }
+function saveTimers() { try { localStorage.setItem('kura.timers', JSON.stringify(state.timers || [])); } catch (e) {} nativeTimersSync(); }
 function alarm() {
   try { const a = audio(); if (a) { SFX.chime(a); setTimeout(() => { try { SFX.chime(a); } catch (e) {} }, 650); } } catch (e) {}
   try { if (navigator.vibrate && (!navigator.userActivation || navigator.userActivation.hasBeenActive)) navigator.vibrate([250, 120, 250, 120, 500]); } catch (e) {}
@@ -8007,10 +8160,10 @@ const renderSoon = () => { clearTimeout(renderT); renderT = setTimeout(render, 9
 
 /* ---------- v20: day views and the calendar ---------- */
 const isWide = () => innerWidth >= 720;
-const dayViewNow = () => (isWide() && state.dayView === 'month' ? 'today' : state.dayView || 'today');
+const dayViewNow = () => (state.dayView === 'week' ? 'week' : 'today');
 function daySeg() {
   const v = dayViewNow();
-  return h('div', { class: 'dayseg', role: 'group', 'aria-label': 'View' }, [['today', 'Day'], ['week', 'Week'], ['month', 'Month']].map(([k, l]) => h('button', {
+  return h('div', { class: 'dayseg', role: 'group', 'aria-label': 'View' }, [['today', 'Day'], ['week', 'Week']].map(([k, l]) => h('button', {
     type: 'button', 'data-v': k, 'aria-pressed': String(v === k), onclick: () => setDayView(k),
   }, l)));
 }
@@ -8046,27 +8199,53 @@ function calData(days) {
   return m;
 }
 let calSig = '';
+const calWeekStart = () => state.calWeek || mondayOf(TODAY);
+function calShift(n) {
+  const weekMode = !isWide() && !state.calOpen;
+  if (weekMode) { const w = addDays(calWeekStart(), 7 * n); state.calWeek = w === mondayOf(TODAY) ? null : w; }
+  else { const m2 = shiftMonth(state.calMonth || monthKey(TODAY), n); state.calMonth = m2 === monthKey(TODAY) ? null : m2; }
+  drawCal();
+}
+function setCalOpen(open) {
+  state.calOpen = !!open;
+  try { localStorage.setItem('kura.calopen', open ? '1' : ''); } catch (e) {}
+  if (open) { const m = state.calWeek ? monthKey(addDays(state.calWeek, 3)) : null; state.calMonth = m === monthKey(TODAY) ? null : m; }
+  else state.calWeek = null;
+  calSig = '';
+  drawCal();
+}
 function drawCal() {
   const el = document.getElementById('cal');
-  if (!el) return;
-  const shown = isWide() ? !els.app.classList.contains('capturing') : state.tab === 'today' && state.dayView === 'month';
-  if (!shown) return;
-  const mk = state.calMonth || monthKey(TODAY);
-  const days = calRange(mk);
+  if (!el || els.app.classList.contains('capturing')) return;
+  const wide = isWide();
+  const weekMode = !wide && !state.calOpen;
+  let days, mk, title;
+  if (weekMode) {
+    const ws = calWeekStart();
+    days = Array.from({ length: 7 }, (_, i) => addDays(ws, i));
+    mk = monthKey(addDays(ws, 3));
+    const a = parseDay(days[0]), b = parseDay(days[6]);
+    const mon = d => d.toLocaleDateString('en-AU', { month: 'short' });
+    title = a.getMonth() === b.getMonth() ? `${a.getDate()}–${b.getDate()} ${mon(a)} ${a.getFullYear()}` : `${a.getDate()} ${mon(a)} – ${b.getDate()} ${mon(b)}`;
+  } else {
+    mk = state.calMonth || monthKey(TODAY);
+    days = calRange(mk);
+    const [y, mo] = mk.split('-').map(Number);
+    title = new Date(y, mo - 1, 1).toLocaleDateString('en-AU', { month: 'long', year: 'numeric' });
+  }
   const data = calData(days);
-  const sig = [mk, TODAY, isWide(), dayViewNow(), ...days.map(d => { const v = data.get(d); return `${v.open}.${v.late}.${v.done}.${v.rep}.${v.exp}.${v.logged ? 1 : 0}`; })].join('|');
+  const sig = [weekMode ? 'w' : 'm', days[0], mk, TODAY, wide, ...days.map(d => { const v = data.get(d); return `${v.open}.${v.late}.${v.done}.${v.rep}.${v.exp}.${v.logged ? 1 : 0}`; })].join('|');
   if (sig === calSig && el.children.length) return;
   calSig = sig;
-  const [y, mo] = mk.split('-').map(Number);
-  const title = new Date(y, mo - 1, 1).toLocaleDateString('en-AU', { month: 'long', year: 'numeric' });
-  const go = mk2 => { state.calMonth = mk2 === monthKey(TODAY) ? null : mk2; drawCal(); };
+  el.classList.toggle('week', weekMode);
+  const atHome = weekMode ? calWeekStart() === mondayOf(TODAY) : mk === monthKey(TODAY);
   const head = h('div', { class: 'box-head cal-head' },
     h('span', { class: 'name', id: 'cal-title', text: title.toUpperCase() }),
-    mk !== monthKey(TODAY) ? h('button', { class: 'link-btn', type: 'button', id: 'cal-today', onclick: () => go(monthKey(TODAY)) }, 'Today') : null,
+    atHome ? null : h('button', { class: 'link-btn', type: 'button', id: 'cal-today', onclick: () => { state.calWeek = null; state.calMonth = null; drawCal(); } }, 'Today'),
     h('span', { class: 'grow' }),
-    h('button', { class: 'ghost cal-nav', type: 'button', id: 'cal-prev', 'aria-label': 'Previous month', onclick: () => go(shiftMonth(mk, -1)) }, '‹'),
-    h('button', { class: 'ghost cal-nav', type: 'button', id: 'cal-next', 'aria-label': 'Next month', onclick: () => go(shiftMonth(mk, 1)) }, '›'),
-    isWide() ? null : daySeg());
+    h('button', { class: 'ghost cal-nav', type: 'button', id: 'cal-prev', 'aria-label': weekMode ? 'Previous week' : 'Previous month', onclick: () => calShift(-1) }, '‹'),
+    h('button', { class: 'ghost cal-nav', type: 'button', id: 'cal-next', 'aria-label': weekMode ? 'Next week' : 'Next month', onclick: () => calShift(1) }, '›'),
+    wide ? null : h('button', { class: 'link-btn plain cal-toggle', type: 'button', id: 'cal-toggle', 'aria-expanded': String(!weekMode), onclick: () => setCalOpen(weekMode) }, weekMode ? 'Month ▾' : 'Week ▴'));
   const wd = h('div', { class: 'cal-wd', 'aria-hidden': 'true' }, ['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(x => h('span', { text: x })));
   const grid = h('div', { class: 'cal-grid', 'aria-label': title + '. Tap a day to see and plan it.' }, days.map((d, i) => {
     const v = data.get(d);
@@ -8078,7 +8257,7 @@ function drawCal() {
     if (v.logged) bits.push('LabArchives log sent');
     const label = parseDay(d).toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long' }) + (d === TODAY ? ', today' : '') + (bits.length ? ': ' + bits.join(', ') : '');
     return h('button', {
-      class: 'cal-day' + (monthKey(d) !== mk ? ' other' : '') + (d === TODAY ? ' is-today' : '') + (d < TODAY ? ' past' : '') + (i % 7 >= 5 ? ' we' : ''),
+      class: 'cal-day' + (!weekMode && monthKey(d) !== mk ? ' other' : '') + (d === TODAY ? ' is-today' : '') + (d < TODAY ? ' past' : '') + (i % 7 >= 5 ? ' we' : ''),
       type: 'button', 'data-day': d, 'aria-label': label, onclick: () => openDay(d),
     },
       h('span', { class: 'cal-n', text: String(parseDay(d).getDate()) }),
@@ -8089,7 +8268,7 @@ function drawCal() {
   }));
   el.replaceChildren(head, wd, grid);
 }
-// swipe the calendar sideways to change month
+// swipe the calendar sideways to change week or month
 let calBlock = 0;
 (() => {
   const el = document.getElementById('cal');
@@ -8099,13 +8278,7 @@ let calBlock = 0;
     if (sx == null) return;
     const dx = e.clientX - sx, dy = e.clientY - sy;
     sx = null;
-    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
-      const mk = state.calMonth || monthKey(TODAY);
-      const next = shiftMonth(mk, dx < 0 ? 1 : -1);
-      state.calMonth = next === monthKey(TODAY) ? null : next;
-      calBlock = Date.now();
-      drawCal();
-    }
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) { calBlock = Date.now(); calShift(dx < 0 ? 1 : -1); }
   });
   el.addEventListener('click', e => { if (Date.now() - calBlock < 350) { e.stopPropagation(); e.preventDefault(); } }, true);
 })();
@@ -8253,6 +8426,165 @@ function critterStats() {
   for (const d in lg) key += d + ':' + lg[d].join(',') + ';';
   if (key !== critKey || !critMemo) { critKey = key; critMemo = critterStatsRaw(); }
   return critMemo;
+}
+
+/* ---------- v21: backups that carry everything (photos and settings too) ---------- */
+const blobToDataUrl = b => new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(fr.result); fr.onerror = () => rej(fr.error); fr.readAsDataURL(b); });
+async function backupData(withPhotos) {
+  const data = {
+    app: 'kura', version: 2, exportedAt: new Date().toISOString(), from: NATIVE ? 'android-app' : 'web',
+    symbols: state.symbols, obsidian: state.obs || null, items: state.items, notes: state.notes || [], glossary: state.glossary || [], projects: state.projects || [],
+    doneLog: state.doneLog || {}, focusSessions: state.focusSessions || [], trophies: state.trophies || {}, experiments: state.exps || [], labLogs: state.labLogs || {}, labarchives: state.lab || {},
+    settings: { theme: state.theme || 'invaders', fx: { ...fx }, field: state.field || '', capture: { ...capPrefs }, petEpoch: state.petEpoch || '' },
+  };
+  if (withPhotos) {
+    const ids = new Set();
+    for (const it of state.items) if (it.photo) ids.add(it.photo);
+    for (const x of state.exps || []) for (const o of x.obs) if (o.photo) ids.add(o.photo);
+    const photos = {};
+    for (const id of ids) { const b = await loadPhoto(id).catch(() => null); if (b) photos[id] = await blobToDataUrl(b); }
+    data.photos = photos;
+  }
+  return data;
+}
+async function importExtras(data) {
+  let photos = 0;
+  if (data.photos && typeof data.photos === 'object') {
+    for (const [id, url] of Object.entries(data.photos)) {
+      if (typeof url !== 'string' || !url.startsWith('data:')) continue;
+      try {
+        const b = await (await fetch(url)).blob();
+        if (store.putPhotoAs) await store.putPhotoAs(id, b); else memPhotos.set(id, b);
+        photos++;
+      } catch (e) {}
+    }
+  }
+  const st = data.settings;
+  if (st && typeof st === 'object') {
+    if (st.theme && THEMES.some(t => t.id === st.theme) && st.theme !== state.theme) { state.theme = st.theme; if (store.kvSet) await store.kvSet('theme', st.theme).catch(() => {}); applyTheme(); }
+    if (st.fx && typeof st.fx === 'object') { Object.assign(fx, st.fx); await saveFx(); }
+    if (typeof st.field === 'string' && st.field && !state.field) { state.field = st.field; if (store.kvSet) await store.kvSet('field', st.field).catch(() => {}); }
+    if (st.capture && typeof st.capture === 'object') { Object.assign(capPrefs, st.capture); await saveCapPrefs(); syncCapUI(); }
+    if (st.petEpoch && (!state.petEpoch || st.petEpoch < state.petEpoch)) { state.petEpoch = st.petEpoch; if (store.kvSet) await store.kvSet('petEpoch', st.petEpoch).catch(() => {}); }
+  }
+  return photos;
+}
+
+/* ---------- v21: the app keeps its own saved copy (Android app only) ---------- */
+let autoT = null, autoInfo = null, autoBusy = false;
+function markDirty() { if (!NATIVE) return; clearTimeout(autoT); autoT = setTimeout(nativeAutosave, 4000); }
+async function nativeAutosave(manual) {
+  const F = Plug.Filesystem;
+  if (!NATIVE || !F || autoBusy) return false;
+  autoBusy = true;
+  try {
+    const json = JSON.stringify(await backupData(false));
+    await F.writeFile({ path: 'kura/autosave.json', data: json, directory: 'DATA', encoding: 'utf8', recursive: true });
+    autoInfo = { at: Date.now(), size: json.length };
+    // one copy a day in Documents/Kura, which stays even if the app is uninstalled; keep a week of them
+    if (manual || state.lastDocCopy !== TODAY) {
+      try {
+        await F.writeFile({ path: `Kura/kura-autosave-${TODAY}.json`, data: json, directory: 'DOCUMENTS', encoding: 'utf8', recursive: true });
+        state.lastDocCopy = TODAY;
+        const list = await F.readdir({ path: 'Kura', directory: 'DOCUMENTS' });
+        const old = (list.files || []).map(f => (typeof f === 'string' ? f : f.name)).filter(n => /^kura-autosave-\d{4}-\d{2}-\d{2}\.json$/.test(n) && n.slice(14, 24) < addDays(TODAY, -7));
+        for (const n of old) await F.deleteFile({ path: 'Kura/' + n, directory: 'DOCUMENTS' }).catch(() => {});
+      } catch (e) {}
+    }
+    if (state.sheet && state.sheet.kind === 'settings' && state.sheet.tab === 'backup') drawSettings();
+    return true;
+  } catch (e) { return false; }
+  finally { autoBusy = false; }
+}
+async function nativeRestoreCheck() {
+  if (!NATIVE || !Plug.Filesystem) return;
+  if (state.items.some(i => !i.example) || (state.notes || []).length) return;
+  try {
+    const r = await Plug.Filesystem.readFile({ path: 'kura/autosave.json', directory: 'DATA', encoding: 'utf8' });
+    const d = JSON.parse(r.data);
+    if (d && Array.isArray(d.items) && d.items.some(i => i && !i.example)) { state.restoreOffer = d; drawBanner(); }
+  } catch (e) {}
+}
+
+/* ---------- v21: timer alarms that ring even when Kura is closed (Android app only) ---------- */
+const notifAt = new Map();
+let notifReady = null;
+const notifId = key => (hashStr('n:' + key) % 2000000000) + 1;
+function notifSetup() {
+  if (!NATIVE || !Plug.LocalNotifications) return Promise.resolve(false);
+  if (!notifReady) {
+    notifReady = (async () => {
+      const L = Plug.LocalNotifications;
+      let p = await L.checkPermissions();
+      if (!p || p.display !== 'granted') p = await L.requestPermissions();
+      try { await L.createChannel({ id: 'kura-timers', name: 'Timers', description: 'Bench and focus timers', importance: 5, visibility: 1, vibration: true }); } catch (e) {}
+      return !!p && p.display === 'granted';
+    })().catch(() => false);
+  }
+  return notifReady;
+}
+async function notifyAt(key, at, title, body) {
+  if (notifAt.get(key) === at) return;
+  if (!(await notifSetup())) return;
+  const L = Plug.LocalNotifications, id = notifId(key);
+  try { await L.cancel({ notifications: [{ id }] }); } catch (e) {}
+  notifAt.set(key, at);
+  if (at <= Date.now()) return;
+  try {
+    await L.schedule({ notifications: [{ id, title, body, schedule: { at: new Date(at), allowWhileIdle: true }, channelId: 'kura-timers', smallIcon: 'ic_stat_kura', iconColor: '#DE4336' }] });
+  } catch (e) {}
+}
+async function unnotify(key) {
+  if (!notifAt.has(key)) return;
+  notifAt.delete(key);
+  if (!NATIVE || !Plug.LocalNotifications) return;
+  try { await Plug.LocalNotifications.cancel({ notifications: [{ id: notifId(key) }] }); } catch (e) {}
+}
+function nativeTimersSync() {
+  if (!NATIVE) return;
+  const live = new Set();
+  for (const t of state.timers || []) {
+    if (t.doneAt) continue;
+    live.add(t.id);
+    const x = expById(t.exp);
+    notifyAt(t.id, t.ends, `Timer done: ${t.label}`, x ? x.title : 'Kura bench timer');
+  }
+  for (const k of [...notifAt.keys()]) if (k !== 'focus' && !live.has(k)) unnotify(k);
+}
+function nativeFocusSync() {
+  if (!NATIVE) return;
+  const f = state.focus;
+  if (f && !f.paused && f.phase !== 'over') notifyAt('focus', f.endsAt, f.phase === 'focus' ? 'Focus session done' : 'Break over', f.phase === 'focus' ? f.title : 'Ready for the next round?');
+  else unnotify('focus');
+}
+
+/* ---------- v21: app start-up (Android app only) ---------- */
+function nativeBoot() {
+  if (!NATIVE) return;
+  for (const m of ['set', 'update', 'remove', 'kvSet', 'kvDel', 'putNote', 'deleteNote', 'putTerm', 'deleteTerm', 'putPhoto', 'putPhotoAs', 'setSettings']) {
+    const f = store[m];
+    if (typeof f === 'function') store[m] = function (...a) { markDirty(); return f.apply(this, a); };
+  }
+  if (Plug.App) {
+    try {
+      Plug.App.addListener('backButton', d => {
+        if (state.cap && !state.sheet) { closeCapture(); return; }
+        if (d && d.canGoBack) history.back();
+        else if (Plug.App.minimizeApp) Plug.App.minimizeApp().catch(() => {});
+      });
+      Plug.App.addListener('resume', () => { tickTimers(); render(); });
+    } catch (e) {}
+  }
+  setTimeout(nativeRestoreCheck, 1500);
+  setTimeout(() => nativeAutosave(), 6000);
+  nativeTimersSync();
+  nativeFocusSync();
+}
+function flushShare() {
+  const p = pendingShare || window.__kuraPendingShare || null;
+  pendingShare = null;
+  window.__kuraPendingShare = null;
+  if (p) window.__kuraShareIn(p);
 }
 
 // v14 wiring
@@ -8593,12 +8925,16 @@ function drawSettings() {
   ];
   const backupSection = [
     h('span', { class: 'lbl', text: 'Backup' }),
-    h('p', { class: 'muted', text: `Your ${state.items.length} notes are stored on this phone only. Export a backup now and then. Photos are not included.` }),
+    h('p', { class: 'muted', id: 'storage-where', text: NATIVE
+      ? `Your ${state.items.length} notes are stored inside the Kura app on this phone, not in Chrome. Kura also keeps its own saved copy, updated a few seconds after every change, and a daily copy in Documents/Kura that stays even if the app is removed.`
+      : `Your ${state.items.length} notes are stored in this browser on this phone. Export a backup now and then: it includes photos and settings (not your AI key).` }),
+    NATIVE ? h('p', { class: 'muted ok', id: 'autosave-info', text: autoInfo ? `Last saved ${hhmm(autoInfo.at)} · ${Math.max(1, Math.round(autoInfo.size / 1024))} KB` : 'Saved copy: waiting for the first change' }) : null,
+    NATIVE ? h('div', { class: 'row' }, h('button', { class: 'btn', type: 'button', id: 'save-now', onclick: async () => { const ok = await nativeAutosave(true); toast(ok ? 'Saved a copy in the app and in Documents/Kura' : "Couldn't save a copy just now"); } }, 'Save a copy now')) : null,
     h('div', { class: 'row' },
       h('button', { class: 'btn', type: 'button', onclick: exportBackup }, 'Export backup'),
       h('button', { class: 'btn', type: 'button', onclick: () => $('#file-import').click() }, 'Import backup')),
     s.confirmImport ? h('div', { class: 'stack' },
-      h('p', { class: 'muted ok', text: `Import ${s.confirmImport.items.length} notes? Notes with the same ID are replaced; others are kept.` }),
+      h('p', { class: 'muted ok', text: `Import ${s.confirmImport.items.length} notes${Object.keys(s.confirmImport.photos || {}).length ? ` and ${Object.keys(s.confirmImport.photos).length} photos` : ''}? Notes with the same ID are replaced; others are kept.` }),
       h('div', { class: 'row' },
         h('button', { class: 'btn primary', type: 'button', onclick: () => doImport(s.confirmImport) }, 'Import'),
         h('button', { class: 'btn', type: 'button', onclick: () => { s.confirmImport = null; drawSettings(); } }, 'Cancel'))) : null,
@@ -8637,16 +8973,18 @@ $('#btn-settings').addEventListener('click', () => openSettings());
 $('#gt-stat').addEventListener('click', () => openDiag());
 $('#ai-stat').addEventListener('click', () => openDiag());
 
-function exportBackup() {
-  const data = { app: 'kura', version: 1, exportedAt: new Date().toISOString(), symbols: state.symbols, obsidian: state.obs || null, items: state.items, notes: state.notes || [], glossary: state.glossary || [], projects: state.projects || [], doneLog: state.doneLog || {}, focusSessions: state.focusSessions || [], trophies: state.trophies || {}, experiments: state.exps || [], labLogs: state.labLogs || {}, labarchives: state.lab || {} };
-  const blob = new Blob([JSON.stringify(data, null, 1)], { type: 'application/json' });
+async function exportBackup() {
+  toast('Preparing the backup…');
+  const data = await backupData(true);
+  const n = Object.keys(data.photos || {}).length;
+  const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = h('a', { href: url, download: `kura-backup-${dayStr()}.json` });
   document.body.append(a);
   a.click();
   a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 5000);
-  toast('Backup exported');
+  setTimeout(() => URL.revokeObjectURL(url), 15000);
+  if (!NATIVE) toast(`Backup exported${n ? ` with ${n} photo${n === 1 ? '' : 's'}` : ''}`);
 }
 $('#file-import').addEventListener('change', async e => {
   const f = e.target.files && e.target.files[0];
@@ -8668,6 +9006,7 @@ async function doImport(data) {
     const { id, ...rest } = it;
     try { await store.set(id, rest); n++; } catch (e) { onWriteError(e); break; }
   }
+  const photosIn = await importExtras(data);
   const syms = cleanSymbols(data.symbols);
   if (syms) await store.setSettings({ symbols: syms, updatedAt: Date.now() }).catch(() => {});
   if (Array.isArray(data.notes) && store.putNote) { for (const nt of data.notes) if (nt && typeof nt.id === 'string') await store.putNote(nt).catch(() => {}); state.notes = await store.listNotes(); }
@@ -8699,7 +9038,7 @@ async function doImport(data) {
   }
   if (Array.isArray(data.glossary) && store.putTerm) { for (const g of data.glossary) if (g && typeof g.id === 'string' && g.term && Array.isArray(g.noteIds)) await store.putTerm(g).catch(() => {}); state.glossary = await store.listTerms(); await markGloss(); }
   if (!state.obs && data.obsidian && data.obsidian.vault && store.kvSet) { await store.kvSet('obsidian', { ...DEFAULT_OBS, ...data.obsidian }).catch(() => {}); await loadObs(); }
-  if (state.sheet && state.sheet.kind === 'settings') { state.sheet.confirmImport = null; state.sheet.importMsg = `Imported ${n} notes.`; drawSettings(); }
+  if (state.sheet && state.sheet.kind === 'settings') { state.sheet.confirmImport = null; state.sheet.importMsg = `Imported ${n} notes${photosIn ? ` and ${photosIn} photo${photosIn === 1 ? '' : 's'}` : ''}.`; drawSettings(); }
 }
 
 async function boot() {
@@ -8750,7 +9089,7 @@ async function boot() {
   try { state.timers = JSON.parse(localStorage.getItem('kura.timers') || '[]') || []; } catch (e) { state.timers = []; }
   runTimers();
   syncCapUI();
-  try { const dv = localStorage.getItem('kura.dayview'); state.dayView = ['week', 'month'].includes(dv) ? dv : 'today'; } catch (e) { state.dayView = 'today'; }
+  try { const dv = localStorage.getItem('kura.dayview'); state.dayView = dv === 'week' ? 'week' : 'today'; state.calOpen = localStorage.getItem('kura.calopen') === '1'; } catch (e) { state.dayView = 'today'; }
   if (store.kvGet) {
     Object.assign(fx, (await store.kvGet('fx').catch(() => null)) || {});
     state.theme = (await store.kvGet('theme').catch(() => null)) || 'invaders';
@@ -8798,15 +9137,17 @@ async function boot() {
   state.petEpoch = store.kvGet ? ((await store.kvGet('petEpoch').catch(() => '')) || '') : '';
   if (!state.petEpoch) { state.petEpoch = TODAY; if (store.kvSet) store.kvSet('petEpoch', TODAY).catch(() => {}); }
   if (kvRestore) kvRestore();
+  nativeBoot();
   state.booting = false;
   render();
   scheduleGtSync(1500);
   drawStreak();
   checkTrophies();
   handleLaunch();
+  flushShare();
   requestAnimationFrame(() => setTimeout(() => { try { if (!state.sheet) els.input.focus({ preventScroll: true }); } catch (e) {} }, 0));
   if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
-  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  if ('serviceWorker' in navigator && location.protocol !== 'file:' && !NATIVE) {
     const hadController = !!navigator.serviceWorker.controller;
     let reloaded = false;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
