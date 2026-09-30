@@ -820,6 +820,19 @@ textarea.lab-extra { min-height: 64px; height: 64px; font-size: 15px; }
 body.focusing .bench-pill { top: calc(var(--vvt, 0px) + var(--vvh, 100vh) - env(safe-area-inset-bottom, 0px) - 106px); }
 body.timing .toast { top: calc(var(--vvt, 0px) + var(--vvh, 100vh) - env(safe-area-inset-bottom, 0px) - 108px); }
 body.timing.focusing .toast { top: calc(var(--vvt, 0px) + var(--vvh, 100vh) - env(safe-area-inset-bottom, 0px) - 156px); }
+/* v19.1: choosing what goes to LabArchives */
+.tg.lab { color: var(--ink); font-weight: 500; letter-spacing: 0.1em; }
+.cap-chip.lab[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--sheet); }
+.pick-list { display: flex; flex-direction: column; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
+.lab-pick { display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; gap: 4px 10px; align-items: center; padding: 9px 12px; border-bottom: 1px solid var(--rule); background: var(--sheet); font-size: 14px; cursor: pointer; }
+.lab-pick:last-child { border-bottom: 0; }
+.lab-pick input { accent-color: var(--ink); width: 17px; height: 17px; margin: 0; }
+.lab-pick .lp-t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.lab-pick .lp-m { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-2); white-space: nowrap; }
+.pick-list.off .lab-pick { background: transparent; }
+.pick-list.off .lp-t { color: var(--ink-2); }
+@media (max-width: 719px) { .lab-pick { grid-template-columns: 18px minmax(0, 1fr); } .lab-pick .lp-m { grid-column: 2; } }
+.item-lab { margin-top: 2px; }
 /* short screens: keyboard up on the Fold leaves roughly a 4:3 area */
 .short .field, .short .wordmark, .short .tags-lbl { display: none; }
 .short .widget { padding-block: 4px; }
@@ -1021,7 +1034,7 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
 (() => {
 'use strict';
 
-const APP_VERSION = 'v19';
+const APP_VERSION = 'v19.1';
 /* ---------- helpers ---------- */
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -1667,6 +1680,7 @@ function laneRow(it) {
           it.today && !isNow(it) ? h('span', { class: 'tg', text: 'due ' + futureLabel(it.today) }) : null,
           it.repeat ? h('span', { class: 'tg', text: '↻ ' + repeatLabel(it.repeat) }) : null,
           projOf(it) ? h('span', { class: 'tg', text: '#' + projOf(it).name }) : null,
+          labTag(it),
           pending ? h('span', { class: 'sorting', text: 'sorting…' }) : null))),
     it.bucket === 'make'
       ? h('button', { class: 'to-today', type: 'button', onclick: () => sendToday(it.id) }, '+ TODAY') : null);
@@ -1693,10 +1707,11 @@ function render() {
       h('button', { class: 'li-body', type: 'button', onclick: () => openItem(it.id) },
         h('span', { class: 'main' },
           h('span', { class: 'txt', text: rowText(it) }),
-          (carried || knownTags(it).length || it.example || it.repeat || projOf(it) || stepsOf(it.text).length) ? h('span', { class: 'meta' },
+          (carried || knownTags(it).length || it.example || it.repeat || projOf(it) || isLab(it) || stepsOf(it.text).length) ? h('span', { class: 'meta' },
             carried ? h('span', { class: 'carry', text: 'since ' + dayName(it.today) }) : null,
             it.repeat ? h('span', { class: 'tg', text: '↻ ' + repeatLabel(it.repeat) }) : null,
             projOf(it) ? h('span', { class: 'tg', text: '#' + projOf(it).name }) : null,
+            labTag(it),
             stepMeta(it),
             tagMeta(it),
             it.example ? h('span', { class: 'ex', text: 'Example' }) : null) : null)));
@@ -2371,7 +2386,8 @@ async function saveDirect() {
   if (!raw) return;
   els.input.value = '';
   const parsed = parseMarks(raw);
-  const pj = takeProject(parsed.text);
+  const lb0 = takeLab(parsed.text);
+  const pj = takeProject(lb0.text);
   let text = pj.text;
   let tags = parsed.tags;
   const route = state.route;
@@ -2394,7 +2410,7 @@ async function saveDirect() {
     done: false, doneAt: null,
     createdAt: now, updatedAt: now,
     source: 'typed', photo: null, page: null,
-    pending: auto, cat: proj ? proj.cat : guessCat(text), proj: proj ? proj.id : null,
+    pending: auto, cat: proj ? proj.cat : guessCat(text), proj: proj ? proj.id : null, lab: lb0.lab ? true : null,
   };
   const id = store.newId();
   const target = store;
@@ -2607,6 +2623,12 @@ function drawItem() {
       whenControls(it, () => drawItem()),
       h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'Symbols' }),
         tagChips(knownTags(it), tags => patch(s.id, { tags }))),
+      h('label', { class: 'keep item-lab', for: 'item-lab' }, (() => {
+        const c = h('input', { type: 'checkbox', id: 'item-lab' });
+        c.checked = isLab(it);
+        c.addEventListener('change', async () => { await patch(s.id, { lab: c.checked }); drawItem(); });
+        return c;
+      })(), projLab(it.proj) ? 'LabArchives: include in the daily log (its project is a lab project)' : 'LabArchives: include in the daily log'),
       state.obs ? h('div', { class: 'row' },
         h('button', { class: 'btn', type: 'button', onclick: () => { commitItemText(); sendToObsidian([byId(s.id)], true); } },
           it.sentAt ? 'Send to Obsidian again' : 'Send to Obsidian'),
@@ -3947,7 +3969,7 @@ function padWhen() {
   const raw = els.input.value;
   if (!raw.trim()) return null;
   const pm = parseMarks(raw.trim());
-  const pj = takeProject(pm.text);
+  const pj = takeProject(takeLab(pm.text).text);
   const w = state.route === 'drop' || RX_FLEETING.test(pj.text) ? null : parseWhen(pj.text);
   return { when: w, proj: pj.proj };
 }
@@ -3958,6 +3980,7 @@ function drawWhen() {
   const bits = [];
   if (r && r.when) bits.push('→ ' + whenLabel(r.when.date) + (r.when.repeat ? ' ↻ ' + repeatLabel(r.when.repeat) : ''));
   if (r && r.proj && projById(r.proj)) bits.push('#' + projById(r.proj).name);
+  if (hasLabTag(els.input.value)) bits.push('LAB');
   el.hidden = !bits.length || !!(state.cap && !state.cap.stale);
   el.textContent = bits.join(' · ');
   el.classList.toggle('off', !!state.whenOff);
@@ -5896,6 +5919,9 @@ function drawNlm() {
 // Block types: p (paragraph), h (small heading), steps (numbered), list (bullets), table ([left, right] rows), note (aside), try ([label, action] buttons)
 const GUIDE = [
   { id: 'new', icon: 'trophy', title: "What's new", blocks: [
+    { h: 'v19.1' }, { list: [
+      '**Only what you choose goes to LabArchives**: mark items **Lab** (LAB in the save preview, **#lab** in the text, the tick box in a note\'s sheet, or a whole lab project). The daily log lists them ticked; untick any, or tick others from the day.',
+    ] },
     { h: 'v19' }, { list: [
       '**LabArchives section**: tap **Lab** at the top of the home screen. A **Daily log** built from your day, **Experiments** written as Project, Aims, Methods and Results with photos, and **Bench** mode with big buttons, timestamped observations and timers. Send to your LabArchives Inbox by email, or copy and paste.',
     ] },
@@ -5969,6 +5995,7 @@ const GUIDE = [
       ['+ Date · Today · ×', 'Plan it for a day, or clear the date. Dated items go to MAKE and appear in TODAY on the day.'],
       ['↻ weekly ×', 'Tap to stop it repeating.'],
       ['Work · Personal · Fun', 'Tap to change the category.'],
+      ['Lab', 'Tap to include it in the LabArchives daily log.'],
       ['Project', 'Pick a project, or make a new one.'],
       ['! ? ☐ →', 'Tap to add or remove a symbol.'],
       ['Save as typed', 'Skips the tidy-up and saves your words as they are.'],
@@ -5993,6 +6020,7 @@ const GUIDE = [
       ['fri · tomorrow · 3 Oct', 'Plans it for that day (see Dates and repeats)'],
       ['every mon · daily', 'A repeating task'],
       ['#aurora', 'Files it in an existing project'],
+      ['#lab', 'Marks it for the LabArchives daily log'],
       ['Prep [] wash [] dry', 'A task with a checklist of steps'],
     ] },
     { p: 'While you type, a small red tag above the pad shows the date Kura found, like "→ Fri ↻ every Mon · #Aurora". Tap it to save this note **without** the date.' },
@@ -6175,7 +6203,7 @@ const GUIDE = [
   { id: 'labarchives', icon: 'tube', title: 'LabArchives: daily log, experiments, bench', blocks: [
     { p: 'Everything for LabArchives lives in one place: tap **Lab** at the top of the home screen (or ⋯ More → LabArchives). It has four tabs.' },
     { table: [
-      ['Daily log', 'A log of the day built from what Kura already knows: tasks you ticked off, focus time, experiments and notes, grouped by project.'],
+      ['Daily log', 'A log of the day built from the items you marked Lab: tasks you finished or focused on, experiments and notes, grouped by project.'],
       ['Experiments', 'One entry per experiment: Project, Aims, Methods and timestamped Results, with photos.'],
       ['Bench', 'Big buttons for the bench: add observations by typing or speaking, take photos and run timers. The screen stays on.'],
       ['Setup', 'Your LabArchives Inbox address and what the daily log includes.'],
@@ -6185,7 +6213,14 @@ const GUIDE = [
     { note: 'Send from the email address your LabArchives account uses. Emails land in the LabArchives Inbox; use **Move to page** there to file them in a notebook.' },
     { h: 'Daily log' },
     { steps: ['At the end of the day open Lab → **Daily log**.', 'Add anything Kura doesn\'t know about (meetings, reading) as dot points under **Add anything else**.', 'Optional: **Tidy with AI** puts it in the past tense and expands shorthand without adding anything.', 'Tap **Email to LabArchives**, **Copy** (then paste into a page) or **Share**. The day is marked as logged.'] },
-    { p: 'Use ‹ › to log an earlier day. You can edit the log before sending; **Rebuild from Kura** starts again. Setup chooses what goes in (focus time, notes, next tasks, Work only).' },
+    { p: 'Use ‹ › to log an earlier day. You can edit the log before sending; **Rebuild from Kura** starts again.' },
+    { h: 'Choosing what goes in' },
+    { list: [
+      'Only items marked **Lab** go in on their own, plus experiments. Mark one when you save it: tap **LAB** in the preview, or type **#lab** anywhere in the note. In a note\'s sheet, tick **LabArchives: include in the daily log**.',
+      'Make a whole project a lab project in Lab → **Setup**: everything in it counts as Lab. Untick a single item in its sheet to leave it out.',
+      'The daily log lists the day\'s Lab items, ticked. Untick any to leave them out, or tap **Show other items from this day** and tick more. Those ticks only change that day\'s log.',
+      'Items marked Lab show **LAB** in the lists.',
+    ] },
     { h: 'Experiments' },
     { list: [
       'Start one with a name (and a project). Write **Aims** and **Methods** as rough dot points.',
@@ -6644,7 +6679,8 @@ function actionSplit(t) {
 }
 function capItem(src) {
   const pm = parseMarks(String(src || '').replace(RX_BULLET, '').trim());
-  const pj = takeProject(pm.text);
+  const lb = takeLab(pm.text);
+  const pj = takeProject(lb.text);
   let t = pj.text;
   const w = !state.whenOff && !RX_FLEETING.test(t) ? parseWhen(t) : null;
   if (w) t = w.text;
@@ -6666,7 +6702,7 @@ function capItem(src) {
   return {
     text, body: '', steps, tags: r.tags, bucket, userBucket: false,
     today: w ? w.date : null, repeat: w ? w.repeat : null,
-    cat: proj ? proj.cat : guessCat(text + ' ' + steps.map(s => s.text).join(' ')), proj: proj ? proj.id : null, keep: true,
+    cat: proj ? proj.cat : guessCat(text + ' ' + steps.map(s => s.text).join(' ')), proj: proj ? proj.id : null, keep: true, lab: lb.lab ? true : null,
   };
 }
 function proposeOffline(raw) {
@@ -6732,10 +6768,11 @@ function capFromAi(r, raw, off, whenOff) {
   const kind = ['single', 'list', 'notebook'].includes(r.kind) ? r.kind : (r.items.length > 1 ? 'list' : 'single');
   if (kind === 'notebook') return { kind, items: [], title: String((r.items[0] || {}).text || '').trim().slice(0, 120) };
   const typed = parseMarks(String(raw).trim());
-  const typedProj = takeProject(typed.text).proj;
+  const typedLab = hasLabTag(raw);
+  const typedProj = takeProject(takeLab(typed.text).text).proj;
   const src = kind === 'single' ? r.items.slice(0, 1) : r.items.slice(0, 12);
   const items = src.map((x, i) => {
-    let text = tidyShort(String((x && x.text) || '').replace(/\s+/g, ' ').trim()).slice(0, 300);
+    let text = tidyShort(takeLab(String((x && x.text) || '').replace(/\s+/g, ' ').trim()).text).slice(0, 300);
     if (!text) return null;
     const base = kind === 'single' ? off.items[0] : (off.kind === 'list' && off.items.length === src.length ? off.items[i] : null);
     let w = null;
@@ -6756,6 +6793,7 @@ function capFromAi(r, raw, off, whenOff) {
       text, body: '', steps, tags, bucket, userBucket: false,
       today: w ? w.date : null, repeat: w ? w.repeat || null : null,
       cat: proj ? proj.cat : CATS.includes(x.category) ? x.category : guessCat(text), proj: proj ? proj.id : null, keep: true,
+      lab: kind === 'single' || !base ? (typedLab ? true : null) : base.lab,
     };
   }).filter(Boolean);
   if (!items.length) return null;
@@ -6829,7 +6867,7 @@ function capData(x, now) {
     today: x.today || null, repeat: x.today ? x.repeat || null : null,
     done: false, doneAt: null, createdAt: now, updatedAt: now,
     source: 'typed', photo: null, page: null, pending: false,
-    cat: CATS.includes(x.cat) ? x.cat : guessCat(x.text), proj: proj ? proj.id : null,
+    cat: CATS.includes(x.cat) ? x.cat : guessCat(x.text), proj: proj ? proj.id : null, lab: x.lab === true ? true : x.lab === false ? false : null,
   };
 }
 async function acceptCapture() {
@@ -6934,6 +6972,8 @@ function capRow(c, x, i) {
   const todayBtn = x.today === TODAY ? null : h('button', { type: 'button', class: 'cap-chip', onclick: () => { x.today = TODAY; x.bucket = 'make'; x.userBucket = false; redraw(); } }, 'Today');
   const clearDate = x.today ? h('button', { type: 'button', class: 'cap-chip', 'aria-label': 'Clear the date', onclick: () => { x.today = null; x.repeat = null; redraw(); } }, '×') : null;
   const rep = x.today && x.repeat ? h('button', { type: 'button', class: 'cap-chip date on', title: 'Tap to stop repeating', onclick: () => { x.repeat = null; redraw(); } }, '↻ ' + repeatLabel(x.repeat) + ' ×') : null;
+  const labOn = isLab(x);
+  const labChip = h('button', { type: 'button', class: 'cap-chip lab', 'aria-pressed': String(labOn), title: 'Include in the LabArchives daily log', 'aria-label': labOn ? 'In the LabArchives log. Tap to leave out.' : 'Not in the LabArchives log. Tap to include.', onclick: () => { x.lab = !labOn; redraw(); } }, 'Lab');
   const cat = h('button', { type: 'button', class: 'cap-chip cat', 'data-cat': x.cat, title: 'Tap to change the category', 'aria-label': `Category ${CAT_NAME[x.cat]}. Tap to change.`, onclick: () => { x.cat = CATS[(CATS.indexOf(x.cat) + 1) % CATS.length]; redraw(); } }, h('i', { class: 'cc' }), CAT_NAME[x.cat]);
   const proj = (state.projects || []).some(p => !p.archived) ? projPicker(x.proj, v => { x.proj = v; const p = projById(v); if (p) x.cat = p.cat; redraw(); }, () => x.cat) : null;
   const syms = h('span', { class: 'cap-syms' }, state.symbols.map(s => h('button', {
@@ -6950,7 +6990,7 @@ function capRow(c, x, i) {
     h('div', { class: 'cap-title' }, keep, title),
     x.body ? h('p', { class: 'cap-body', text: x.body }) : null,
     steps,
-    h('div', { class: 'cap-ctl' }, seg, dateChip, clearDate, todayBtn, rep, cat, proj, syms));
+    h('div', { class: 'cap-ctl' }, seg, dateChip, clearDate, todayBtn, rep, cat, labChip, proj, syms));
 }
 function drawCapture() {
   const box = document.getElementById('capture');
@@ -7034,7 +7074,7 @@ function bannerMsgs() {
   if (reviewDue() && !state.reviewDismissed) out.push({ id: 'review', text: 'Weekly review time: tidy loose ends and plan next week.', act: ['Start review', () => openReview()], later: () => { state.reviewDismissed = true; } });
   if (state.seenVersion !== undefined && state.seenVersion !== APP_VERSION) {
     const fresh = !state.seenVersion && !state.items.some(i => !i.example);
-    out.push({ id: 'ver', text: fresh ? 'New to Kura? The user guide shows how everything works.' : `Updated to ${APP_VERSION}: a LabArchives section (tap Lab at the top) for daily logs, experiments and bench work.`,
+    out.push({ id: 'ver', text: fresh ? 'New to Kura? The user guide shows how everything works.' : /^v19/.test(state.seenVersion || '') ? `Updated to ${APP_VERSION}: only items you mark Lab (or tick) go into the LabArchives log.` : `Updated to ${APP_VERSION}: a LabArchives section (tap Lab at the top) for daily logs, experiments and bench work.`,
       act: [fresh ? 'Open the guide' : "What's new", () => openGuide(fresh ? 'start' : 'new'), 'banner-guide'], later: () => markSeen(), laterLabel: 'Got it' });
   }
   const missing = [!state.sample && 'a free AI key', !state.obs && 'your Obsidian vault'].filter(Boolean);
@@ -7061,6 +7101,18 @@ function drawBanner() {
 const SET_TABS = [['basics', 'Basics'], ['ai', 'AI'], ['obsidian', 'Obsidian'], ['tasks', 'Google Tasks'], ['look', 'Look'], ['backup', 'Backup']];
 const SET_TAB_OF = { ai: 'ai', obsidian: 'obsidian', tasks: 'tasks', gtasks: 'tasks', look: 'look', theme: 'look', backup: 'backup' };
 const SET_HELP = { basics: 'start', ai: 'ai', obsidian: 'obsidian', tasks: 'gtasks', look: 'themes', backup: 'backup' };
+
+/* ---------- v19.1: only items marked Lab go to LabArchives ---------- */
+// "#lab" anywhere in a note marks it; a lab project marks everything in it; item.lab === false opts one out
+function hasLabTag(t) { return /(^|\s)#lab(?=[\s,.;:!?]|$)/i.test(String(t || '')); }
+function takeLab(t) {
+  const src = String(t || '');
+  if (!hasLabTag(src)) return { text: src, lab: false };
+  return { text: src.replace(/(^|\s)#lab(?=[\s,.;:!?]|$)/gi, '$1').replace(/\s{2,}/g, ' ').replace(/\s+([,.;:!?])/g, '$1').trim(), lab: true };
+}
+function projLab(id) { const p = projById(id); return !!(p && p.lab); }
+function isLab(x) { return !!x && (x.lab === true || (x.lab !== false && projLab(x.proj))); }
+function labTag(x) { return isLab(x) ? h('span', { class: 'tg lab', text: 'LAB' }) : null; }
 
 /* ---------- v19: LabArchives section — daily log, experiments, bench mode ---------- */
 const LAB_DEFAULT = { inbox: '', focus: true, notes: true, next: true, workOnly: true };
@@ -7161,51 +7213,97 @@ function markLogged(day, via) {
 }
 
 /* ---------- 1. daily log, built from what Kura already knows about the day ---------- */
-function dayData(day) {
-  const cfg = labCfg();
+function setPick(day, key, on) {
+  const all = { ...(state.labPicks || {}) };
+  all[day] = { ...(all[day] || {}), [key]: !!on };
+  const keep = addDays(TODAY, -30);
+  for (const k of Object.keys(all)) if (k < keep) delete all[k];
+  state.labPicks = all;
+  if (store.kvSet) store.kvSet('labPicks', all).catch(() => {});
+}
+// everything from the day that could go in; Lab items and experiments start ticked
+function dayCands(day) {
   const inDay = ms => !!ms && dayStr(new Date(ms)) === day;
-  const workish = x => !cfg.workOnly || catOf(x) === 'work';
   const items = state.items.filter(i => !i.example);
-  const sessions = (state.focusSessions || []).filter(f => f.d === day);
   const mins = new Map();
-  for (const f of sessions) if (f.item) mins.set(f.item, (mins.get(f.item) || 0) + f.m);
-  const done = items.filter(i => i.done && inDay(i.doneAt) && workish(i)).sort((a, b) => a.doneAt - b.doneAt);
-  const doneIds = new Set(done.map(i => i.id));
-  const worked = [...mins.keys()].filter(id => !doneIds.has(id)).map(byId).filter(i => i && !i.example && workish(i));
-  const workedIds = new Set(worked.map(i => i.id));
-  const notes = items.filter(i => inDay(i.createdAt) && i.bucket === 'stock' && !doneIds.has(i.id) && !workedIds.has(i.id) && i.source !== 'note' && workish(i)).slice(0, 12);
-  const nb = (state.notes || []).filter(n => inDay(n.created) && workish(n));
-  const exps = (state.exps || []).map(x => ({ x, obs: x.obs.filter(o => inDay(o.t)) })).filter(e => e.obs.length);
-  const next = items.filter(i => !i.done && i.today && i.today > day && i.today <= addDays(day, 3) && workish(i)).sort((a, b) => (a.today < b.today ? -1 : a.today > b.today ? 1 : 0)).slice(0, 8);
-  const total = sessions.filter(f => !f.item || workish(byId(f.item) || { cat: 'work' })).reduce((a, f) => a + f.m, 0);
-  return { done, worked, notes, nb, exps, next, mins, total, sessions: sessions.length };
+  for (const f of (state.focusSessions || []).filter(f => f.d === day)) if (f.item) mins.set(f.item, (mins.get(f.item) || 0) + f.m);
+  const picks = (state.labPicks || {})[day] || {};
+  const out = [], seen = new Set();
+  const add = (key, kind, def, fields) => {
+    if (seen.has(key)) return;
+    seen.add(key);
+    out.push({ key, kind, on: key in picks ? !!picks[key] : !!def, ...fields });
+  };
+  const pj = id => (projById(id) ? ' · #' + projById(id).name : '');
+  for (const it of items.filter(i => i.done && inDay(i.doneAt)).sort((a, b) => a.doneAt - b.doneAt)) {
+    const m = mins.get(it.id) || 0;
+    add(it.id, 'done', isLab(it), { it, proj: it.proj, mins: m, label: firstLine(rowText(it)), meta: 'done' + (m ? ' · ' + fmtMin(m) : '') + pj(it.proj) });
+  }
+  for (const [id, m] of mins) {
+    const it = byId(id);
+    if (it && !it.example) add(id, 'worked', isLab(it), { it, proj: it.proj, mins: m, label: firstLine(rowText(it)), meta: fmtMin(m) + ' focus' + pj(it.proj) });
+  }
+  for (const x of state.exps || []) {
+    const obs = x.obs.filter(o => inDay(o.t));
+    if (obs.length) add('ex:' + x.id, 'exp', true, { x, obs, proj: x.proj, label: 'Experiment: ' + x.title, meta: `${obs.filter(o => o.kind !== 'timer').length} results` + pj(x.proj) });
+  }
+  for (const it of items.filter(i => inDay(i.createdAt) && i.bucket === 'stock' && i.source !== 'note')) {
+    add(it.id, 'note', isLab(it), { it, proj: it.proj, label: firstLine(rowText(it)), meta: 'note' + pj(it.proj) });
+  }
+  for (const n of (state.notes || []).filter(n => inDay(n.created))) {
+    add('nb:' + n.id, 'notebook', isLab(n), { n, proj: n.proj, label: 'Notebook: ' + n.title, meta: 'notebook' + pj(n.proj) });
+  }
+  return out;
 }
 function buildLog(day, extra) {
   const cfg = labCfg();
-  const d = dayData(day);
+  const picked = dayCands(day).filter(c => c.on);
   const groups = new Map();
   const add = (pid, line) => { const k = pid && projById(pid) ? pid : ''; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(line); };
-  const m = id => (cfg.focus && d.mins.get(id) ? ` (${fmtMin(d.mins.get(id))})` : '');
-  for (const it of d.done) add(it.proj, `✓ ${firstLine(rowText(it))}${m(it.id)}`);
-  for (const it of d.worked) add(it.proj, `• ${firstLine(rowText(it))}${cfg.focus && d.mins.get(it.id) ? ` (${fmtMin(d.mins.get(it.id))}, ongoing)` : ' (ongoing)'}`);
-  for (const e of d.exps) {
-    const n = e.obs.filter(o => o.kind !== 'timer').length, ph = e.obs.filter(o => o.photo).length;
-    add(e.x.proj, `• Experiment: ${e.x.title} (${n} result${n === 1 ? '' : 's'}${ph ? `, ${ph} photo${ph === 1 ? '' : 's'}` : ''}, ${hhmm(e.obs[0].t)}–${hhmm(e.obs[e.obs.length - 1].t)})`);
-  }
-  if (cfg.notes) {
-    for (const it of d.notes) add(it.proj, `• Note: ${firstLine(rowText(it))}`);
-    for (const n of d.nb) add(n.proj, `• Notebook: ${n.title}`);
+  let total = 0;
+  for (const c of picked) {
+    total += c.mins || 0;
+    if (c.kind === 'done') add(c.proj, `✓ ${c.label}${cfg.focus && c.mins ? ` (${fmtMin(c.mins)})` : ''}`);
+    else if (c.kind === 'worked') add(c.proj, `• ${c.label}${cfg.focus ? ` (${fmtMin(c.mins)}, ongoing)` : ' (ongoing)'}`);
+    else if (c.kind === 'exp') {
+      const n = c.obs.filter(o => o.kind !== 'timer').length, ph = c.obs.filter(o => o.photo).length;
+      add(c.proj, `• Experiment: ${c.x.title} (${n} result${n === 1 ? '' : 's'}${ph ? `, ${ph} photo${ph === 1 ? '' : 's'}` : ''}, ${hhmm(c.obs[0].t)}–${hhmm(c.obs[c.obs.length - 1].t)})`);
+    } else if (c.kind === 'note') add(c.proj, `• Note: ${c.label}`);
+    else add(c.proj, `• ${c.label}`);
   }
   const extraLines = String(extra || '').split('\n').map(l => l.replace(/^\s*(?:[-*•]\s*)?/, '').trim()).filter(Boolean);
   const L = [`Daily log · ${longDay(day)}`];
-  if (cfg.focus && d.total) L.push(`Focus time: ${fmtMin(d.total)}`);
+  if (cfg.focus && total) L.push(`Focus time: ${fmtMin(total)}`);
   const keys = [...groups.keys()].sort((a, b) => ((a === '') - (b === '')) || String((projById(a) || {}).name || '').localeCompare(String((projById(b) || {}).name || '')));
   const named = keys.some(Boolean);
   for (const k of keys) L.push('', k ? projById(k).name : named ? 'Other' : 'Tasks', ...groups.get(k));
   if (extraLines.length) L.push('', 'Also', ...extraLines.map(x => '• ' + x));
-  if (!keys.length && !extraLines.length) L.push('', 'Nothing recorded in Kura for this day. Add dot points above.');
-  if (cfg.next && d.next.length) L.push('', 'Next', ...d.next.map(it => `• ${firstLine(rowText(it))} (${parseDay(it.today).toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' })})`));
+  if (!keys.length && !extraLines.length) L.push('', 'Nothing ticked for this day yet. Tick items above or add dot points.');
+  const next = state.items.filter(i => !i.example && !i.done && i.today && i.today > day && i.today <= addDays(day, 3) && isLab(i)).sort((a, b) => (a.today < b.today ? -1 : a.today > b.today ? 1 : 0)).slice(0, 8);
+  if (cfg.next && next.length) L.push('', 'Next', ...next.map(it => `• ${firstLine(rowText(it))} (${parseDay(it.today).toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' })})`));
   return L.join('\n');
+}
+function labPickList(s) {
+  const cands = dayCands(s.day);
+  const on = cands.filter(c => c.on), off = cands.filter(c => !c.on);
+  const row = c => {
+    const cb = h('input', { type: 'checkbox', 'data-k': 'pick-' + c.key, 'aria-label': (c.on ? 'Leave out: ' : 'Include: ') + c.label });
+    cb.checked = c.on;
+    cb.addEventListener('change', () => {
+      setPick(s.day, c.key, cb.checked);
+      if (s.edited) toast('Your edited log was kept. Tap Rebuild from Kura to apply the change.');
+      else s.text = null;
+      drawLab();
+    });
+    return h('label', { class: 'lab-pick' + (c.on ? '' : ' off'), 'data-key': c.key }, cb, h('span', { class: 'lp-t', text: c.label }), h('span', { class: 'lp-m', text: c.meta }));
+  };
+  const showOff = s.showOff != null ? s.showOff : !on.length;
+  return h('div', { class: 'stack lab-picks' },
+    h('span', { class: 'lbl', text: `In this log · ${on.length}` }),
+    on.length ? h('div', { class: 'pick-list', id: 'lab-picks-on' }, on.map(row))
+      : h('p', { class: 'muted', text: off.length ? 'Nothing from this day is marked Lab. Tick the ones to include from the other items, or mark items Lab when you save them.' : 'Nothing from this day yet. Items marked Lab that you finish or focus on, experiments and Lab notes appear here.' }),
+    off.length ? h('button', { class: 'link-btn plain', type: 'button', id: 'lab-more', onclick: () => { s.showOff = !showOff; drawLab(); } }, `${showOff ? 'Hide' : 'Show'} other items from this day (${off.length})`) : null,
+    showOff && off.length ? h('div', { class: 'pick-list off', id: 'lab-picks-off' }, off.map(row)) : null);
 }
 async function tidyLogAI(s) {
   if (!state.sample) { toast('Add an AI key in Settings to tidy the log with AI.'); return; }
@@ -7459,6 +7557,7 @@ function labLogView(s) {
       h('button', { class: 'btn', type: 'button', id: 'lab-next', 'aria-label': 'Next day', disabled: s.day >= TODAY, onclick: () => go(1) }, '›'),
       h('span', { class: 'grow' }),
       h('span', { class: 'lab-status' + (logged ? ' ok' : ''), id: 'lab-status', text: logged ? `Logged ✓ · ${logged.via} ${hhmm(logged.at)}` : 'Not logged yet' })),
+    labPickList(s),
     h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'Add anything else' }),
       h('div', { class: 'lab-extra-row' }, extra, micButton(() => extra, { cls: 'icon-btn', keepFocus: true }))),
     h('div', { class: 'stack lab-grow' }, h('span', { class: 'lbl', text: s.edited ? 'Log · edited' : 'Log · built from Kura' }), ta),
@@ -7466,7 +7565,7 @@ function labLogView(s) {
       s.edited ? h('button', { class: 'btn', type: 'button', id: 'lab-rebuild', onclick: () => { s.edited = false; s.text = null; drawLab(); } }, 'Rebuild from Kura') : null,
       state.sample ? h('button', { class: 'btn', type: 'button', id: 'lab-tidy', disabled: !!s.busy, onclick: () => tidyLogAI(s) }, s.busy || 'Tidy with AI') : null,
       logged ? null : h('button', { class: 'link-btn plain', type: 'button', id: 'lab-mark', onclick: () => { markLogged(s.day, 'marked'); drawLab(); } }, 'Mark as logged')),
-    h('p', { class: 'muted', text: `Built from the tasks you ticked off, focus time, experiments${labCfg().notes ? ' and notes' : ''} for this day${labCfg().workOnly ? ', Work category only' : ''}. Change what goes in under Setup.` }));
+    h('p', { class: 'muted', text: 'Only ticked items go in. Mark items Lab as you save them (tap LAB in the preview, or type #lab), or make a project a lab project in Setup, and they are ticked for you. Experiments are always ticked.' }));
   const text = () => (s.text || '').trim();
   const foot = labBtns(
     async () => { if (await labCopy(text(), 'Log')) { markLogged(s.day, 'copied'); drawLab(); } },
@@ -7684,10 +7783,18 @@ function labSetupView(s) {
       h('span', { class: 'muted', text: 'It should appear in your LabArchives Inbox within a minute or two.' })),
     h('hr', { class: 'rule' }),
     h('span', { class: 'lbl', text: 'What goes in the daily log' }),
+    h('p', { class: 'muted', text: 'Only items marked Lab go in, plus experiments. Mark an item when you save it (LAB in the preview, or #lab in the text) or in its sheet. You can also tick or untick items in each daily log.' }),
     chk('lab-focus', 'focus', 'Focus time (per task and in total)'),
-    chk('lab-notes', 'notes', 'Notes captured that day and new notebook notes'),
-    chk('lab-next', 'next', 'Next: tasks planned for the next few days'),
-    chk('lab-work', 'workOnly', 'Work category only (leave out Personal and Fun)'),
+    chk('lab-next', 'next', 'Next: Lab tasks planned for the next few days'),
+    h('hr', { class: 'rule' }),
+    h('span', { class: 'lbl', text: 'Lab projects' }),
+    h('p', { class: 'muted', text: 'Everything in a lab project counts as Lab. Untick a single item in its sheet to leave it out.' }),
+    (state.projects || []).filter(p => !p.archived).length ? h('div', { class: 'stack', id: 'lab-projects' }, (state.projects || []).filter(p => !p.archived).map(p => {
+      const c = h('input', { type: 'checkbox', id: 'labproj-' + p.id });
+      c.checked = !!p.lab;
+      c.addEventListener('change', async () => { state.projects = state.projects.map(q => (q.id === p.id ? { ...q, lab: c.checked } : q)); await saveProjects(); render(); });
+      return h('label', { class: 'keep', for: 'labproj-' + p.id, 'data-cat': p.cat }, c, '#' + p.name);
+    })) : h('p', { class: 'muted', text: 'No projects yet. Make one in the Notebook (Projects) or with + New project when saving a note.' }),
     h('hr', { class: 'rule' }),
     h('span', { class: 'lbl', text: 'Photos' }),
     h('p', { class: 'muted', text: "An email link can't carry attachments. For an experiment with photos, tap Share and pick Gmail: the text and photos go in, and Kura copies the Inbox address so you can paste it into To." }));
@@ -8183,6 +8290,7 @@ async function boot() {
   state.exps = store.kvGet ? ((await store.kvGet('experiments').catch(() => null)) || []) : [];
   state.labLogs = store.kvGet ? ((await store.kvGet('labLogs').catch(() => null)) || {}) : {};
   state.labDrafts = store.kvGet ? ((await store.kvGet('labDrafts').catch(() => null)) || {}) : {};
+  state.labPicks = store.kvGet ? ((await store.kvGet('labPicks').catch(() => null)) || {}) : {};
   try { state.timers = JSON.parse(localStorage.getItem('kura.timers') || '[]') || []; } catch (e) { state.timers = []; }
   runTimers();
   syncCapUI();
