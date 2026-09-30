@@ -939,6 +939,16 @@ textarea.jr-area { min-height: 66px; font-size: 15px; line-height: 1.5; resize: 
 .ag-pick.on .lp-t { text-decoration: line-through; color: var(--ink-2); }
 .ag-pick .ghost { padding: 2px; }
 .m-meet { width: 5px; height: 5px; border: 1px solid var(--ink); transform: rotate(45deg); }
+/* v23: glossary terms and times */
+.term { text-decoration: underline dotted; text-decoration-color: color-mix(in srgb, var(--ink) 55%, transparent); text-underline-offset: 3px; text-decoration-thickness: 1.5px; cursor: help; }
+.li.done .term { text-decoration-color: var(--ink-2); }
+.term-chips .nb-chip { font-family: var(--f-mono); font-size: 12px; }
+.term-title { font-size: 19px; font-weight: 500; margin: 0; }
+.term-peek .gl-def { font-size: 15px; line-height: 1.55; margin: 0; }
+.gl-new-row { padding: 8px 12px; gap: 10px; flex-wrap: nowrap; }
+.gl-new-row .muted { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tg.time { font-variant-numeric: tabular-nums; color: var(--ink); border-color: var(--ink); }
+.tg.time.late { color: var(--red); border-color: var(--red); }
 /* short screens: keyboard up on the Fold leaves roughly a 4:3 area */
 .short .field, .short .wordmark, .short .tags-lbl { display: none; }
 .short .widget { padding-block: 4px; }
@@ -1142,7 +1152,7 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
 (() => {
 'use strict';
 
-const APP_VERSION = 'v22';
+const APP_VERSION = 'v23';
 /* ---------- helpers ---------- */
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -1817,6 +1827,7 @@ function onItems(list) {
   checkRepeats();
   syncDoneLog();
   render();
+  syncTaskAlarms();
   scheduleGtSync();
   if (state.sheet && state.sheet.kind === 'log') drawLog();
   refreshBank();
@@ -1907,6 +1918,8 @@ const inToday = it => isNow(it) && (!it.done || (it.doneAt && dayStr(new Date(it
 function todaySort(a, b) {
   if (!!a.done !== !!b.done) return a.done ? 1 : -1;
   if (a.today !== b.today) return a.today < b.today ? -1 : 1;
+  if (!!a.at !== !!b.at) return a.at ? -1 : 1;
+  if (a.at && b.at && a.at !== b.at) return a.at < b.at ? -1 : 1;
   return (a.createdAt || 0) - (b.createdAt || 0);
 }
 function icoFor(it) {
@@ -1929,14 +1942,15 @@ function laneRow(it) {
     h('button', { class: 'li-body', type: 'button', onclick: () => openItem(it.id) },
       icoFor(it),
       h('span', { class: 'main' },
-        h('span', { class: 'txt', text: rowText(it) }),
+        h('span', { class: 'txt' }, termNodes(rowText(it))),
         h('span', { class: 'meta' },
           h('span', { text: rel(it.createdAt) }),
           tagMeta(it),
           stepMeta(it),
           it.page ? h('span', { class: 'pg', text: '· ' + it.page }) : null,
           it.example ? h('span', { class: 'ex', text: 'Example' }) : null,
-          it.today && !isNow(it) ? h('span', { class: 'tg', text: 'due ' + futureLabel(it.today) }) : null,
+          it.today && !isNow(it) ? h('span', { class: 'tg', text: 'due ' + futureLabel(it.today) + (it.at ? ' ' + it.at : '') }) : null,
+          it.today && isNow(it) ? timeTag(it) : null,
           it.repeat ? h('span', { class: 'tg', text: '↻ ' + repeatLabel(it.repeat) }) : null,
           projOf(it) ? h('span', { class: 'tg', text: '#' + projOf(it).name }) : null,
           labTag(it),
@@ -2061,7 +2075,7 @@ function mdLine(it, cfg) {
     const t = tagSlug(symById(id).name);
     if (t && /[^\d]/.test(t)) tags.push('#' + t);
   }
-  let line = (isTask ? (it.done ? '- [x] ' : '- [ ] ') : '- ') + text;
+  let line = (isTask ? (it.done ? '- [x] ' : '- [ ] ') : '- ') + text + (isTask && it.at && it.today ? ' at ' + it.at : '');
   if (it.page) line += ` (page: ${it.page})`;
   line += ' ' + tags.join(' ');
   if (isTask && cfg.tasksDates && it.repeat) line += ' 🔁 ' + repeatTasksText(it.repeat);
@@ -2640,7 +2654,7 @@ async function saveDirect() {
   const parsed = parseMarks(raw);
   const lb0 = takeLab(parsed.text);
   const pj = takeProject(lb0.text);
-  let text = pj.text;
+  let text = canonTerms(pj.text);
   let tags = parsed.tags;
   const route = state.route;
   const when = !state.whenOff && route !== 'drop' && !RX_FLEETING.test(text) ? parseWhen(text) : null;
@@ -2659,6 +2673,7 @@ async function saveDirect() {
     text, tags, bucket,
     today: when ? when.date : route === 'today' ? TODAY : null,
     repeat: when ? when.repeat : null,
+    at: when ? when.time || null : null,
     done: false, doneAt: null,
     createdAt: now, updatedAt: now,
     source: 'typed', photo: null, page: null,
@@ -2668,7 +2683,7 @@ async function saveDirect() {
   const target = store;
   try { await target.set(id, data); }
   catch (e) { els.input.value = raw; onWriteError(e); return; }
-  if (when) toast(`Planned ${whenLabel(when.date)}${when.repeat ? ' ↻ ' + repeatLabel(when.repeat) : ''}${proj ? ' · #' + proj.name : ''}`);
+  if (when) toast(`Planned ${whenLabel(when.date)}${when.time ? ' ' + when.time : ''}${when.repeat ? ' ↻ ' + repeatLabel(when.repeat) : ''}${proj ? ' · #' + proj.name : ''}`);
   else if (proj && !auto) toast(`Added to #${proj.name}`);
   const isToday = !!data.today && data.today <= TODAY;
   if (!auto && innerWidth < 720) setTab(isToday ? 'today' : bucket);
@@ -2877,6 +2892,7 @@ function drawItem() {
         h('div', { class: 'row', id: 'item-cat' }, catSeg(catOf(it), c => patch(s.id, { cat: c })),
           projPicker(it.proj || null, v => patch(s.id, { proj: v }), () => catOf(byId(s.id) || it)))),
       whenControls(it, () => drawItem()),
+      termChipsFor(it.text),
       h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'Symbols' }),
         tagChips(knownTags(it), tags => patch(s.id, { tags }))),
       h('label', { class: 'keep item-lab', for: 'item-lab' }, (() => {
@@ -3212,7 +3228,7 @@ async function commitScan(btn) {
     const w = r.bucket === 'make' ? parseWhen(tp.text) : null;
     try {
       await store.set(id, {
-        text: (w && w.text) || tp.text, tags: r.tags, bucket: r.bucket, today: r.today ? TODAY : (w ? w.date : null), repeat: w ? w.repeat : null,
+        text: (w && w.text) || tp.text, tags: r.tags, bucket: r.bucket, today: r.today ? TODAY : (w ? w.date : null), repeat: w ? w.repeat : null, at: w ? w.time || null : null,
         done: false, doneAt: null, createdAt: now - i, updatedAt: now,
         source: 'scan', photo, page, pending: false, cat: scan.cat || guessCat(r.text), proj: tp.proj || scan.proj || null,
       });
@@ -3289,13 +3305,14 @@ function mdNodes(md) {
 
 function comprehendPrompt(raw, tpl) {
   const field = state.field ? `The writer's field: ${state.field}.` : 'The writer works in engineering and science.';
+  const gl = glossFor(raw, 40);
   return `You are the note-taking assistant inside Kura, a researcher's notebook app. ${field} Today is ${TODAY}.
 Turn the rough notebook entry below into a clean note.
 ${tplPrompt(tpl)}
 Rules:
 - Keep the writer's meaning, facts and numbers exactly. Never invent results, measurements, citations, names or conclusions.
 - Fix spelling, expand obvious shorthand, and use correct technical terms and SI units. If something is unclear, keep it as written and add a question about it.
-- "context": up to 5 technical or scientific terms, equations or units the entry touches on, each with a short explanation from well-established textbook knowledge only. Give each "term" its standard name, with a common abbreviation in brackets if there is one, e.g. "Electrochemical impedance spectroscopy (EIS)". No citations, no speculation, nothing about the writer's own results. Use [] if the entry has nothing technical.
+${gl.length ? `- The writer's own glossary (use these exact spellings and meanings; keep their abbreviations; don't put these in "context" again unless the entry adds something new):\n${glossLines(gl)}\n` : ''}- "context": up to 5 technical or scientific terms, equations or units the entry touches on, each with a short explanation from well-established textbook knowledge only. Give each "term" its standard name, with a common abbreviation in brackets if there is one, e.g. "Electrochemical impedance spectroscopy (EIS)". No citations, no speculation, nothing about the writer's own results. Use [] if the entry has nothing technical.
 - "category": "work" for research, study, lab or job; "personal" for life admin, family, friends, health, money, errands or home; "fun" for hobbies, games, entertainment, trips or things done for enjoyment.${projRule()}
 - "tasks": things the writer needs to do, as short imperative lines. Lines marked with a box, [] or -> are tasks.
 - "questions": open questions the writer raised or left unresolved. Lines marked with ? are questions.
@@ -3439,7 +3456,7 @@ async function nbSave(sendObs) {
   for (const t of r.tasks.filter(x => x.keep && !existing.has(x.text.trim().toLowerCase()))) {
     const id = store.newId();
     const w = parseWhen(t.text);
-    await store.set(id, { text: (w && w.text) || t.text, tags: symById('task') ? ['task'] : [], bucket: 'make', today: t.today ? TODAY : (w ? w.date : null), repeat: w ? w.repeat : null, done: false, doneAt: null,
+    await store.set(id, { text: (w && w.text) || t.text, tags: symById('task') ? ['task'] : [], bucket: 'make', today: t.today ? TODAY : (w ? w.date : null), repeat: w ? w.repeat : null, at: w ? w.time || null : null, done: false, doneAt: null,
       createdAt: now - made, updatedAt: now, source: 'note', photo: null, page: n.title, pending: false, noteId: n.id, cat: n.cat, proj: n.proj }).catch(onWriteError);
     n.itemIds.push(id);
     made++;
@@ -3477,7 +3494,7 @@ async function nbAsk(question) {
     ...(state.notes || []).filter(inCat).map(n => ({ ref: n.id, kind: 'note', title: n.title, date: dayStr(new Date(n.created || 0)),
       body: [projOf(n) ? 'Project: ' + projOf(n).name : '', n.summary, (n.points || []).join('; '), n.note || n.raw, (n.tags || []).join(' ')].filter(Boolean).join('\n') })),
     ...state.items.filter(it => !it.example && inCat(it)).map(it => ({ ref: it.id, kind: 'item', title: String(it.text).split('\n')[0].slice(0, 80), date: dayStr(new Date(it.createdAt || 0)),
-      body: `${it.text}${it.page ? ' (page: ' + it.page + ')' : ''}${projOf(it) ? ' #' + projOf(it).name : ''}${it.today ? ' (planned ' + it.today + (it.repeat ? ', repeats ' + repeatLabel(it.repeat) : '') + ')' : ''} [${LABEL[it.bucket] || ''}${it.done ? ', done' : ''}]` })),
+      body: `${it.text}${it.page ? ' (page: ' + it.page + ')' : ''}${projOf(it) ? ' #' + projOf(it).name : ''}${it.today ? ' (planned ' + it.today + (it.at ? ' ' + it.at : '') + (it.repeat ? ', repeats ' + repeatLabel(it.repeat) : '') + ')' : ''} [${LABEL[it.bucket] || ''}${it.done ? ', done' : ''}]` })),
     ...(state.glossary || []).filter(g => cat === 'all' || termCats(g).includes(cat)).map(g => ({ ref: g.id, kind: 'term', title: g.term, date: dayStr(new Date(g.created || 0)), body: g.def })),
   ];
   const score = d => {
@@ -3513,7 +3530,7 @@ async function nbAsk(question) {
 Use the NOTES below as your main source. After each sentence that uses a note, cite it by its id in square brackets, like [${picked[0] ? picked[0].ref : 'id'}].
 If the notes don't answer the question, say so plainly. You may then add general technical knowledge, starting that part with "General knowledge:". Never invent the user's own results, measurements or data.
 Keep the answer short and practical. Plain text, no Markdown headings.
-${history ? '\nEarlier in this conversation:\n' + history + '\n' : ''}
+${(() => { const gl = glossFor(q + '\n' + picked.map(d => d.body).join('\n'), 20); return gl.length ? "\nThe user's glossary (their own definitions; read abbreviations with these meanings):\n" + glossLines(gl) + '\n' : ''; })()}${history ? '\nEarlier in this conversation:\n' + history + '\n' : ''}
 NOTES:
 ${picked.map(d => `[${d.ref}] ${d.title} (${d.kind === 'note' ? 'note' : d.kind === 'term' ? 'glossary term' : 'quick note'}, ${d.date})\n${d.body}`).join('\n\n') || '(no notes yet)'}
 
@@ -3605,6 +3622,8 @@ function findTerm(p) {
   return (state.glossary || []).find(g => g.key === p.key || (g.alias && g.alias === p.key) || (p.alias && (g.key === p.alias || g.alias === p.alias))) || null;
 }
 async function markGloss() {
+  glossVer++;
+  renderSoon();
   state.glossChanged = Date.now();
   if (store.kvSet) await store.kvSet('glossChanged', state.glossChanged).catch(() => {});
 }
@@ -3626,6 +3645,12 @@ async function syncGlossary(n, removing) {
         touched.add(g);
         added++;
       } else if (!g.alias && p.alias) { g.alias = p.alias; touched.add(g); }
+      used.add(g.id);
+      if (!g.noteIds.includes(n.id)) { g.noteIds = [...g.noteIds, n.id]; g.updated = now; touched.add(g); }
+    }
+    for (const x of termMatches([n.title, n.note, n.raw].filter(Boolean).join('\n'))) {
+      const g = termById(x.e.id);
+      if (!g || used.has(g.id)) continue;
       used.add(g.id);
       if (!g.noteIds.includes(n.id)) { g.noteIds = [...g.noteIds, n.id]; g.updated = now; touched.add(g); }
     }
@@ -3789,6 +3814,7 @@ function drawNotebook() {
   } else if (nb.tab === 'gloss') {
     const shown = terms.filter(g => (cat === 'all' || termCats(g).includes(cat)) && (!q || `${g.term} ${g.def}`.toLowerCase().includes(q)));
     const list = h('div', { class: 'list', style: 'padding:0' });
+    const useN = termUseCounts();
     let letter = '';
     for (const g of shown) {
       const L = /^[a-z]/i.test(g.term) ? g.term[0].toUpperCase() : '#';
@@ -3800,13 +3826,13 @@ function drawNotebook() {
       },
         h('span', { class: 't', text: g.term }),
         h('span', { class: 'x', text: g.def }),
-        h('span', { class: 'meta' }, h('span', { text: `${n} note${n === 1 ? '' : 's'}` }), h('span', { text: g.edited ? '· edited by you' : '· AI' }))));
+        h('span', { class: 'meta' }, h('span', { text: `${n} note${n === 1 ? '' : 's'}${useN.get(g.id) ? ` · ${useN.get(g.id)} quick` : ''}` }), h('span', { text: g.manual ? ' · added by you' : g.edited ? ' · edited by you' : ' · AI' }))));
     }
-    if (!shown.length) list.append(h('p', { class: 'empty', text: q || cat !== 'all' ? 'No matching terms.' : 'No terms yet. When you comprehend a note, the terms in its Technical context are collected here automatically, linked to the note.' }));
+    if (!shown.length) list.append(h('p', { class: 'empty', text: q || cat !== 'all' ? 'No matching terms.' : 'No terms yet. Tap + New term, type "EIS = electrochemical impedance spectroscopy" in the pad, or comprehend a technical note: its terms are collected here automatically.' }));
     const foot = state.obs ? h('div', { class: 'nb-foot' },
       h('span', { class: 'lbl grow', id: 'gl-state', text: !terms.length ? '' : glossDirty() ? (state.glossSentAt ? 'Changed since sent' : 'Not sent yet') : 'Up to date' }),
       h('button', { class: 'btn', id: 'gl-send', type: 'button', disabled: !terms.length, onclick: sendGlossaryToObsidian }, 'Send to Obsidian')) : null;
-    listCol = h('aside', { class: 'nb-list card-box' }, search, list, foot);
+    listCol = h('aside', { class: 'nb-list card-box' }, search, h('div', { class: 'row gl-new-row' }, h('button', { class: 'btn', id: 'gl-new', type: 'button', onclick: () => openTermEdit({}) }, '+ New term'), h('span', { class: 'muted', text: 'or type "EIS = …" in the pad' })), list, foot);
   } else {
     const kind = nb.tab === 'bank' ? nb.kind : 'all';
     const kindSeg = nb.tab === 'bank' ? h('div', { class: 'seg small nb-tabs nb-kind', role: 'group', 'aria-label': 'Show' },
@@ -3957,7 +3983,8 @@ function drawNotebook() {
         used.length
           ? h('div', { class: 'nb-sec' }, h('span', { class: 'lbl', text: `Used in ${used.length} note${used.length === 1 ? '' : 's'}` }),
             h('div', { class: 'nb-chips' }, used.map(n => h('button', { class: 'nb-chip', type: 'button', 'data-cat': catOf(n), onclick: () => openNoteInBank(n.id) }, n.title))))
-          : h('p', { class: 'muted', text: 'No note uses this term any more.' }));
+          : h('p', { class: 'muted', text: g.manual ? 'No notebook note mentions it yet. Notes that do are linked here.' : 'No notebook note uses this term any more.' }),
+        termUsesBlock(g));
       const del = h('button', { class: 'btn danger', type: 'button', onclick: async () => {
         if (!nb.confirmDel) { nb.confirmDel = true; del.textContent = 'Tap again to delete'; return; }
         await removeTerm(g);
@@ -4158,6 +4185,18 @@ function parseWhen(input) {
       repeat = { unit: 'week', n: m[1] ? Math.max(1, +m[1]) : /other|fortnight/i.test(m[0]) ? 2 : 1, dows: null };
     })
     || cut(`\\s(?:every\\s+(\\d{1,2})\\s+months?|every\\s+month|monthly)${END}`, m => { repeat = { unit: 'month', n: m[1] ? Math.max(1, +m[1]) : 1, dom: null }; });
+  // times: "at 6pm", "6:30pm", "18:00", "at noon"
+  let time = null;
+  const hm = (hh, mm, ap) => {
+    let hr = +hh;
+    const mi = +(mm || 0);
+    if (ap) { if (hr < 1 || hr > 12) return null; if (/p/i.test(ap) && hr < 12) hr += 12; if (/a/i.test(ap) && hr === 12) hr = 0; }
+    return hr > 23 || mi > 59 ? null : pad2(hr) + ':' + pad2(mi);
+  };
+  cut(`\\s(?:at\\s+|@\\s*)?(\\d{1,2})(?:[:.](\\d{2}))?\\s*([ap])\\.?m\\.?${END}`, m => { time = hm(m[1], m[2], m[3]); return time ? undefined : false; })
+    || cut(`\\s(at\\s+|@\\s*)?([01]?\\d|2[0-3])(?::|h)([0-5]\\d)(?:\\s*(?:h|hrs))?${END}`, m => { if (!m[1] && +m[2] < 5) return false; time = hm(m[2], m[3]); return time ? undefined : false; })
+    || cut(`\\s(?:at\\s+)?(?:noon|midday)${END}`, () => { time = '12:00'; })
+    || cut(`\\sat\\s+midnight${END}`, () => { time = '00:00'; });
   // dates
   cut(`${PREP}\\s(?:the\\s+)?day\\s+after\\s+tomorrow${END}`, () => { date = addDays(TODAY, 2); })
     || cut(`${PREP}\\s(?:today|tonight|tdy)${END}`, () => { date = TODAY; })
@@ -4180,15 +4219,22 @@ function parseWhen(input) {
     || cut(`(?:\\s(?:on|by|due|before|until|till|this|next|coming))?\\s(next\\s+|this\\s+|coming\\s+)?${DOW_LONG_RX}${END}`, m => { date = weekdayDate(m); })
     || cut(`(?:\\s(?:on|by|due|before|until|till))?\\s(next\\s+|this\\s+|coming\\s+)?${DOW_ANY_RX}\\s*$`, m => { date = weekdayDate(m); })
     || cut(`\\s(?:on|by|due|before|until|till)\\s(next\\s+|this\\s+|coming\\s+)?${DOW_ANY_RX}${END}`, m => { date = weekdayDate(m); });
-  if (!date && !repeat) return null;
+  if (!date && !repeat && !time) return null;
+  const saidDay = !!date;
   if (repeat) {
     const base = date || TODAY;
     if (repeat.unit === 'week' && !(repeat.dows && repeat.dows.length)) repeat.dows = [dowOfDay(base)];
     if (repeat.unit === 'month' && !repeat.dom) repeat.dom = parseDay(base).getDate();
     if (!date) date = firstOccurrence(repeat, TODAY);
   }
+  if (time) {
+    // a time that has already gone today means the next one
+    const passed = time <= pad2(new Date().getHours()) + ':' + pad2(new Date().getMinutes());
+    if (!date) date = TODAY;
+    if (!saidDay && date === TODAY && passed) date = repeat ? nextOccurrence(repeat, TODAY) : addDays(TODAY, 1);
+  }
   const text = t.replace(/\s{2,}/g, ' ').replace(/\s+([,.;!?])/g, '$1').replace(/[\s,;:.–-]+$/, '').trim();
-  return { text: text || String(input).trim(), date, repeat };
+  return { text: text || String(input).trim(), date, repeat, time };
 }
 function weekdayDate(m) {
   const pre = String(m[1] || '').trim().toLowerCase();
@@ -4212,7 +4258,7 @@ async function spawnNext(it) {
     const now = Date.now();
     await store.update(it.id, { spawned: true, spawnedId: id });
     await store.set(id, {
-      text: it.text, tags: it.tags || [], bucket: 'make', today: next, repeat: it.repeat, cat: it.cat, proj: it.proj || null,
+      text: it.text, tags: it.tags || [], bucket: 'make', today: next, repeat: it.repeat, at: it.at || null, cat: it.cat, proj: it.proj || null,
       done: false, doneAt: null, createdAt: now, updatedAt: now, source: it.source || 'typed', photo: null, page: it.page || null,
       pending: false, noteId: it.noteId || null,
     });
@@ -4234,9 +4280,11 @@ function drawWhen() {
   if (!el) return;
   const r = padWhen();
   const bits = [];
-  if (r && r.when) bits.push('→ ' + whenLabel(r.when.date) + (r.when.repeat ? ' ↻ ' + repeatLabel(r.when.repeat) : ''));
+  if (r && r.when) bits.push('→ ' + whenLabel(r.when.date) + (r.when.time ? ' ' + r.when.time : '') + (r.when.repeat ? ' ↻ ' + repeatLabel(r.when.repeat) : ''));
   if (r && r.proj && projById(r.proj)) bits.push('#' + projById(r.proj).name);
   if (hasRaiseTag(els.input.value)) bits.push('→ AGENDA');
+  const td = termDef(els.input.value);
+  if (td) bits.splice(0, bits.length, '→ GLOSSARY' + (td.term ? ': ' + td.term.slice(0, 30) : ''));
   el.hidden = !bits.length || !!(state.cap && !state.cap.stale);
   el.textContent = bits.join(' · ');
   el.classList.toggle('off', !!state.whenOff);
@@ -4245,7 +4293,7 @@ function drawWhen() {
 
 function drawWeek(items, filtering) {
   const end = addDays(TODAY, 7);
-  const byDay = (a, b) => (a.today < b.today ? -1 : a.today > b.today ? 1 : (a.createdAt || 0) - (b.createdAt || 0));
+  const byDay = (a, b) => (a.today < b.today ? -1 : a.today > b.today ? 1 : (a.at || '99') < (b.at || '99') ? -1 : (a.at || '99') > (b.at || '99') ? 1 : (a.createdAt || 0) - (b.createdAt || 0));
   const up = items.filter(it => !it.done && it.today && it.today > TODAY && it.today <= end).sort(byDay);
   const later = items.filter(it => !it.done && it.today && it.today > end).sort(byDay);
   const nodes = [];
@@ -4310,8 +4358,17 @@ function whenControls(it, onDone) {
     await patch(it.id, p);
     onDone();
   });
+  const timeIn = h('input', { class: 'field-in date-in', id: 'item-time', type: 'time', 'aria-label': 'Time' });
+  timeIn.value = it.at || '';
+  timeIn.addEventListener('change', async () => {
+    const cur = byId(it.id);
+    if (!cur) return;
+    const v = timeIn.value || null;
+    await patch(it.id, v && !cur.today ? { at: v, today: TODAY, bucket: cur.bucket === 'drop' ? 'make' : cur.bucket, done: false, doneAt: null } : { at: v });
+    onDone();
+  });
   return h('div', { class: 'row' },
-    h('span', { class: 'lbl', text: 'Date' }), dateIn,
+    h('span', { class: 'lbl', text: 'Date' }), dateIn, h('span', { class: 'lbl', text: 'Time' }), timeIn,
     it.today ? h('button', { class: 'btn', type: 'button', 'aria-label': 'Clear date', onclick: async () => { await patch(it.id, { today: null, repeat: null }); onDone(); } }, '✕') : null,
     h('span', { class: 'lbl', text: 'Repeat' }), sel);
 }
@@ -4407,7 +4464,7 @@ async function addTaskTo(p, raw) {
   const w = parseWhen(pm.text);
   const now = Date.now();
   await store.set(store.newId(), {
-    text: (w && w.text) || pm.text, tags: pm.tags, bucket: 'make', today: w ? w.date : null, repeat: w ? w.repeat : null,
+    text: (w && w.text) || pm.text, tags: pm.tags, bucket: 'make', today: w ? w.date : null, repeat: w ? w.repeat : null, at: w ? w.time || null : null,
     cat: p.cat, proj: p.id, done: false, doneAt: null, createdAt: now, updatedAt: now, source: 'typed', photo: null, page: null, pending: false,
   }).catch(onWriteError);
   toast(w ? `Added to #${p.name} · ${whenLabel(w.date)}${w.repeat ? ' ↻ ' + repeatLabel(w.repeat) : ''}` : `Added to #${p.name}`);
@@ -5045,7 +5102,7 @@ async function shareOut(title, text) {
   catch (e) { toast("Couldn't share or copy on this device."); }
 }
 const itemShareText = it => [rowText(it), ...stepsOf(it.text).map(s => `${s.done ? '☑' : '☐'} ${s.text}`),
-  it.today ? `Planned: ${it.today}${it.repeat ? ' (' + repeatLabel(it.repeat) + ')' : ''}` : '', projOf(it) ? `#${projOf(it).name}` : ''].filter(Boolean).join('\n');
+  it.today ? `Planned: ${it.today}${it.at ? ' ' + it.at : ''}${it.repeat ? ' (' + repeatLabel(it.repeat) + ')' : ''}` : '', projOf(it) ? `#${projOf(it).name}` : ''].filter(Boolean).join('\n');
 const noteShareText = n => [n.title, n.summary ? '\n' + n.summary : '', '\n' + (n.note || n.raw || ''), (n.tasks || []).length ? '\nTasks:\n' + n.tasks.map(t => '- ' + t).join('\n') : ''].filter(Boolean).join('\n');
 function projectShareText(p) {
   const st = projStats(p);
@@ -6147,6 +6204,12 @@ function drawNlm() {
 // Block types: p (paragraph), h (small heading), steps (numbered), list (bullets), table ([left, right] rows), note (aside), try ([label, action] buttons)
 const GUIDE = [
   { id: 'new', icon: 'trophy', title: "What's new", blocks: [
+    { h: 'v23' }, { list: [
+      '**Times and reminders**: "go for a run at 6:00pm", "6pm", "18:30" or "at noon" give a task a time. TODAY sorts by time, the calendar and week show it, and you get a reminder (in the app, an Android notification). Settings → Basics → **Task reminders** sets how early.',
+      '**The glossary everywhere**: your terms are underlined in lists, the day view, the journal and meetings. Tap one to see its definition and every note that uses it.',
+      '**Add terms from anywhere**: type "EIS = electrochemical impedance spectroscopy" in the pad, long-press a note → **Add to glossary**, or **+ New term** in the Glossary. **Define with AI** fills in a definition.',
+      '**The AI knows your glossary**: smart capture, Comprehend and Ask read your terms, so your abbreviations are understood and kept exactly as you write them ("eis" becomes "EIS").',
+    ] },
     { h: 'v22' }, { list: [
       '**Journal** replaces the LabArchives log: a short page a day with how it went, what you finished (filled in for you), wins, blockers and tomorrow\'s plan. **Save to Obsidian** keeps it as Kura/Journal/2026-10-01.',
       '**Meetings**: set up your regular meetings, collect what to raise during the week (**#raise** in the pad, or long-press a task → **Raise at meeting**), then tick things off, take notes and turn action items into tasks in one tap.',
@@ -6227,7 +6290,7 @@ const GUIDE = [
   ] },
   { id: 'write', icon: 'pen', title: 'Writing quick notes', blocks: [
     { steps: [
-      'Type in the pad. Keep it short: "call mum re bday sat", "prep samples: wash, dry, weigh", "mtg w/ Pierre fri".',
+      'Type in the pad. Keep it short: "go for a run at 6:00pm", "prep samples: wash, dry, weigh", "mtg w/ Pierre fri".',
       'Press **Enter**. With **AUTO** picked (the default), a preview opens under your text showing what Kura will save.',
       'Change anything by tapping it, then press **Enter** again or tap **Save**. **Undo** appears for a few seconds.',
     ] },
@@ -6241,7 +6304,7 @@ const GUIDE = [
     ] },
     { table: [
       ['DROP · STOCK · MAKE', 'Which list it goes to.'],
-      ['+ Date · Today · ×', 'Plan it for a day, or clear the date. Dated items go to MAKE and appear in TODAY on the day.'],
+      ['+ Date · + Time · Today · ×', 'Plan it for a day and time, or clear them. Dated items go to MAKE and appear in TODAY on the day.'],
       ['↻ weekly ×', 'Tap to stop it repeating.'],
       ['Work · Personal · Fun', 'Tap to change the category.'],
       ['Project', 'Pick a project, or make a new one.'],
@@ -6266,6 +6329,8 @@ const GUIDE = [
       ['[] or [ ] at the start', 'Task'],
       ['-> at the start', 'Follow-up'],
       ['fri · tomorrow · 3 Oct', 'Plans it for that day (see Dates and repeats)'],
+      ['6pm · 6:30pm · 18:30 · at noon', 'Gives it a time, with a reminder'],
+      ['EIS = electrochemical impedance spectroscopy', 'Adds a term to your glossary (or end any note with #term)'],
       ['every mon · daily', 'A repeating task'],
       ['#aurora', 'Files it in an existing project'],
       ['#raise', 'Puts it on the agenda for your next meeting instead of a list'],
@@ -6337,6 +6402,15 @@ const GUIDE = [
       ['this weekend', 'Saturday'],
       ['end of week · end of month', 'Friday · the last day of the month'],
     ] },
+    { h: 'Times' },
+    { table: [
+      ['at 6pm · 6:00pm · 6.30 pm', '12-hour times need am or pm'],
+      ['18:30 · at 7:15 · 18h30', '24-hour times need the colon (or h)'],
+      ['at noon · at midnight', '12:00 · 00:00'],
+      ['go for a run at 6pm', 'Today at 18:00, or tomorrow if 6 pm has already gone'],
+      ['fri at 9am · every mon 8:30am', 'A day or repeat with a time'],
+    ] },
+    { list: ['TODAY lists timed tasks first, in time order, and the time turns red once it has passed.', 'A reminder comes at the time (Settings → Basics → **Task reminders** can make it 5 to 60 minutes earlier, or off). In the Android app it is a notification, even when Kura is closed; in the web version it shows while Kura is open.', 'Change or clear the time in the note\'s sheet, or with **+ Time** in the save preview.'] },
     { h: 'Repeats' },
     { table: [
       ['daily · every day · every 2 days', 'Every day, or every n days'],
@@ -6362,7 +6436,7 @@ const GUIDE = [
     ] },
     { p: 'Drag a row sideways. When the label turns red, let go. A short drag springs back. After most actions, **Undo** appears at the bottom of the screen for about 5 seconds.' },
     { h: 'Long-press for quick actions' },
-    { p: 'Press and hold any task (or right-click it) for a menu: **Today**, **Tomorrow**, **Next week**, **Pick a day**, **Unplan**, **Done**, **Focus**, **Raise at meeting**, move to DROP · STOCK · MAKE, **Open** or **Delete**. Most show **Undo** afterwards.' },
+    { p: 'Press and hold any task (or right-click it) for a menu: **Today**, **Tomorrow**, **Next week**, **Pick a day**, **Unplan**, **Done**, **Focus**, **Raise at meeting**, **Add to glossary**, move to DROP · STOCK · MAKE, **Open** or **Delete**. Most show **Undo** afterwards.' },
   ] },
   { id: 'camera', icon: 'page', title: 'Brain Camera and pasting a page', blocks: [
     { h: 'With an AI key' },
@@ -6409,6 +6483,22 @@ const GUIDE = [
     { note: 'The AI is told never to invent results, numbers or citations. The Paper template keeps your citation exactly as you wrote it.' },
   ] },
   { id: 'glossary', icon: 'page', title: 'The Glossary', blocks: [
+    { p: 'Your own dictionary of technical terms and abbreviations. Kura uses it everywhere: terms are underlined wherever you write them, and the AI reads them so your shorthand is understood.' },
+    { h: 'Adding terms' },
+    { table: [
+      ['In the pad', '"EIS = electrochemical impedance spectroscopy" and Enter. Or end any note with **#term** ("AuNW #term") to open the term with an AI definition.'],
+      ['From a note', 'Long-press it → **Add to glossary**.'],
+      ['In the Glossary', '**+ New term**. **Define with AI** writes a short textbook definition; edit it to make it yours.'],
+      ['Automatically', 'The terms in a notebook note\'s Technical context when you Comprehend it.'],
+    ] },
+    { p: 'Write the abbreviation in brackets, "Gold nanowire (AuNW)", and Kura recognises both forms, and plurals too.' },
+    { h: 'Using it' },
+    { list: [
+      'Underlined terms appear in your lists, TODAY, the day view, the journal and meetings. Tap one to see its definition, the notebook notes and the quick notes that use it.',
+      'A note\'s sheet, the journal and meeting notes list the glossary terms they mention.',
+      'Smart capture, Comprehend and Ask are given your terms, so "eis sweep on aunw foam" is read correctly and your abbreviations are never "tidied" away. Kura also fixes their spelling to yours: "eis" becomes "EIS".',
+    ] },
+    { h: 'Looking after it' },
     { list: [
       'Every term in a note\'s Technical context is saved automatically, sorted A to Z and linked to the notes that use it.',
       'Different spellings of one term are merged, like "EIS" and "Electrochemical impedance spectroscopy (EIS)".',
@@ -6417,6 +6507,7 @@ const GUIDE = [
       '**Delete** a term and Kura won\'t add it again.',
       '**Send to Obsidian** (bottom of the list) writes one Glossary note. It shows whether Obsidian is up to date.',
     ] },
+    { try: [['Open the Glossary', 'glossary'], ['New term', 'newterm']] },
   ] },
   { id: 'projects', icon: 'plan', title: 'Projects', blocks: [
     { steps: ['Notebook → **Projects** → type a name at the bottom → **Add**.', 'From then on, **#name** in any quick note files it there, e.g. #aurora.', 'You can also pick a project in a task\'s sheet, when reviewing a notebook note, on a Brain Camera page, or for something shared into Kura.'] },
@@ -6631,6 +6722,8 @@ const GUIDE_ACTIONS = {
   aisettings: () => openSettings('ai'),
   calendar: () => openDay(TODAY),
   journal: () => openDesk('journal'),
+  glossary: () => openInNotebook(() => { if (state.nb) { state.nb.tab = 'gloss'; nbPrefs.tab = 'gloss'; drawNotebook(); } }),
+  newterm: () => openTermEdit({}),
   meetings: () => openDesk('meet'),
   newmeeting: () => openDesk('meet', { mview: 'edit', edit: { id: null, name: '', who: '', every: 'week', next: TODAY, time: '' } }),
   timers: () => openDesk('timers'),
@@ -6910,7 +7003,7 @@ const capPrefs = { preview: true, ai: true };
 async function saveCapPrefs() { if (store.kvSet) await store.kvSet('capture', { ...capPrefs }).catch(() => {}); }
 function syncCapUI() {
   els.input.placeholder = capPrefs.preview
-    ? 'Jot it short: "call mum sat", "prep samples: wash, dry". Enter to preview, Enter again to save.'
+    ? 'Jot it short: "go for a run at 6:00pm", "email Pierre fri". Enter to preview, Enter again to save.'
     : 'Write anything. Enter saves. Start with ! ? [] -> to tag it.';
 }
 const SHORTHAND = [
@@ -6939,7 +7032,7 @@ function tidyShort(s) {
     for (const [rx, rep] of SHORTHAND) seg = seg.replace(rx, rep);
     return seg;
   }).join('').replace(/[ \t]{2,}/g, ' ').replace(/ +([,.;!?])/g, '$1').trim();
-  return t.replace(/^([a-z])(?![A-Z])/, c => c.toUpperCase());
+  return canonTerms(t).replace(/^([a-z])(?![A-Z])/, c => c.toUpperCase());
 }
 const RX_BULLET = /^\s*(?:[*•·▪◦‣]|-(?!>)|\d{1,2}[.)])\s+/;
 const RX_LIST_HEAD = /\b(shopping|groceries|grocery|packing|pack|buy|get|order|to-?dos?|checklist|list|steps)\b/i;
@@ -6988,7 +7081,7 @@ function capItem(src) {
   if (w || (steps.length && bucket !== 'drop')) bucket = 'make';
   return {
     text, body: '', steps, tags: r.tags, bucket, userBucket: false,
-    today: w ? w.date : null, repeat: w ? w.repeat : null,
+    today: w ? w.date : null, repeat: w ? w.repeat : null, at: w ? w.time || null : null,
     cat: proj ? proj.cat : guessCat(text + ' ' + steps.map(s => s.text).join(' ')), proj: proj ? proj.id : null, keep: true, lab: lb.lab ? true : null,
   };
 }
@@ -7028,13 +7121,14 @@ function capPrompt(raw) {
   const legend = state.symbols.map(s => `"${s.id}" = ${s.name}`).join(', ');
   const ps = (state.projects || []).filter(p => !p.archived).map(p => p.name);
   const rel = relatedNotes(raw);
+  const gl = glossFor(raw, 25, 15);
   const day = parseDay(TODAY).toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
   return `You turn quick jottings into clear notes and tasks for a personal notebook app. The writer types as little as possible. Fill in obvious wording, expand shorthand and fix typos, but keep their names, numbers and technical terms exactly. Never invent facts, people, places, dates or amounts.
 Today is ${day}.${state.field ? `\nThe writer's field: ${String(state.field).slice(0, 200)}.` : ''}
 Buckets: "drop" = fleeting, only useful today; "stock" = worth keeping (a fact, idea, reference or open question); "make" = something to do.
 Categories: "work" = research, study, lab or job; "personal" = life admin, family, friends, health, money, errands, home; "fun" = hobbies, games, entertainment, trips.
 Symbols (add only when clearly implied): ${legend}.
-Projects: ${ps.length ? ps.map(x => JSON.stringify(x)).join(', ') : 'none'}.${rel.length ? '\nRelated notes the writer already has (context for names and terms only, do not copy):\n' + rel.map(nt => `- ${nt.title}: ${String(nt.summary || nt.note || '').replace(/\s+/g, ' ').slice(0, 160)}`).join('\n') : ''}
+Projects: ${ps.length ? ps.map(x => JSON.stringify(x)).join(', ') : 'none'}.${gl.length ? "\nThe writer's glossary (their own terms: use these exact spellings, keep abbreviations as abbreviations, and read the jotting with these meanings):\n" + glossLines(gl) : ''}${rel.length ? '\nRelated notes the writer already has (context for names and terms only, do not copy):\n' + rel.map(nt => `- ${nt.title}: ${String(nt.summary || nt.note || '').replace(/\s+/g, ' ').slice(0, 160)}`).join('\n') : ''}
 
 Jotting:
 """${String(raw).slice(0, 4000)}"""
@@ -7042,7 +7136,7 @@ Jotting:
 Rules:
 - "kind": "single" for one thing; "list" when the jotting holds several separate things (one item each, at most 12); "notebook" when it is a long piece of writing better kept whole as a notebook note.
 - "text": for something to do, start with a verb and use at most 12 words. Otherwise one clear sentence of at most 25 words that keeps every fact. Leave date and time words out of "text".
-- "when": the exact date or repeat words from the jotting that apply to this item (like "fri", "tomorrow", "3 Oct", "every mon"), else "".
+- "when": the exact date, time or repeat words from the jotting that apply to this item (like "fri", "tomorrow", "3 Oct", "every mon", "6pm", "at 18:30"), else "".
 - "steps": only when the jotting lists parts, or the task clearly has 2 to 4 separate steps someone would tick off. At most 4, each at most 6 words. Otherwise [].
 - "project": one of the listed project names, or "".
 - For "notebook", return one item whose "text" is a short title.
@@ -7067,7 +7161,7 @@ function capFromAi(r, raw, off, whenOff) {
       if (x.when) w = parseWhen(' ' + String(x.when).slice(0, 60) + ' ');
       const w2 = parseWhen(text);
       if (w2) { text = w2.text; if (!w) w = w2; }
-      if (!w && base && base.today) w = { date: base.today, repeat: base.repeat };
+      if (!w && base && base.today) w = { date: base.today, repeat: base.repeat, time: base.at };
     }
     const aiSteps = (Array.isArray(x.steps) ? x.steps : []).map(s => tidyShort(String(s || '').trim()).slice(0, 80)).filter(Boolean).slice(0, 4);
     const typedSteps = base ? base.steps.filter(s => s.typed) : [];
@@ -7078,7 +7172,7 @@ function capFromAi(r, raw, off, whenOff) {
     if (w || (steps.length && bucket !== 'drop')) bucket = 'make';
     return {
       text, body: '', steps, tags, bucket, userBucket: false,
-      today: w ? w.date : null, repeat: w ? w.repeat || null : null,
+      today: w ? w.date : null, repeat: w ? w.repeat || null : null, at: w ? w.time || null : null,
       cat: proj ? proj.cat : CATS.includes(x.category) ? x.category : guessCat(text), proj: proj ? proj.id : null, keep: true,
       lab: kind === 'single' || !base ? (typedLab ? true : null) : base.lab,
     };
@@ -7151,7 +7245,7 @@ function capData(x, now) {
   const proj = projById(x.proj);
   return {
     text, tags: (x.tags || []).filter(t => symById(t)), bucket: capBucket(x),
-    today: x.today || null, repeat: x.today ? x.repeat || null : null,
+    today: x.today || null, repeat: x.today ? x.repeat || null : null, at: x.today ? x.at || null : null,
     done: false, doneAt: null, createdAt: now, updatedAt: now,
     source: 'typed', photo: null, page: null, pending: false,
     cat: CATS.includes(x.cat) ? x.cat : guessCat(x.text), proj: proj ? proj.id : null, lab: x.lab === true ? true : x.lab === false ? false : null,
@@ -7257,9 +7351,14 @@ function capRow(c, x, i) {
   dateIn.addEventListener('change', () => { x.today = dateIn.value || null; if (!x.today) x.repeat = null; else { x.bucket = 'make'; x.userBucket = false; } redraw(); });
   const dateChip = h('label', { class: 'cap-chip date' + (x.today ? ' on' : '') }, x.today ? (x.today === TODAY ? 'today' : whenLabel(x.today)) : '+ Date', dateIn);
   const todayBtn = x.today === TODAY ? null : h('button', { type: 'button', class: 'cap-chip', onclick: () => { x.today = TODAY; x.bucket = 'make'; x.userBucket = false; redraw(); } }, 'Today');
-  const clearDate = x.today ? h('button', { type: 'button', class: 'cap-chip', 'aria-label': 'Clear the date', onclick: () => { x.today = null; x.repeat = null; redraw(); } }, '×') : null;
+  const clearDate = x.today ? h('button', { type: 'button', class: 'cap-chip', 'aria-label': 'Clear the date', onclick: () => { x.today = null; x.repeat = null; x.at = null; redraw(); } }, '×') : null;
   const rep = x.today && x.repeat ? h('button', { type: 'button', class: 'cap-chip date on', title: 'Tap to stop repeating', onclick: () => { x.repeat = null; redraw(); } }, '↻ ' + repeatLabel(x.repeat) + ' ×') : null;
   const labChip = null;
+  const timeIn = h('input', { type: 'time', class: 'cap-date-in', 'data-k': 'tm' + i, 'aria-label': 'Pick a time' });
+  timeIn.value = x.at || '';
+  timeIn.addEventListener('click', () => { try { timeIn.showPicker(); } catch (e) {} });
+  timeIn.addEventListener('change', () => { x.at = timeIn.value || null; if (x.at && !x.today) { x.today = TODAY; x.bucket = 'make'; x.userBucket = false; } redraw(); });
+  const timeChip = eff === 'drop' ? null : h('label', { class: 'cap-chip date' + (x.at ? ' on' : '') }, x.at ? '⏰ ' + x.at : '+ Time', timeIn);
   const cat = h('button', { type: 'button', class: 'cap-chip cat', 'data-cat': x.cat, title: 'Tap to change the category', 'aria-label': `Category ${CAT_NAME[x.cat]}. Tap to change.`, onclick: () => { x.cat = CATS[(CATS.indexOf(x.cat) + 1) % CATS.length]; redraw(); } }, h('i', { class: 'cc' }), CAT_NAME[x.cat]);
   const proj = (state.projects || []).some(p => !p.archived) ? projPicker(x.proj, v => { x.proj = v; const p = projById(v); if (p) x.cat = p.cat; redraw(); }, () => x.cat) : null;
   const syms = h('span', { class: 'cap-syms' }, state.symbols.map(s => h('button', {
@@ -7276,7 +7375,7 @@ function capRow(c, x, i) {
     h('div', { class: 'cap-title' }, keep, title),
     x.body ? h('p', { class: 'cap-body', text: x.body }) : null,
     steps,
-    h('div', { class: 'cap-ctl' }, seg, dateChip, clearDate, todayBtn, rep, cat, labChip, proj, syms));
+    h('div', { class: 'cap-ctl' }, seg, dateChip, timeChip, clearDate, todayBtn, rep, cat, labChip, proj, syms));
 }
 function drawCapture() {
   const box = document.getElementById('capture');
@@ -7345,6 +7444,7 @@ async function submitPad() {
   const raw = els.input.value.trim();
   if (!raw) { closeCapture(); return; }
   if (hasRaiseTag(raw)) { await raiseFromPad(raw); return; }
+  if (termDef(raw)) { await termFromPad(raw); return; }
   const c = state.cap;
   if (c && !c.stale && c.raw === raw) { acceptCapture(); return; }
   if (state.route === 'auto' && capPrefs.preview) { openCapture(raw); return; }
@@ -7368,7 +7468,7 @@ function bannerMsgs() {
   if (reviewDue() && !state.reviewDismissed) out.push({ id: 'review', text: 'Weekly review time: tidy loose ends and plan next week.', act: ['Start review', () => openReview()], later: () => { state.reviewDismissed = true; } });
   if (state.seenVersion !== undefined && state.seenVersion !== APP_VERSION) {
     const fresh = !state.seenVersion && !state.items.some(i => !i.example);
-    out.push({ id: 'ver', text: fresh ? 'New to Kura? The user guide shows how everything works.' : `Updated to ${APP_VERSION}: Journal and Meetings replace the Lab section, 24 new critters, and voice keeps recording until you tap the mic again.`,
+    out.push({ id: 'ver', text: fresh ? 'New to Kura? The user guide shows how everything works.' : `Updated to ${APP_VERSION}: tasks can have a time and a reminder ("go for a run at 6pm"), and your glossary is underlined and used everywhere.`,
       act: [fresh ? 'Open the guide' : "What's new", () => openGuide(fresh ? 'start' : 'new'), 'banner-guide'], later: () => markSeen(), laterLabel: 'Got it' });
   }
   const missing = [!state.sample && 'a free AI key', !state.obs && 'your Obsidian vault'].filter(Boolean);
@@ -8112,7 +8212,7 @@ let symKey = '';
 function rowSig(it, kind) {
   const p = projOf(it);
   return [kind, it.text, (it.tags || []).join(','), it.bucket, it.today || '', it.done ? 1 : 0, it.repeat ? repeatLabel(it.repeat) : '', p ? p.name : '', isLab(it) ? 1 : 0,
-    it.page || '', it.example ? 1 : 0, it.pending && Date.now() - (it.createdAt || 0) < 120000 ? 1 : 0, kind === 't' ? '' : rel(it.createdAt), TODAY, symKey].join('\u0001');
+    it.page || '', it.example ? 1 : 0, it.pending && Date.now() - (it.createdAt || 0) < 120000 ? 1 : 0, kind === 't' ? '' : rel(it.createdAt), TODAY, symKey, it.at ? it.at + (taskLate(it) ? '!' : '') : '', glossVer].join('\u0001');
 }
 function cachedRow(key, sig, make) {
   rowUsed.add(key);
@@ -8149,8 +8249,9 @@ function todayRow(it) {
     }, icon('check', 2.6)),
     h('button', { class: 'li-body', type: 'button', onclick: () => openItem(it.id) },
       h('span', { class: 'main' },
-        h('span', { class: 'txt', text: rowText(it) }),
-        (carried || knownTags(it).length || it.example || it.repeat || projOf(it) || isLab(it) || stepsOf(it.text).length) ? h('span', { class: 'meta' },
+        h('span', { class: 'txt' }, termNodes(rowText(it))),
+        (carried || it.at || knownTags(it).length || it.example || it.repeat || projOf(it) || isLab(it) || stepsOf(it.text).length) ? h('span', { class: 'meta' },
+          timeTag(it),
           carried ? h('span', { class: 'carry', text: 'since ' + dayName(it.today) }) : null,
           it.repeat ? h('span', { class: 'tg', text: '↻ ' + repeatLabel(it.repeat) }) : null,
           projOf(it) ? h('span', { class: 'tg', text: '#' + projOf(it).name }) : null,
@@ -8310,8 +8411,8 @@ function drawDay() {
   const row = (it, withCheck) => h('div', { class: 'day-row' + (it.done ? ' done' : ''), 'data-id': it.id },
     withCheck ? h('button', { class: 'check', type: 'button', role: 'checkbox', 'aria-checked': String(!!it.done), 'aria-label': it.done ? 'Mark not done' : 'Mark done', onclick: async () => { await toggleDone(it.id); setTimeout(() => { if (state.sheet === s) drawDay(); }, 60); } }, icon('check', 2.6)) : h('span', { class: 'day-ico', text: '✓' }),
     h('button', { class: 'day-txt', type: 'button', onclick: () => openQuick(it.id, back) },
-      h('span', { text: firstLine(rowText(it)) }),
-      h('span', { class: 'meta' }, projOf(it) ? h('span', { class: 'tg', text: '#' + projOf(it).name }) : null, it.repeat ? h('span', { class: 'tg', text: '↻ ' + repeatLabel(it.repeat) }) : null, labTag(it))));
+      h('span', {}, termNodes(firstLine(rowText(it)))),
+      h('span', { class: 'meta' }, timeTag(it), projOf(it) ? h('span', { class: 'tg', text: '#' + projOf(it).name }) : null, it.repeat ? h('span', { class: 'tg', text: '↻ ' + repeatLabel(it.repeat) }) : null, labTag(it))));
   const add = h('input', { class: 'field-in', type: 'text', id: 'day-add', 'data-k': 'day-add', enterkeyhint: 'done', autocomplete: 'off', placeholder: future ? 'Add a task for this day' : 'Add something you did this day', 'aria-label': 'Add a task for this day' });
   const addIt = async () => {
     const v = add.value.trim();
@@ -8338,7 +8439,7 @@ function drawDay() {
       d !== TODAY ? h('button', { class: 'link-btn', type: 'button', onclick: () => { s.day = TODAY; drawDay(); } }, 'Today') : null),
     h('div', { class: 'row day-add-row' }, add, h('button', { class: 'btn primary', type: 'button', id: 'day-add-btn', onclick: addIt }, 'Add')),
     sec(`Planned · ${planned.length}`, planned.map(it => row(it, true))),
-    sec('Repeats that land here', reps.map(it => h('div', { class: 'day-row rep' }, h('span', { class: 'day-ico', text: '↻' }), h('button', { class: 'day-txt', type: 'button', onclick: () => openQuick(it.id, back) }, h('span', { text: firstLine(rowText(it)) }), h('span', { class: 'meta' }, h('span', { class: 'tg', text: repeatLabel(it.repeat) })))))),
+    sec('Repeats that land here', reps.map(it => h('div', { class: 'day-row rep' }, h('span', { class: 'day-ico', text: '↻' }), h('button', { class: 'day-txt', type: 'button', onclick: () => openQuick(it.id, back) }, h('span', {}, termNodes(firstLine(rowText(it)))), h('span', { class: 'meta' }, h('span', { class: 'tg', text: repeatLabel(it.repeat) })))))),
     sec(`Done · ${done.length}`, done.map(it => row(it, true))),
     focus || d <= TODAY || meetData().series.some(x => x.next === d) || meetData().notes.some(n => n.day === d) ? h('div', { class: 'stack' },
       h('span', { class: 'lbl', text: 'Journal and meetings' }),
@@ -8392,13 +8493,14 @@ function drawQuick() {
     tile('done', 'check', it.done ? 'Not done' : 'Done', async () => { await toggleDone(it.id); after(); }, it.done),
     !it.done ? tile('focus', 'timer', 'Focus', () => { closeSheet(); startFocus(it.id); }) : null,
     tile('raise', 'plan', isLab(it) ? 'Raising ✓' : 'Raise at meeting', () => { toggleRaise(it); drawQuick(); }, isLab(it)),
+    tile('gloss', 'page', 'Add to glossary', () => { const g = guessTerm(rowText(it)); openTermEdit({ ...g, auto: !!g.term && !g.def }, s); }),
     tile('open', 'pen', 'Open', () => openItem(it.id)),
     tile('delete', 'close', 'Delete', async () => { closeSheet(); await removeWithUndo([it.id]); }));
   const seg = segControl(it.bucket, async b => { await patchWithUndo(it.id, { bucket: b }, `Moved to ${LABEL[b]}`); after(); }, true);
   const body = h('div', { class: 'sheet-body' },
     h('p', { class: 'q-title', text: rowText(it) }),
     h('div', { class: 'row' }, h('span', { class: 'lbl', text: 'List' }), seg,
-      it.today ? h('span', { class: 'tg', text: it.done ? 'done' : 'planned ' + whenLabel(it.today) }) : null),
+      it.today ? h('span', { class: 'tg', text: it.done ? 'done' : 'planned ' + whenLabel(it.today) + (it.at ? ' ' + it.at : '') }) : null),
     grid);
   showSheet(h('div', { class: 'sheet quick', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Quick actions' }, head('QUICK', 'long-press menu', 'swipes'), body));
 }
@@ -8526,13 +8628,14 @@ function notifSetup() {
       const L = Plug.LocalNotifications;
       let p = await L.checkPermissions();
       if (!p || p.display !== 'granted') p = await L.requestPermissions();
-      try { await L.createChannel({ id: 'kura-timers', name: 'Timers', description: 'Bench and focus timers', importance: 5, visibility: 1, vibration: true }); } catch (e) {}
+      try { await L.createChannel({ id: 'kura-timers', name: 'Timers', description: 'Timers and focus sessions', importance: 5, visibility: 1, vibration: true }); } catch (e) {}
+      try { await L.createChannel({ id: 'kura-tasks', name: 'Task reminders', description: 'Tasks with a time, like "go for a run at 6pm"', importance: 4, visibility: 1, vibration: true }); } catch (e) {}
       return !!p && p.display === 'granted';
     })().catch(() => false);
   }
   return notifReady;
 }
-async function notifyAt(key, at, title, body) {
+async function notifyAt(key, at, title, body, channel) {
   if (notifAt.get(key) === at) return;
   if (!(await notifSetup())) return;
   const L = Plug.LocalNotifications, id = notifId(key);
@@ -8540,7 +8643,7 @@ async function notifyAt(key, at, title, body) {
   notifAt.set(key, at);
   if (at <= Date.now()) return;
   try {
-    await L.schedule({ notifications: [{ id, title, body, schedule: { at: new Date(at), allowWhileIdle: true }, channelId: 'kura-timers', smallIcon: 'ic_stat_kura', iconColor: '#DE4336' }] });
+    await L.schedule({ notifications: [{ id, title, body, schedule: { at: new Date(at), allowWhileIdle: true }, channelId: channel || 'kura-timers', smallIcon: 'ic_stat_kura', iconColor: '#DE4336' }] });
   } catch (e) {}
 }
 async function unnotify(key) {
@@ -8558,7 +8661,7 @@ function nativeTimersSync() {
     const x = expById(t.exp);
     notifyAt(t.id, t.ends, `Timer done: ${t.label}`, x ? x.title : 'Kura timer');
   }
-  for (const k of [...notifAt.keys()]) if (k !== 'focus' && !live.has(k)) unnotify(k);
+  for (const k of [...notifAt.keys()]) if (k !== 'focus' && !k.startsWith('task:') && !live.has(k)) unnotify(k);
 }
 function nativeFocusSync() {
   if (!NATIVE) return;
@@ -8985,8 +9088,8 @@ function journalView(s) {
   const row = (it, ico) => h('div', { class: 'day-row' + (it.done ? ' done' : ''), 'data-id': it.id },
     h('span', { class: 'day-ico', text: ico }),
     h('button', { class: 'day-txt', type: 'button', onclick: () => openQuick(it.id, back) },
-      h('span', { text: firstLine(rowText(it)) }),
-      h('span', { class: 'meta' }, projOf(it) ? h('span', { class: 'tg', text: '#' + projOf(it).name }) : null)));
+      h('span', {}, termNodes(firstLine(rowText(it)))),
+      h('span', { class: 'meta' }, timeTag(it), projOf(it) ? h('span', { class: 'tg', text: '#' + projOf(it).name }) : null)));
   const body = h('div', {},
     h('div', { class: 'lab-day' },
       h('button', { class: 'btn', type: 'button', id: 'jr-prev', 'aria-label': 'Previous day', onclick: () => go(-1) }, '‹'),
@@ -9000,6 +9103,7 @@ function journalView(s) {
     deskArea('wins', 'Wins', j.wins, 'What went well, one per line', v => jrSet(d, { wins: v })),
     deskArea('blockers', 'Blockers', j.blockers, "What's stuck, or who you're waiting on", v => jrSet(d, { blockers: v })),
     deskArea('notes', 'Notes', j.notes, 'Anything else about the day', v => jrSet(d, { notes: v }), 4),
+    termChipsFor([j.wins, j.blockers, j.notes].filter(Boolean).join('\n')),
     notes.length ? h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'Meetings' }),
       h('div', { class: 'day-lab' }, notes.map(n => h('button', { class: 'btn', type: 'button', onclick: () => openDesk('meet', { mview: 'run', note: n.id }) }, n.title)))) : null,
     h('div', { class: 'stack' }, h('span', { class: 'lbl', text: `${d === TODAY ? 'Tomorrow' : 'Next day'} · ${tom.length}` }),
@@ -9036,7 +9140,7 @@ function agendaAdder(s, sid) {
 function agendaRows(list, s) {
   return h('div', { class: 'day-list ag-list' }, list.map(a => h('div', { class: 'day-row ag-row', 'data-id': a.id },
     h('span', { class: 'day-ico', text: '?' }),
-    h('span', { class: 'day-txt' }, h('span', { text: a.text }), h('span', { class: 'meta' },
+    h('span', { class: 'day-txt' }, h('span', {}, termNodes(a.text)), h('span', { class: 'meta' },
       a.item ? h('span', { class: 'tg', text: 'from a task' }) : null,
       !a.series && meetData().series.length > 1 ? h('span', { class: 'tg', text: 'any meeting' }) : null,
       h('span', { class: 'tg', text: 'added ' + dayName(dayStr(new Date(a.at))) }))),
@@ -9143,7 +9247,7 @@ function meetRunView(s, n) {
     const cb = h('input', { type: 'checkbox', 'aria-label': 'Discussed: ' + a.text });
     cb.checked = !!a.on;
     cb.addEventListener('change', () => { a.on = cb.checked; touch(); lbl.classList.toggle('on', cb.checked); });
-    const lbl = h('label', { class: 'lab-pick ag-pick' + (a.on ? ' on' : '') }, cb, h('span', { class: 'lp-t', text: a.text }), h('button', { class: 'ghost', type: 'button', 'aria-label': 'Remove', onclick: ev => { ev.preventDefault(); n.agenda = n.agenda.filter(x => x !== a); touch(); drawDesk(); } }, icon('close')));
+    const lbl = h('label', { class: 'lab-pick ag-pick' + (a.on ? ' on' : '') }, cb, h('span', { class: 'lp-t' }, termNodes(a.text)), h('button', { class: 'ghost', type: 'button', 'aria-label': 'Remove', onclick: ev => { ev.preventDefault(); n.agenda = n.agenda.filter(x => x !== a); touch(); drawDesk(); } }, icon('close')));
     return lbl;
   }));
   const agIn = h('input', { class: 'field-in', type: 'text', id: 'mt-ag-in', 'data-k': 'mt-ag-in', enterkeyhint: 'done', autocomplete: 'off', placeholder: 'Add an agenda item', 'aria-label': 'Add an agenda item' });
@@ -9156,7 +9260,7 @@ function meetRunView(s, n) {
     const it = a.task && byId(a.task);
     return h('div', { class: 'day-row' + (it && it.done ? ' done' : ''), 'data-id': a.id },
       h('span', { class: 'day-ico', text: '→' }),
-      h('span', { class: 'day-txt' }, h('span', { text: a.text }), it ? h('span', { class: 'meta' }, h('span', { class: 'tg', text: it.done ? 'done' : it.today ? 'task · ' + whenLabel(it.today) : 'task in MAKE' })) : null),
+      h('span', { class: 'day-txt' }, h('span', {}, termNodes(a.text)), it ? h('span', { class: 'meta' }, h('span', { class: 'tg', text: it.done ? 'done' : it.today ? 'task · ' + whenLabel(it.today) : 'task in MAKE' })) : null),
       it ? h('button', { class: 'btn', type: 'button', onclick: () => openQuick(it.id, () => openDesk('meet', { mview: 'run', note: n.id })) }, 'Task ✓')
         : [h('button', { class: 'btn', type: 'button', 'data-act': 'task', onclick: async () => { if (await taskFromAction(a, n)) { toast('Added to MAKE'); drawDesk(); render(); } } }, '+ Task'),
           h('button', { class: 'ghost', type: 'button', 'aria-label': 'Remove action', onclick: () => { n.actions = n.actions.filter(x => x !== a); touch(); drawDesk(); } }, icon('close'))]);
@@ -9172,6 +9276,7 @@ function meetRunView(s, n) {
     h('div', { class: 'stack' }, h('span', { class: 'lbl', text: `Agenda · tick what you covered · ${n.agenda.filter(a => a.on).length}/${n.agenda.length}` }),
       n.agenda.length ? agRows : h('p', { class: 'muted', text: 'No agenda items. Add some below, or just take notes.' }),
       h('div', { class: 'row day-add-row' }, agIn, h('button', { class: 'btn', type: 'button', id: 'mt-ag-btn', onclick: agAdd }, 'Add'))),
+    termChipsFor([n.text, ...n.agenda.map(a => a.text), ...n.actions.map(a => a.text)].join('\n')),
     deskArea('mt-notes', 'Notes', n.text, 'What was said and decided. Tap the mic to dictate; it keeps listening until you tap it again.', v => { n.text = v; touch(); }, 7),
     h('div', { class: 'stack' }, h('span', { class: 'lbl', text: `Actions · ${n.actions.length}` }), acRows,
       h('div', { class: 'row day-add-row' }, acIn, micButton(() => acIn, { cls: 'icon-btn', keepFocus: true }), h('button', { class: 'btn', type: 'button', id: 'mt-ac-btn', onclick: acAdd }, 'Add'))),
@@ -9396,6 +9501,350 @@ function v22Msgs() {
     out.push({ id: 'updset', text: 'Let the app update itself: add your Kura website address once.', act: ['Set up', () => openSettings('app')], later: later('kura.updAsk', '1') });
   }
   return out;
+}
+
+/* ---------- v23: the glossary everywhere ---------- */
+let glossVer = 1, gIdx = null, gIdxVer = -1;
+const rxEsc = s => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+// abbreviations that are also everyday words (CAT, SET, RUN…) only match in their own case
+const COMMON_WORDS = new Set(('a an and are as at be but by can cat did do does dry for get got had has have he her him his how if in is it its let may me my no nor not now of off on or our out own per put ran run saw say see set she so the to too two up us use via was way we wet who why yes yet you all any ask big bit box buy car day end eye far few fit fix fun gap gas hot lot low man map max men mix net new old one pay pen pet pot raw red row sad sea sit six sky sum sun tag tap tea ten tie tip top toy try war web win zip also back best both call came come each even find fine five four from give good half help here high hold home hope idea into just keep kind know last late less life like line list live long look lose lost love made make mark mean meet mind miss more most move much must name near need next note once only open over part pass plan play read real rest ride road room safe same save seen send show side sign size slow some soon step stop sure take talk task team tell test than that them then they this time told tool took turn type unit upon very wait walk want week well went what when will wish with word work year your').split(' '));
+const isAbbrev = f => /[A-Z].*[A-Z]/.test(f) && f.length <= 8 && !/\s/.test(f);
+function glossIndex() {
+  if (gIdx && gIdxVer === glossVer) return gIdx;
+  const byForm = new Map(), forms = [];
+  for (const g of state.glossary || []) {
+    const m = /^(.*?)\s*\(([^)]{1,60})\)\s*$/.exec(g.term || '');
+    for (let f of [m ? m[1] : g.term, m ? m[2] : '', ...(g.forms || [])]) {
+      f = String(f || '').trim().replace(/\s+/g, ' ');
+      if (f.length < 2 || f.length > 60 || !/\p{L}/u.test(f)) continue;
+      const k = f.toLowerCase();
+      if (byForm.has(k)) continue;
+      byForm.set(k, { id: g.id, form: f });
+      forms.push(f);
+    }
+  }
+  forms.sort((a, b) => b.length - a.length);
+  const rx = forms.length ? new RegExp(`(^|[^\\p{L}\\p{N}])(${forms.map(f => rxEsc(f).replace(/ /g, '\\s+')).join('|')})((?:e?s)?)(?=$|[^\\p{L}\\p{N}])`, 'giu') : null;
+  gIdx = { rx, byForm };
+  gIdxVer = glossVer;
+  return gIdx;
+}
+function termHit(txt) {
+  const e = glossIndex().byForm.get(String(txt).toLowerCase().replace(/\s+/g, ' '));
+  if (!e) return null;
+  if (e.form !== txt && isAbbrev(e.form) && (COMMON_WORDS.has(txt.toLowerCase()) || txt.length <= 2)) return null;
+  return e;
+}
+function termMatches(text) {
+  const idx = glossIndex(), s = String(text || ''), out = [];
+  if (!idx.rx || !s) return out;
+  for (const m of s.matchAll(idx.rx)) {
+    const e = termHit(m[2]);
+    if (!e) continue;
+    const start = m.index + m[1].length;
+    out.push({ start, end: start + m[2].length + m[3].length, form: m[2], suffix: m[3], e });
+  }
+  return out;
+}
+// text with your glossary terms underlined; tap one to see what it means
+function termNodes(text) {
+  const s = String(text || '');
+  const hits = termMatches(s);
+  if (!hits.length) return [s];
+  const out = [];
+  let last = 0;
+  for (const x of hits) {
+    if (x.start > last) out.push(s.slice(last, x.start));
+    out.push(h('span', { class: 'term', 'data-term': x.e.id, text: s.slice(x.start, x.end) }));
+    last = x.end;
+  }
+  if (last < s.length) out.push(s.slice(last));
+  return out;
+}
+// "eis sweep" → "EIS sweep": your abbreviations keep your spelling
+function canonTerms(text) {
+  const s = String(text || '');
+  const hits = termMatches(s).filter(x => isAbbrev(x.e.form) && x.form !== x.e.form);
+  if (!hits.length) return s;
+  let out = '', last = 0;
+  for (const x of hits) { out += s.slice(last, x.start) + x.e.form + x.suffix; last = x.end; }
+  return out + s.slice(last);
+}
+function termsIn(text, max = 30) {
+  const ids = [];
+  for (const x of termMatches(text)) if (!ids.includes(x.e.id)) ids.push(x.e.id);
+  return ids.slice(0, max).map(termById).filter(Boolean);
+}
+const termAbbr = g => { const m = /\(([^)]{1,60})\)\s*$/.exec(g.term || ''); return m ? m[1] : g.term; };
+// what the AI is told about your terms: the ones in the text, plus your latest abbreviations
+function glossFor(text, max = 25, recent = 0) {
+  const got = termsIn(text, max);
+  if (recent) got.push(...(state.glossary || []).filter(g => !got.includes(g) && isAbbrev(termAbbr(g))).sort((a, b) => (b.updated || 0) - (a.updated || 0)).slice(0, recent));
+  return got.slice(0, max);
+}
+const glossLines = gs => gs.map(g => `- ${g.term}: ${String(g.def || '').replace(/\s+/g, ' ').slice(0, 160)}`).join('\n');
+function termUses(g) {
+  return state.items.filter(it => !it.example && termMatches(it.text).some(x => x.e.id === g.id)).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+}
+function termUseCounts() {
+  const c = new Map();
+  for (const it of state.items) {
+    if (it.example) continue;
+    const seen = new Set();
+    for (const x of termMatches(it.text)) if (!seen.has(x.e.id)) { seen.add(x.e.id); c.set(x.e.id, (c.get(x.e.id) || 0) + 1); }
+  }
+  return c;
+}
+function termChipsFor(text, label) {
+  const gs = termsIn(text, 12);
+  if (!gs.length) return null;
+  return h('div', { class: 'stack term-chips' }, h('span', { class: 'lbl', text: label || 'Glossary terms here' }),
+    h('div', { class: 'nb-chips' }, gs.map(g => h('button', { class: 'nb-chip', type: 'button', 'data-term-chip': g.id, onclick: () => openTermPeek(g.id) }, termAbbr(g)))));
+}
+function termUsesBlock(g) {
+  const uses = termUses(g);
+  if (!uses.length) return null;
+  return h('div', { class: 'nb-sec' }, h('span', { class: 'lbl', text: `In ${uses.length} quick note${uses.length === 1 ? '' : 's'} and task${uses.length === 1 ? '' : 's'}` }),
+    h('div', { class: 'nb-chips' }, uses.slice(0, 12).map(it => h('button', { class: 'nb-chip', type: 'button', 'data-cat': catOf(it), onclick: () => { closeNotebook(); setTimeout(() => openItem(it.id), 40); } }, firstLine(rowText(it)).slice(0, 60)))));
+}
+
+// tap an underlined term anywhere
+document.addEventListener('click', e => {
+  const t = e.target && e.target.closest ? e.target.closest('.term') : null;
+  if (!t || !t.dataset.term || Date.now() - lastQuickAt < 600) return;
+  e.preventDefault();
+  e.stopPropagation();
+  openTermPeek(t.dataset.term);
+}, true);
+function openTermPeek(id) {
+  if (!termById(id)) return;
+  const cur = state.sheet;
+  const prev = cur && cur.kind === 'term' ? cur.prev : cur && cur.kind === 'termedit' ? cur.back : cur;
+  state.sheet = { kind: 'term', id, prev: prev || null };
+  drawTermPeek();
+}
+function reopenSheet(s) {
+  if (!s) { closeSheet(); return; }
+  state.sheet = s;
+  const draw = { desk: drawDesk, day: drawDay, item: drawItem, quick: drawQuick, term: drawTermPeek, termedit: drawTermEdit }[s.kind];
+  if (draw) draw(); else closeSheet();
+}
+function openInNotebook(then) {
+  closeSheet();
+  setTimeout(() => { if (!(state.nb && state.nb.open)) openNotebook(); setTimeout(then, 60); }, 60);
+}
+function drawTermPeek() {
+  const s = state.sheet;
+  if (!s || s.kind !== 'term') return;
+  const g = termById(s.id);
+  if (!g) { reopenSheet(s.prev); return; }
+  const notes = (g.noteIds || []).map(noteById).filter(Boolean);
+  const uses = termUses(g);
+  const body = h('div', { class: 'sheet-body' },
+    h('h3', { class: 'term-title', text: g.term }),
+    h('p', { class: 'gl-def', text: g.def || 'No definition yet. Tap Edit to add one.' }),
+    h('span', { class: 'lbl', text: g.edited ? (g.manual ? 'Added by you' : 'Edited by you') : 'Written by AI · check before relying on it' }),
+    notes.length ? h('div', { class: 'stack' }, h('span', { class: 'lbl', text: `Notebook notes · ${notes.length}` }),
+      h('div', { class: 'nb-chips' }, notes.map(n => h('button', { class: 'nb-chip', type: 'button', 'data-cat': catOf(n), onclick: () => openInNotebook(() => openNoteInBank(n.id)) }, n.title)))) : null,
+    uses.length ? h('div', { class: 'stack' }, h('span', { class: 'lbl', text: `Quick notes and tasks · ${uses.length}` }),
+      h('div', { class: 'day-list', id: 'term-uses' }, uses.slice(0, 12).map(it => h('button', { class: 'day-row mt-note', type: 'button', onclick: () => openItem(it.id) },
+        h('span', { class: 'day-ico', text: it.done ? '✓' : it.bucket === 'make' ? '○' : '·' }),
+        h('span', { class: 'day-txt' }, h('span', { text: firstLine(rowText(it)) }), h('span', { class: 'meta' }, h('span', { class: 'tg', text: (LABEL[it.bucket] || '') + ' · ' + rel(it.createdAt) }))))))) : null,
+    !notes.length && !uses.length ? h('p', { class: 'muted', text: 'Not used in any note yet.' }) : null);
+  const foot = h('div', { class: 'sheet-foot' },
+    s.prev ? h('button', { class: 'btn', type: 'button', id: 'term-back', onclick: () => reopenSheet(s.prev) }, '‹ Back') : null,
+    h('span', { class: 'grow' }),
+    h('button', { class: 'btn', type: 'button', id: 'term-gloss', onclick: () => openInNotebook(() => openTerm(g.id)) }, 'In the Glossary'),
+    h('button', { class: 'btn primary', type: 'button', id: 'term-edit', onclick: () => openTermEdit({ id: g.id, term: g.term, def: g.def }, s) }, 'Edit'));
+  showSheet(h('div', { class: 'sheet term-peek', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Glossary term' }, head('GLOSSARY', g.edited ? 'yours' : 'AI', 'glossary'), body, foot));
+}
+
+// adding and editing terms from anywhere
+function openTermEdit(init, back) {
+  state.sheet = { kind: 'termedit', id: init.id || null, term: init.term || '', def: init.def || '', busy: '', back: back || null };
+  drawTermEdit();
+  if (init.auto && !init.def && init.term && state.sample) defineWithAi(state.sheet);
+}
+async function defineWithAi(s) {
+  if (!state.sample) { toast('Add an AI key in Settings to define terms with AI.'); return; }
+  const t = String(s.term || '').trim();
+  if (!t) { toast('Type the term first'); const x = document.getElementById('te-term'); if (x) x.focus(); return; }
+  s.busy = 'Defining…';
+  drawTermEdit();
+  const field = state.field ? ` The writer's field: ${String(state.field).slice(0, 200)}.` : '';
+  const known = glossFor(t + '\n' + (s.def || ''), 8).filter(g => g.id !== s.id);
+  const prompt = `Define a technical term for a researcher's personal glossary.${field}
+Term: "${t.slice(0, 120)}"${s.def ? `\nWhat they wrote about it: "${String(s.def).slice(0, 600)}"` : ''}${known.length ? '\nTheir glossary already has:\n' + glossLines(known) : ''}
+Rules: "term" is the standard name, with the common abbreviation in brackets if there is one, e.g. "Electrochemical impedance spectroscopy (EIS)". If it looks like the writer's own abbreviation and you can't be sure what it stands for, keep it as written. "def" is 1 to 2 plain sentences from well-established textbook knowledge; keep anything the writer already said. No citations, no speculation.
+Reply with only JSON: {"term": "...", "def": "..."}`;
+  try {
+    const r = await state.sample.json(prompt, { modelTier: 'quick' });
+    if (r && r.term && state.sheet === s) s.term = String(r.term).trim().slice(0, 80);
+    if (r && r.def && state.sheet === s) s.def = String(r.def).trim().slice(0, 1200);
+    setAiStatus(null);
+  } catch (e) { toast(sampleMsg(e)); }
+  s.busy = '';
+  if (state.sheet === s) drawTermEdit();
+}
+function drawTermEdit() {
+  const s = state.sheet;
+  if (!s || s.kind !== 'termedit') return;
+  const ti = h('input', { class: 'field-in', type: 'text', id: 'te-term', 'data-k': 'te-term', autocomplete: 'off', placeholder: 'e.g. Electrochemical impedance spectroscopy (EIS)', 'aria-label': 'Term' });
+  ti.value = s.term;
+  ti.addEventListener('input', () => { s.term = ti.value; });
+  const di = h('textarea', { class: 'field-in jr-area', id: 'te-def', 'data-k': 'te-def', rows: '4', placeholder: 'What it means, in your words', 'aria-label': 'Definition' });
+  di.value = s.def;
+  di.addEventListener('input', () => { s.def = di.value; });
+  const body = h('div', { class: 'sheet-body' },
+    h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'Term' }), ti,
+      h('p', { class: 'muted', text: 'Put the abbreviation in brackets and Kura recognises both, like "Gold nanowire (AuNW)". Kura underlines it wherever you write it.' })),
+    h('div', { class: 'stack' }, h('div', { class: 'row lab-lbl-row' }, h('span', { class: 'lbl', text: 'Definition' }), h('span', { class: 'grow' }), micButton(() => di, { cls: 'icon-btn', keepFocus: true })), di),
+    state.sample ? h('div', { class: 'row' }, h('button', { class: 'btn', type: 'button', id: 'te-ai', disabled: !!s.busy, onclick: () => defineWithAi(s) }, s.busy || (s.def ? 'Improve with AI' : 'Define with AI'))) : null);
+  const foot = h('div', { class: 'sheet-foot' },
+    h('button', { class: 'btn', type: 'button', id: 'te-cancel', onclick: () => reopenSheet(s.back) }, 'Cancel'),
+    h('span', { class: 'grow' }),
+    h('button', { class: 'btn primary', type: 'button', id: 'te-save', onclick: async () => {
+      const g = await saveManualTerm(s.term, s.def, s.id);
+      if (!g) return;
+      toast(s.id ? 'Term saved' : `${termAbbr(g)} added to the glossary`);
+      render();
+      if (state.nb && state.nb.open && state.nb.tab === 'gloss') { closeSheet(); openTerm(g.id); }
+      else if (s.back && s.back.kind === 'term') { s.back.id = g.id; reopenSheet(s.back); }
+      else reopenSheet(s.back);
+    } }, 'Save'));
+  showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Glossary term' }, head(s.id ? 'EDIT TERM' : 'NEW TERM', 'glossary', 'glossary'), body, foot));
+}
+async function saveManualTerm(term, def, id) {
+  const t = String(term || '').trim().replace(/\s+/g, ' ').slice(0, 80), d = String(def || '').trim().slice(0, 2000);
+  if (!t) { toast('A term needs a name.'); return null; }
+  const p = parseTerm(t);
+  const now = Date.now();
+  let g = id ? termById(id) : findTerm(p);
+  if (g) Object.assign(g, { term: t, key: p.key || g.key, alias: p.alias || g.alias || '', def: d || g.def || '', edited: true, updated: now });
+  else {
+    g = { id: newTermId(), term: t, key: p.key, alias: p.alias, def: d, noteIds: [], edited: true, manual: true, created: now, updated: now };
+    (state.glossary || (state.glossary = [])).push(g);
+  }
+  if (glossIgnore.includes(g.key)) { glossIgnore = glossIgnore.filter(k => k !== g.key); if (store.kvSet) store.kvSet('glossIgnore', glossIgnore).catch(() => {}); }
+  await saveTerm(g);
+  await markGloss();
+  await linkTermNotes(g);
+  return g;
+}
+// notebook notes that mention a term are linked to it
+async function linkTermNotes(g) {
+  let changed = false;
+  for (const n of state.notes || []) {
+    if ((g.noteIds || []).includes(n.id)) continue;
+    if (termMatches([n.title, n.note, n.raw].filter(Boolean).join('\n')).some(x => x.e.id === g.id)) { g.noteIds = [...(g.noteIds || []), n.id]; changed = true; }
+  }
+  if (changed) await saveTerm(g);
+}
+// in the pad: "EIS = electrochemical impedance spectroscopy", or anything ending in #term
+const RX_TERMTAG = /(^|\s)#(term|def|define|glossary)(?=[\s,.;:!?]|$)/i;
+function termDef(raw) {
+  let s = String(raw || '').trim();
+  if (!s || s.includes('\n') || /https?:\/\//i.test(s)) return null;
+  const tagged = RX_TERMTAG.test(s);
+  if (tagged) s = s.replace(new RegExp(RX_TERMTAG.source, 'gi'), '$1').replace(/\s{2,}/g, ' ').trim();
+  if (!s) return null;
+  const m = /^(.{2,60}?)\s*(?:=|:=|≡)\s*(.+)$/.exec(s) || (tagged ? /^(.{2,60}?)(?:\s*:\s+|\s+[-–—]\s+)(.+)$/.exec(s) : null);
+  if (m) {
+    const term = m[1].trim(), def = m[2].trim();
+    const okTerm = /^\p{L}/u.test(term) && term.split(/\s+/).length <= 6;
+    if (!okTerm) return tagged ? { term: s, def: '' } : null;
+    if (!tagged && (def.split(/\s+/).length < 2 || /^[\d.,+\-−]/.test(def) || !/\p{L}{3}/u.test(def))) return null;
+    return { term, def };
+  }
+  return tagged ? { term: s.split(/\s+/).length <= 6 ? s : '', def: s.split(/\s+/).length <= 6 ? '' : s } : null;
+}
+async function termFromPad(raw) {
+  const d = termDef(raw);
+  if (!d) return;
+  els.input.value = '';
+  if (state.cap) closeCapture();
+  drawWhen();
+  if (!d.def || !d.term) { openTermEdit({ term: d.term, def: d.def, auto: true }); return; }
+  const had = findTerm(parseTerm(d.term));
+  const before = had ? { ...had } : null;
+  const g = await saveManualTerm(d.term, d.def, had ? had.id : null);
+  if (!g) return;
+  play('done');
+  toast(had ? `Updated ${termAbbr(g)} in the glossary` : `${termAbbr(g)} added to the glossary`, { label: 'Undo', fn: async () => {
+    if (before) { Object.assign(g, before); await saveTerm(g); }
+    else { state.glossary = (state.glossary || []).filter(x => x !== g); if (store.deleteTerm) await store.deleteTerm(g.id).catch(() => {}); }
+    await markGloss();
+    render();
+  } });
+  render();
+}
+function guessTerm(text) {
+  const t = firstLine(text).replace(/[.;:!?]+$/, '');
+  const m = /^(.{2,60}?)(?:\s*(?:=|:=|≡|:)\s+|\s+[-–—]\s+)(.+)$/.exec(t);
+  if (m && /^\p{L}/u.test(m[1]) && m[1].split(/\s+/).length <= 6) return { term: m[1].trim(), def: m[2].trim() };
+  // a short note is probably the term itself; a sentence is probably about one
+  return t.split(/\s+/).length <= 3 ? { term: t, def: '' } : { term: '', def: t };
+}
+
+/* ---------- v23: times and reminders ---------- */
+function taskWhen(it) {
+  if (!it || !it.today || !it.at || !/^\d{2}:\d{2}$/.test(it.at)) return 0;
+  const d = parseDay(it.today);
+  d.setHours(+it.at.slice(0, 2), +it.at.slice(3, 5), 0, 0);
+  return d.getTime();
+}
+const taskLate = it => !it.done && !!it.at && it.today <= TODAY && taskWhen(it) < Date.now();
+const remindLead = () => { const v = Number(capPrefs.remind); return Number.isFinite(v) ? v : 0; };
+const timeTag = it => (it.at && it.today ? h('span', { class: 'tg time' + (taskLate(it) ? ' late' : ''), text: it.at }) : null);
+let taskAlarmT = null;
+function syncTaskAlarms() { if (!NATIVE) return; clearTimeout(taskAlarmT); taskAlarmT = setTimeout(syncTaskAlarmsNow, 800); }
+function syncTaskAlarmsNow() {
+  if (!NATIVE || !Plug.LocalNotifications || !state.items) return;
+  const lead = remindLead(), now = Date.now(), live = new Map();
+  if (lead >= 0) for (const it of state.items) {
+    if (it.done || it.example) continue;
+    const w = taskWhen(it);
+    if (w && w - lead * 60000 > now) live.set('task:' + it.id, [w - lead * 60000, it]);
+  }
+  for (const [k, [at, it]] of live) {
+    notifyAt(k, at, firstLine(rowText(it)).slice(0, 120), `${lead ? `In ${lead} min · ` : ''}${it.at}${projOf(it) ? ' · #' + projOf(it).name : ''} · Kura`, 'kura-tasks');
+  }
+  for (const k of [...notifAt.keys()]) if (k.startsWith('task:') && !live.has(k)) unnotify(k);
+  try { localStorage.setItem('kura.taskAlarms', JSON.stringify([...live].map(([k, v]) => [k, v[0]]))); } catch (e) {}
+}
+function restoreTaskAlarms() {
+  if (!NATIVE) return;
+  try { for (const [k, at] of JSON.parse(localStorage.getItem('kura.taskAlarms') || '[]')) if (!notifAt.has(k)) notifAt.set(k, at); } catch (e) {}
+}
+// while Kura is open (and in the web version) a reminder shows in the app
+const reminded = new Set((() => { try { return JSON.parse(localStorage.getItem('kura.reminded') || '[]'); } catch (e) { return []; } })());
+function checkReminders() {
+  if (NATIVE || !state.items || state.booting) return;
+  const lead = remindLead();
+  if (lead < 0) return;
+  const now = Date.now();
+  for (const it of state.items) {
+    if (it.done || it.example) continue;
+    const w = taskWhen(it);
+    if (!w) continue;
+    const at = w - lead * 60000, key = it.id + '@' + at;
+    if (now >= at && now - at < 10 * 60000 && !reminded.has(key)) {
+      reminded.add(key);
+      try { localStorage.setItem('kura.reminded', JSON.stringify([...reminded].slice(-200))); } catch (e) {}
+      alarm();
+      toast(`⏰ ${firstLine(rowText(it)).slice(0, 60)} · ${lead ? 'in ' + lead + ' min' : it.at}`, { label: 'Open', fn: () => openItem(it.id) });
+    }
+  }
+}
+setInterval(checkReminders, 20000);
+setInterval(() => { if (state.items && state.items.some(it => it.at && it.today === TODAY && !it.done)) renderSoon(); }, 60000);
+function remindPicker() {
+  const sel = h('select', { class: 'field-in rep-sel', id: 'set-remind', 'aria-label': 'Reminders for tasks with a time' },
+    [['0', 'At the time'], ['5', '5 min before'], ['15', '15 min before'], ['30', '30 min before'], ['60', '1 hour before'], ['-1', 'Off']].map(([v, l]) => h('option', { value: v, text: l })));
+  sel.value = String(remindLead());
+  sel.addEventListener('change', async () => { capPrefs.remind = Number(sel.value); await saveCapPrefs(); syncTaskAlarms(); });
+  return h('div', { class: 'row' }, h('span', { class: 'lbl', text: 'Task reminders' }), sel,
+    h('span', { class: 'muted', text: NATIVE ? 'For tasks with a time, like "go for a run at 6pm". Android shows a notification.' : 'For tasks with a time, like "go for a run at 6pm". Shown while Kura is open.' }));
 }
 
 // v14 wiring
@@ -9684,6 +10133,7 @@ function drawSettings() {
     h('span', { class: 'lbl', text: 'Smart capture' }),
     capChk('cap-preview', 'preview', 'Preview before saving (with AUTO)'),
     capChk('cap-ai', 'ai', 'Let AI word and split notes (needs a key)'),
+    remindPicker(),
     h('p', { class: 'muted', text: 'With AUTO picked, Enter shows what Kura will save: tidied wording, separate items, date, category, project and steps. Enter again saves it. Turn the preview off to save straight away.' }),
     h('hr', { class: 'rule' }),
     h('span', { class: 'lbl', text: 'Symbols' }),
@@ -9948,6 +10398,7 @@ async function boot() {
   state.notes = store.listNotes ? await store.listNotes().catch(() => []) : [];
   state.field = store.kvGet ? ((await store.kvGet('field').catch(() => '')) || '') : '';
   state.glossary = store.listTerms ? await store.listTerms().catch(() => []) : [];
+  glossVer++;
   if (store.kvGet) {
     glossIgnore = (await store.kvGet('glossIgnore').catch(() => null)) || [];
     state.glossSentAt = (await store.kvGet('glossSentAt').catch(() => 0)) || 0;
@@ -9965,6 +10416,8 @@ async function boot() {
   if (kvRestore) kvRestore();
   nativeBoot();
   updBoot();
+  restoreTaskAlarms();
+  syncTaskAlarms();
   state.booting = false;
   render();
   scheduleGtSync(1500);
