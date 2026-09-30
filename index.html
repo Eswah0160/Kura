@@ -914,6 +914,31 @@ body.timing.focusing .toast { top: calc(var(--vvt, 0px) + var(--vvh, 100vh) - en
 @media (prefers-reduced-motion: reduce) { .pet.ultra::before, .pet.legendary::before { animation: none; opacity: 1; } }
 /* v21: Android app */
 html.native .fit { top: calc(var(--vvt, 0px) + env(safe-area-inset-top, var(--safe-area-inset-top, 0px))); }
+/* v22: journal, meetings, timers */
+.mood { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; align-self: flex-start; }
+.mood button { border: 0; border-right: 1px solid var(--rule); background: transparent; color: var(--ink-2); font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.08em; padding: 9px 12px; line-height: 1; }
+.mood button:last-child { border-right: 0; }
+.mood button[aria-pressed="true"] { background: var(--ink); color: var(--sheet); }
+textarea.jr-area { min-height: 66px; font-size: 15px; line-height: 1.5; resize: vertical; }
+#jr-mt-notes { min-height: 150px; }
+.mt-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
+.mt-card { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; text-align: left; border: 1px solid var(--rule); border-radius: 8px; background: var(--sheet); padding: 11px 12px; color: var(--ink); }
+.mt-card b { font-size: 15px; font-weight: 500; }
+.mt-card.today { border-color: var(--red); }
+.mt-n { font-size: 13px; color: var(--ink-2); }
+.mt-card.today .mt-n { color: var(--red); }
+.mt-head { display: flex; flex-direction: column; gap: 3px; }
+.mt-title { font-size: 18px; font-weight: 500; }
+.bench-btn.mt-start { width: 100%; }
+.mt-title-in { flex: 1; min-width: 0; font-size: 15px; }
+.mt-when { align-items: flex-end; }
+.mt-when .stack { flex: 1 1 120px; min-width: 0; }
+.mt-note { width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--rule); }
+.ag-row .day-txt { cursor: default; }
+.ag-pick { grid-template-columns: 18px minmax(0, 1fr) auto !important; }
+.ag-pick.on .lp-t { text-decoration: line-through; color: var(--ink-2); }
+.ag-pick .ghost { padding: 2px; }
+.m-meet { width: 5px; height: 5px; border: 1px solid var(--ink); transform: rotate(45deg); }
 /* short screens: keyboard up on the Fold leaves roughly a 4:3 area */
 .short .field, .short .wordmark, .short .tags-lbl { display: none; }
 .short .widget { padding-block: 4px; }
@@ -997,9 +1022,9 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/><path d="M9 8h6"/></svg>
           <span class="vl">Notebook</span>
         </button>
-        <button class="ghost lab-btn" id="btn-lab" type="button" aria-label="LabArchives: daily log, experiments, bench mode">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6M10 3v13.5a2 2 0 0 0 4 0V3"/><path d="M10 11h4"/><path d="M17.5 8.5h3M19 7v3"/></svg>
-          <span class="vl">Lab</span>
+        <button class="ghost lab-btn" id="btn-desk" type="button" aria-label="Journal, meetings and timers">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5h10a2 2 0 0 1 2 2V20.5H8a2 2 0 0 1-2-2z"/><path d="M6 18.5a2 2 0 0 1 2-2h10"/><path d="M9.5 8h5M9.5 11.5h3"/></svg>
+          <span class="vl">Journal</span>
         </button>
         <button class="ghost vault-btn" id="btn-vault" type="button" aria-label="Send new notes to Obsidian">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h18v3H3z"/><path d="M4.5 8v11h15V8"/><path d="M12 10.5v5.5M9.5 13.5L12 16l2.5-2.5"/></svg>
@@ -1009,7 +1034,7 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="1.5"/><path d="M8 3v4M16 3v4M4 10h16M9 15l2 2 4-4"/></svg>
           <span class="vl">Review</span>
         </button>
-        <button class="ghost more-btn" id="btn-more" type="button" aria-label="More: focus, plan, stats, trophies, tools">
+        <button class="ghost more-btn" id="btn-more" type="button" aria-label="More: focus, plan, journal, meetings, timers, stats">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/></svg>
           <span class="vl">More</span>
         </button>
@@ -1110,14 +1135,14 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
 <div class="nb fit" id="nb" hidden></div>
 <div class="sheet-wrap fit" id="sheet" hidden></div>
 <button class="focus-pill" id="focus-pill" type="button" hidden aria-label="Open focus timer"></button>
-<button class="focus-pill bench-pill" id="bench-pill" type="button" hidden aria-label="Open bench timers"></button>
+<button class="focus-pill bench-pill" id="bench-pill" type="button" hidden aria-label="Open timers"></button>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
 <script>
 (() => {
 'use strict';
 
-const APP_VERSION = 'v21';
+const APP_VERSION = 'v22';
 /* ---------- helpers ---------- */
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -1286,31 +1311,48 @@ async function nativeSave(name, blob) {
   if (saved) toast(`Saved to Documents/Kura/${safe}`, { label: 'Share', fn: share });
   else await share();
 }
+// Android's speech service ends a session after each pause (and says nothing after an error), so each
+// session reports its words, waits briefly for the final wording, then ends; Kura starts the next one.
 class NativeSpeech {
-  constructor() { this.lang = navigator.language || 'en-AU'; this.interimResults = true; this.continuous = false; this.onresult = null; this.onerror = null; this.onend = null; this._subs = []; this._done = false; }
+  constructor() { this.lang = navigator.language || 'en-AU'; this.interimResults = true; this.continuous = false; this.onresult = null; this.onerror = null; this.onend = null; this._subs = []; this._done = false; this._endAt = 0; this._t = null; this._iv = null; this._ending = false; }
   async start() {
     const P = Plug.SpeechRecognition;
-    const emit = t => { if (t && this.onresult) this.onresult({ results: [[{ transcript: t }]] }); };
+    const emit = t => { if (t && this.onresult && !this._done) this.onresult({ results: [[{ transcript: t }]] }); };
     try {
       const av = await P.available();
       if (!av || !av.available) throw { error: 'service-not-allowed' };
       let perm = await P.checkPermissions();
       if (!perm || perm.speechRecognition !== 'granted') perm = await P.requestPermissions();
       if (!perm || perm.speechRecognition !== 'granted') throw { error: 'not-allowed' };
-      this._subs.push(await P.addListener('partialResults', d => emit(((d && d.matches) || [])[0])));
-      this._subs.push(await P.addListener('listeningState', d => { if (d && d.status === 'stopped') this._end(); }));
+      this._subs.push(await P.addListener('partialResults', d => { emit(((d && d.matches) || [])[0]); if (this._ending) this._later(200); }));
+      this._subs.push(await P.addListener('listeningState', d => { if (d && d.status === 'stopped') this._later(1200); }));
       const r = await P.start({ language: this.lang, maxResults: 1, partialResults: true, popup: false });
       if (r && r.matches && r.matches[0]) emit(r.matches[0]);
+      this._iv = setInterval(async () => {
+        if (this._done) return;
+        try { const l = await P.isListening(); if (!l || !l.listening) this._later(1200); } catch (e) {}
+      }, 800);
     } catch (e) {
       if (this.onerror) this.onerror({ error: (e && e.error) || (/permission/i.test(String(e && e.message)) ? 'not-allowed' : 'aborted') });
       this._end();
     }
   }
-  stop() { try { Plug.SpeechRecognition.stop(); } catch (e) {} setTimeout(() => this._end(), 400); }
+  // end in ms (only ever sooner, never later)
+  _later(ms) {
+    this._ending = true;
+    const at = Date.now() + ms;
+    if (this._endAt && this._endAt <= at) return;
+    this._endAt = at;
+    clearTimeout(this._t);
+    this._t = setTimeout(() => this._end(), ms);
+  }
+  stop() { try { const r = Plug.SpeechRecognition.stop(); if (r && r.catch) r.catch(() => {}); } catch (e) {} this._later(1000); }
   abort() { this.stop(); }
   _end() {
     if (this._done) return;
     this._done = true;
+    clearTimeout(this._t);
+    clearInterval(this._iv);
     for (const s of this._subs) { try { s.remove(); } catch (e) {} }
     if (this.onend) this.onend();
   }
@@ -2006,7 +2048,7 @@ function drawDropActions(list) {
 
 let bannerMsg = null;
 /* ---------- Obsidian ---------- */
-const DEFAULT_OBS = { vault: '', target: 'daily', note: 'Kura/Inbox', tasksDates: true, includeDrop: false, notesFolder: 'Kura/Notes', glossaryNote: 'Kura/Glossary', reviewsFolder: 'Kura/Reviews' };
+const DEFAULT_OBS = { vault: '', target: 'daily', note: 'Kura/Inbox', tasksDates: true, includeDrop: false, notesFolder: 'Kura/Notes', glossaryNote: 'Kura/Glossary', reviewsFolder: 'Kura/Reviews', journalFolder: 'Kura/Journal', meetingsFolder: 'Kura/Meetings' };
 const tagSlug = t => String(t).toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\p{L}\p{N}_\-/]/gu, '');
 function mdLine(it, cfg) {
   const isTask = it.bucket === 'make' || !!it.today;
@@ -2713,6 +2755,8 @@ function closeSheet(fromPop) {
   if (s && s.kind === 'item') commitItemText();
   if (s && s.kind === 'focus') setTimeout(focusTick);
   if (s && s.kind === 'lab') { stopDictation(); benchWake(false); saveExps(true); setTimeout(drawTimerBits); }
+  if (s && s.kind === 'desk') { saveJournal(true); saveMeet(true); setTimeout(() => { drawTimerBits(); drawCal(); }); }
+  if (dict && els.sheet.contains(dict.target)) dict.stop();
   if (s && s.kind === 'scan' && state.scan) {
     state.scan.ctl && state.scan.ctl.abort();
     if (state.scan.url) URL.revokeObjectURL(state.scan.url);
@@ -2838,9 +2882,9 @@ function drawItem() {
       h('label', { class: 'keep item-lab', for: 'item-lab' }, (() => {
         const c = h('input', { type: 'checkbox', id: 'item-lab' });
         c.checked = isLab(it);
-        c.addEventListener('change', async () => { await patch(s.id, { lab: c.checked }); drawItem(); });
+        c.addEventListener('change', () => { const cur = byId(s.id); if (cur && c.checked !== isLab(cur)) toggleRaise(cur); drawItem(); });
         return c;
-      })(), projLab(it.proj) ? 'LabArchives: include in the daily log (its project is a lab project)' : 'LabArchives: include in the daily log'),
+      })(), `Raise at ${raiseWhere(null)}`),
       state.obs ? h('div', { class: 'row' },
         h('button', { class: 'btn', type: 'button', onclick: () => { commitItemText(); sendToObsidian([byId(s.id)], true); } },
           it.sentAt ? 'Send to Obsidian again' : 'Send to Obsidian'),
@@ -4192,7 +4236,7 @@ function drawWhen() {
   const bits = [];
   if (r && r.when) bits.push('→ ' + whenLabel(r.when.date) + (r.when.repeat ? ' ↻ ' + repeatLabel(r.when.repeat) : ''));
   if (r && r.proj && projById(r.proj)) bits.push('#' + projById(r.proj).name);
-  if (hasLabTag(els.input.value)) bits.push('LAB');
+  if (hasRaiseTag(els.input.value)) bits.push('→ AGENDA');
   el.hidden = !bits.length || !!(state.cap && !state.cap.stale);
   el.textContent = bits.join(' · ');
   el.classList.toggle('off', !!state.whenOff);
@@ -4516,50 +4560,6 @@ function tplChips(d) {
 
 /* ---------- voice capture (the browser's speech service; in Chrome the audio goes to Google for recognition) ---------- */
 const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition || null;
-let rec = null, recBtn = null;
-function stopDictation() { if (rec) { try { rec.stop(); } catch (e) {} } }
-function micButton(getTarget, opts = {}) {
-  if (!SpeechRec) return null;
-  const b = h('button', { class: (opts.cls || 'btn') + ' mic', type: 'button', id: opts.id, 'aria-label': 'Dictate', title: 'Dictate' }, icon('mic', 1.8), opts.label || null);
-  b.addEventListener('pointerdown', e => { if (opts.keepFocus) e.preventDefault(); });
-  b.addEventListener('click', () => dictate(getTarget(), b));
-  return b;
-}
-function dictate(target, btn) {
-  if (!SpeechRec || !target) return;
-  if (rec) { const same = recBtn === btn; stopDictation(); if (same) return; }
-  const r = new SpeechRec();
-  r.lang = navigator.language || 'en-AU';
-  r.interimResults = true;
-  r.continuous = !/Android/i.test(navigator.userAgent); // Android repeats words in continuous mode
-  const base = target.value;
-  r.onresult = e => {
-    let said = '';
-    for (let i = 0; i < e.results.length; i++) said += e.results[i][0].transcript;
-    said = said.trim();
-    const glue = base && !/[\s\n]$/.test(base) ? ' ' : '';
-    target.value = base + (said ? glue + said : '');
-    target.dispatchEvent(new Event('input', { bubbles: true }));
-  };
-  r.onerror = e => {
-    const why = e && e.error;
-    if (why === 'not-allowed' || why === 'service-not-allowed') toast('Allow the microphone for Kura to dictate (site settings in Chrome).');
-    else if (why === 'network') toast('Voice input needs an internet connection.');
-    else if (why && why !== 'no-speech' && why !== 'aborted') toast('Voice input stopped: ' + why);
-  };
-  r.onend = () => {
-    if (rec !== r) return;
-    rec = null;
-    if (recBtn) recBtn.classList.remove('rec');
-    recBtn = null;
-  };
-  rec = r;
-  recBtn = btn;
-  btn.classList.add('rec');
-  try { r.start(); toast('Listening… tap the mic again to stop'); }
-  catch (e) { rec = null; recBtn = null; btn.classList.remove('rec'); toast("Couldn't start voice input."); }
-}
-
 /* ---------- weekly review ---------- */
 function isoWeek(ds) {
   const d = parseDay(ds);
@@ -5019,7 +5019,9 @@ function drawMore() {
     tile('plan', 'plan', 'Plan my day', state.sample ? 'AI or rules' : 'suggestions', () => openPlan()),
     tile('stats', 'stats', 'Stats', `streak ${streakNow()}`, () => openStats()),
     tile('trophies', 'trophy', 'Trophies', `${won}/${TROPHIES.length}`, () => openTrophies()),
-    tile('tools', 'flask', 'Lab tools', 'dilution, units…', () => openTools()),
+    tile('journal', 'pen', 'Journal', jrHas(TODAY) ? 'today written ✓' : 'wins · blockers · tomorrow', () => openDesk('journal')),
+    tile('meet', 'plan', 'Meetings', nextSeries() ? 'next ' + meetWhen(nextSeries()) : 'agenda · notes · actions', () => openDesk('meet')),
+    tile('timers', 'timer', 'Timers', runningTimers().length ? `${runningTimers().length} running` : 'countdowns with alarms', () => openDesk('timers')),
     tile('review', 'cal', 'Weekly review', state.lastReview ? 'last ' + dayName(state.lastReview) : 'not done yet', () => openReview()),
     tile('log', 'list', 'Done log', null, () => openLog()),
     state.obs ? tile('vault', 'vault', 'Send to Obsidian', unsent().length ? `${unsent().length} waiting` : 'all sent', () => { closeSheet(); sendToObsidian(unsent()); }) : null,
@@ -5028,7 +5030,6 @@ function drawMore() {
     tile('guide', 'help', 'User guide', 'how it all works', () => openGuide()),
     tile('theme', 'palette', 'Theme', (THEMES.find(t => t.id === (state.theme || 'invaders')) || THEMES[0]).name + ' · tap to switch', async () => { await setTheme(state.theme === 'pets' ? 'invaders' : 'pets'); drawMore(); }),
     state.theme === 'pets' ? tile('critters', 'heart', 'Critter Log', `${PETS.filter(p => critterStats()[p.id]).length}/${PETS.length} met`, () => openCritters()) : null,
-    tile('lab', 'tube', 'LabArchives', (state.labLogs || {})[TODAY] ? 'today logged ✓' : 'log · experiments · bench', () => openLab()),
     tile('settings', 'gear', 'Settings', null, () => openSettings()));
   showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'More' },
     head('MORE', 'KURA ' + APP_VERSION, 'home'), h('div', { class: 'sheet-body' }, grid)));
@@ -5751,8 +5752,9 @@ function handleLaunch() {
       h('div', { class: 'sheet-foot' }, h('span', { class: 'grow' }), h('button', { class: 'btn primary', type: 'button', onclick: () => { closeSheet(); els.fileCam.click(); } }, 'Open camera'))));
   } else if (act === 'focus') { state.focus ? openFocusView() : openFocusPicker(); }
   else if (act === 'plan') openPlan();
-  else if (act === 'lab' || act === 'log') openLab('log');
-  else if (act === 'bench') openLab('bench');
+  else if (act === 'journal' || act === 'lab' || act === 'log') openDesk('journal');
+  else if (act === 'meet') openDesk('meet');
+  else if (act === 'timers' || act === 'bench') openDesk('timers');
   else if (act === 'guide') openGuide(q.get('topic') || 'start');
   else if (act === 'review') openReview();
 }
@@ -6145,6 +6147,15 @@ function drawNlm() {
 // Block types: p (paragraph), h (small heading), steps (numbered), list (bullets), table ([left, right] rows), note (aside), try ([label, action] buttons)
 const GUIDE = [
   { id: 'new', icon: 'trophy', title: "What's new", blocks: [
+    { h: 'v22' }, { list: [
+      '**Journal** replaces the LabArchives log: a short page a day with how it went, what you finished (filled in for you), wins, blockers and tomorrow\'s plan. **Save to Obsidian** keeps it as Kura/Journal/2026-10-01.',
+      '**Meetings**: set up your regular meetings, collect what to raise during the week (**#raise** in the pad, or long-press a task → **Raise at meeting**), then tick things off, take notes and turn action items into tasks in one tap.',
+      '**Timers** have their own tab: countdowns with alarms that ring even when the app is closed.',
+      '**Voice keeps recording** until you tap the mic again, even through pauses.',
+      '**24 new critters**, 48 in all: 16 common, 10 uncommon, 6 rare, 10 ultra and 6 legendary. Critters you already befriended stay the same.',
+      '**The Android app updates itself** from your Kura website: Settings → App.',
+      'The Lab section and Lab tools are gone. Your old experiments and logs are still in your backups.',
+    ] },
     { h: 'v21' }, { list: [
       '**Kura as an Android app**: a real app with its own storage on the phone, not in Chrome. See the chapter "Kura as an Android app".',
       '**Calendar on the cover screen**: a week strip under the pad that opens into the full month (**Month ▾**).',
@@ -6199,11 +6210,11 @@ const GUIDE = [
       ['STREAK', 'How many days in a row you have finished at least one task. Tap it for Stats.'],
       ['AI ! · TASKS !', 'Only appear when AI or Google Tasks has a problem. Tap one to see what to fix.'],
       ['Search', 'Filters every list as you type. On the cover screen, tap the magnifier first.'],
-      ['Calendar', 'The month beside TODAY (unfolded), or Month in the TODAY switch (cover screen). Tap a day to open it.'],
+      ['Calendar', 'The month beside TODAY (unfolded), or this week under the pad on the cover screen (**Month ▾** opens the month). Tap a day to open it.'],
       ['Notebook', 'Opens the Notebook (Bank, Projects, Glossary, Ask). The K U R A → wordmark does the same.'],
-      ['Lab', 'The LabArchives section: daily log, experiments, bench mode and setup.'],
+      ['Journal', 'Your daily journal, meetings and timers, in three tabs.'],
       ['Vault + number', 'Appears when notes are waiting to go to Obsidian. Tap it to send them.'],
-      ['⋯ More', 'Focus, Plan my day, Stats, Trophies, Lab tools, Weekly review, Done log, Send to Obsidian, NotebookLM, sound, theme, this guide and **Settings**.'],
+      ['⋯ More', 'Focus, Plan my day, Stats, Trophies, Journal, Meetings, Timers, Weekly review, Done log, Send to Obsidian, NotebookLM, sound, theme, this guide and **Settings**.'],
     ] },
     { h: 'The invaders' },
     { p: 'Every open task (anything in MAKE or with a date) is a pixel invader. Red ones are due today. Tap an invader to open its task. When you finish a task, the cannon shoots it down.' },
@@ -6233,7 +6244,6 @@ const GUIDE = [
       ['+ Date · Today · ×', 'Plan it for a day, or clear the date. Dated items go to MAKE and appear in TODAY on the day.'],
       ['↻ weekly ×', 'Tap to stop it repeating.'],
       ['Work · Personal · Fun', 'Tap to change the category.'],
-      ['Lab', 'Tap to include it in the LabArchives daily log.'],
       ['Project', 'Pick a project, or make a new one.'],
       ['! ? ☐ →', 'Tap to add or remove a symbol.'],
       ['Save as typed', 'Skips the tidy-up and saves your words as they are.'],
@@ -6258,12 +6268,12 @@ const GUIDE = [
       ['fri · tomorrow · 3 Oct', 'Plans it for that day (see Dates and repeats)'],
       ['every mon · daily', 'A repeating task'],
       ['#aurora', 'Files it in an existing project'],
-      ['#lab', 'Marks it for the LabArchives daily log'],
+      ['#raise', 'Puts it on the agenda for your next meeting instead of a list'],
       ['Prep [] wash [] dry', 'A task with a checklist of steps'],
     ] },
     { p: 'While you type, a small red tag above the pad shows the date Kura found, like "→ Fri ↻ every Mon · #Aurora". Tap it to save this note **without** the date.' },
     { h: 'Voice' },
-    { p: 'Tap the **mic** in the pad and speak. On Android it stops after each sentence, so tap again to keep going. Chrome sends the audio to Google to turn it into text, and it needs an internet connection.' },
+    { p: 'Tap the **mic** and speak. It keeps recording, through pauses, until you tap the mic again (it turns red while recording, and the screen stays on). Every text box with a mic works the same way. Speech is turned into text by Google\'s speech service, so it needs an internet connection.' },
     { try: [['Write a note', 'pad'], ['Smart capture settings', 'settings']] },
   ] },
   { id: 'lists', icon: 'check', title: 'DROP, STOCK, MAKE and TODAY', blocks: [
@@ -6274,7 +6284,7 @@ const GUIDE = [
       ['TODAY', "Today's tasks. Tick the box when done. Tasks you didn't finish stay, marked \"since Mon\"."],
     ] },
     { h: 'Day, Week and Month' },
-    { p: 'The switch on the TODAY card shows **Day** (today\'s list), **Week** (the next 7 days, grouped by day, plus a peek at later tasks) or, on the cover screen, **Month** (the calendar). See the Calendar chapter.' },
+    { p: 'The switch on the TODAY card shows **Day** (today\'s list) or **Week** (the next 7 days, grouped by day, plus a peek at later tasks). The calendar has its own chapter.' },
     { p: 'Long lists show the newest 50; tap **Show more** at the bottom for the rest. Searching always shows every match.' },
     { h: 'Finishing tasks' },
     { list: ['Tick a task in TODAY (or swipe it right). You get +10 score, and **Undo** appears for a few seconds.', 'Finished tasks are listed in the **Done log** (⋯ More → Done log), grouped by day. From there you can put one back in TODAY.'] },
@@ -6287,11 +6297,12 @@ const GUIDE = [
       ['Red number', 'Planned tasks that are now overdue'],
       ['Small circle', 'A repeating task lands that day'],
       ['✓', 'Something was finished that day'],
-      ['Small square', 'Lab results that day (filled: the LabArchives log was sent)'],
+      ['Small diamond', 'A meeting that day'],
+      ['Small square', 'The journal was written that day (filled: saved to Obsidian)'],
     ] },
     { h: 'A day' },
     { list: [
-      'Tap a day to open it: what is planned, repeats that land there, what was done, lab results and focus time.',
+      'Tap a day to open it: what is planned, repeats that land there, what was done, focus time, meetings and the journal.',
       'Type in the box and tap **Add** to plan a task for that day (a past day records it as done).',
       '**Plan something from MAKE** puts one of your unplanned tasks on that day in one tap.',
       'Tap a task to move it, finish it or change it. ‹ › steps through the days.',
@@ -6351,7 +6362,7 @@ const GUIDE = [
     ] },
     { p: 'Drag a row sideways. When the label turns red, let go. A short drag springs back. After most actions, **Undo** appears at the bottom of the screen for about 5 seconds.' },
     { h: 'Long-press for quick actions' },
-    { p: 'Press and hold any task (or right-click it) for a menu: **Today**, **Tomorrow**, **Next week**, **Pick a day**, **Unplan**, **Done**, **Focus**, **Mark Lab**, move to DROP · STOCK · MAKE, **Open** or **Delete**. Most show **Undo** afterwards.' },
+    { p: 'Press and hold any task (or right-click it) for a menu: **Today**, **Tomorrow**, **Next week**, **Pick a day**, **Unplan**, **Done**, **Focus**, **Raise at meeting**, move to DROP · STOCK · MAKE, **Open** or **Delete**. Most show **Undo** afterwards.' },
   ] },
   { id: 'camera', icon: 'page', title: 'Brain Camera and pasting a page', blocks: [
     { h: 'With an AI key' },
@@ -6446,57 +6457,39 @@ const GUIDE = [
     { p: '16 trophies, including First shot, Sharpshooter (25 tasks), Invader hunter (100), On a roll / Week warrior / Unstoppable (3, 7 and 30-day streaks), Clean sweep, Brain Camera, Scholar, Lexicon, Deep work, Flow state (10 h focus), Reflective, Shipped, Night owl and Early bird. Locked ones show your progress.' },
     { try: [['Stats', 'stats'], ['Trophies', 'trophies']] },
   ] },
-  { id: 'tools', icon: 'flask', title: 'Lab tools', blocks: [
-    { p: '⋯ More → **Lab tools**. Results update as you type. **Copy** puts a result on the clipboard; **Add to pad** turns it into a note (press Enter to save).' },
+  { id: 'journal', icon: 'pen', title: 'Journal', blocks: [
+    { p: 'Tap **Journal** at the top of the home screen (or ⋯ More → Journal). One short page a day, saved on the phone as you type.' },
     { table: [
-      ['Dilution', 'C1·V1 = C2·V2. Fill three boxes, leave one blank. E.g. 10 mM stock → 1 mM in 10 mL: take 1 mL + 9 mL diluent.'],
-      ['Molarity', 'mass = concentration × volume × molar mass. E.g. 100 mM NaCl (58.44 g/mol) in 10 mL = 58.44 mg.'],
-      ['Serial', 'Start concentration, factor and number of tubes. Add a tube volume to get transfer and diluent amounts.'],
-      ['Units', 'Converts across SI prefixes for resistance, capacitance, frequency, voltage, current, time, length, volume, mass and concentration.'],
-      ['% change', 'From A to B: percentage, ratio and difference. E.g. 1.2 → 0.84 = −30%.'],
-      ['RC / Z', 'Time constant, cutoff frequency, and at a frequency: |Zc|, series and parallel |Z| and phase.'],
+      ['How did the day go?', 'Rough · Meh · OK · Good · Great. Tap again to clear.'],
+      ['Done', 'Everything you ticked off that day, with focus time. Filled in for you.'],
+      ['Wins · Blockers · Notes', 'One per line. Each box has a mic: it records until you tap it again.'],
+      ['Tomorrow', 'Tasks already planned for tomorrow. Add one, or tap a task from MAKE to plan it.'],
+      ['Meetings', 'Links to that day\'s meeting notes.'],
     ] },
-    { note: 'Pick units from the menus next to each box. Commas work as decimal points.' },
-    { try: [['Open Lab tools', 'tools']] },
+    { list: ['‹ › steps through past days. The calendar marks days with a journal (a small square, filled once saved to Obsidian).', '**Save to Obsidian** writes Kura/Journal/2026-10-01.md with tags and links to the day\'s meetings. Saving again updates the same note. **Copy** and **Share** give you plain text.', 'After 6 pm, if today has no journal yet, the home banner offers to open it.'] },
+    { try: [['Open the journal', 'journal']] },
   ] },
-  { id: 'labarchives', icon: 'tube', title: 'LabArchives: daily log, experiments, bench', blocks: [
-    { p: 'Everything for LabArchives lives in one place: tap **Lab** at the top of the home screen (or ⋯ More → LabArchives). It has four tabs.' },
-    { table: [
-      ['Daily log', 'A log of the day built from the items you marked Lab: tasks you finished or focused on, experiments and notes, grouped by project.'],
-      ['Experiments', 'One entry per experiment: Project, Aims, Methods and timestamped Results, with photos.'],
-      ['Bench', 'Big buttons for the bench: add observations by typing or speaking, take photos and run timers. The screen stays on.'],
-      ['Setup', 'Your LabArchives Inbox address and what the daily log includes.'],
+  { id: 'meetings', icon: 'plan', title: 'Meetings', blocks: [
+    { p: 'For meetings that come round regularly, like a supervisor 1:1 or a group meeting. Journal → **Meetings** tab, or ⋯ More → Meetings.' },
+    { steps: [
+      '**+ New meeting**: a name, who it is with, the next date (and time) and how often it repeats.',
+      'During the week, collect what to raise: type **#raise** anywhere in a note in the pad (it goes on the agenda instead of a list), long-press a task → **Raise at meeting**, or add items in the meeting\'s page. Items marked for a task show RAISE in your lists.',
+      'On the day, a banner reminds you and the calendar shows a small diamond. Open the meeting and tap **Start the meeting**.',
+      'Tick agenda items as you cover them, type or dictate notes, and add **actions** ("send draft to Pierre fri"). **+ Task** puts an action in MAKE straight away, planned for the day it mentions.',
+      '**Finish meeting**: remaining actions become tasks (untick the box to skip that), anything you didn\'t cover is carried to next time, and the next date moves on by itself.',
+      '**Save to Obsidian** writes Kura/Meetings/2026-10-02 Supervisor 1:1.md with the agenda, notes and actions.',
     ] },
-    { h: 'Set up once' },
-    { steps: ['In LabArchives, open your Inbox and copy its email address.', 'Kura → Lab → **Setup**: paste it and tap **Save**.', 'Tap **Send a test email**, send it, and check it arrives in your LabArchives Inbox.'] },
-    { note: 'Send from the email address your LabArchives account uses. Emails land in the LabArchives Inbox; use **Move to page** there to file them in a notebook.' },
-    { h: 'Daily log' },
-    { steps: ['At the end of the day open Lab → **Daily log**.', 'Add anything Kura doesn\'t know about (meetings, reading) as dot points under **Add anything else**.', 'Optional: **Tidy with AI** puts it in the past tense and expands shorthand without adding anything.', 'Tap **Email to LabArchives**, **Copy** (then paste into a page) or **Share**. The day is marked as logged.'] },
-    { p: 'Use ‹ › to log an earlier day. You can edit the log before sending; **Rebuild from Kura** starts again.' },
-    { h: 'Choosing what goes in' },
+    { note: 'Things raised without a meeting chosen show under every meeting until one of them covers it. **Start a one-off meeting** takes notes for a meeting that doesn\'t repeat.' },
+    { try: [['Open Meetings', 'meetings'], ['New meeting', 'newmeeting']] },
+  ] },
+  { id: 'timers', icon: 'timer', title: 'Timers', blocks: [
+    { p: 'Journal → **Timers** tab (or ⋯ More → Timers). Add a label, then tap a length, or type minutes and tap **Start timer**. Several can run at once.' },
     { list: [
-      'Only items marked **Lab** go in on their own, plus experiments. Mark one when you save it: tap **LAB** in the preview, or type **#lab** anywhere in the note. In a note\'s sheet, tick **LabArchives: include in the daily log**.',
-      'Make a whole project a lab project in Lab → **Setup**: everything in it counts as Lab. Untick a single item in its sheet to leave it out.',
-      'The daily log lists the day\'s Lab items, ticked. Untick any to leave them out, or tap **Show other items from this day** and tick more. Those ticks only change that day\'s log.',
-      'Items marked Lab show **LAB** in the lists.',
+      'While a timer runs, a pill at the bottom of the home screen counts down. Tap it to come back.',
+      '**+1′** adds a minute; **Stop** ends it early.',
+      'In the Android app the alarm rings through Android even when Kura is closed. In the web version it only sounds while Kura is open; a timer that ends in the background is shown as done when you come back.',
     ] },
-    { h: 'Experiments' },
-    { list: [
-      'Start one with a name (and a project). Write **Aims** and **Methods** as rough dot points.',
-      'Add **Results** as you go: each gets the time automatically. The camera button adds a photo.',
-      'Tap **Entry →** to see the LabArchives entry. **Format with AI** tidies the wording but keeps every number, unit and sample ID; **Use my wording** undoes it.',
-      '**Email to LabArchives** sends the text. **Share + photos** sends the text and photos through your email app; Kura copies the Inbox address so you can paste it into To.',
-      'An experiment can run over several days: results are grouped by day. **Finish** moves it out of the open list.',
-    ] },
-    { h: 'Bench mode' },
-    { list: [
-      'Pick the experiment at the top. Type, or tap **Speak**, then **Add**: each observation is timestamped.',
-      '**Photo** takes a picture straight into the results.',
-      '**Timer**: pick a length (1 min to 2 h) or type the minutes, with an optional label. The start and the finish are logged in the experiment. Several timers can run at once.',
-      'While a timer runs, a pill at the bottom of the home screen shows the time left. Tap it to come back.',
-    ] },
-    { note: 'Keep Kura open for the alarm: phones pause web apps in the background. A timer that ends while Kura is in the background is logged at the right time when you come back. The alarm sounds even when 8-bit sounds are off.' },
-    { try: [['Open LabArchives', 'lab'], ['Bench mode', 'bench'], ['Setup', 'labsetup']] },
+    { try: [['Open timers', 'timers']] },
   ] },
   { id: 'obsidian', icon: 'page', title: 'Obsidian', blocks: [
     { h: 'Set up' },
@@ -6568,7 +6561,7 @@ const GUIDE = [
     ] },
     { h: 'Critters' },
     { list: [
-      'There are 24 original critters: 8 common, 5 uncommon, 3 rare (about 1 in 16 tasks), 5 ultra (about 1 in 40) and 3 legendary (about 1 in 150). It is pure luck, and which critter guards a task is decided by the task itself. Ultra and legendary critters sparkle.',
+      'There are 48 original critters: 16 common, 10 uncommon, 6 rare (about 1 in 16 tasks), 10 ultra (about 1 in 40) and 6 legendary (about 1 in 150). It is pure luck, and which critter guards a task is decided by the task itself. Ultra and legendary critters sparkle. Tasks you finished before v22 keep the critter they had.',
       'A critter with **!** is guarding a task that is due today. Tap any critter to open its task.',
       'Tap **♥** in the corner of the screen, or ⋯ More → **Critter Log**, to see who you have met, how many times, and when you first met. Critters you haven\'t met are shadows marked ???.',
       'Your whole task history counts, so switching themes never loses friends.',
@@ -6580,7 +6573,8 @@ const GUIDE = [
     { h: 'What the app adds' },
     { list: [
       '**Its own storage**, plus an automatic saved copy after every change and a daily copy in Documents/Kura.',
-      '**Timer alarms that ring when Kura is closed**: bench timers and focus sessions use Android notifications.',
+      '**Timer alarms that ring when Kura is closed**: timers and focus sessions use Android notifications.',
+      '**Updates itself** from your Kura website (Settings → App), so most updates don\'t need a new APK.',
       '**Works fully offline**: the fonts and the whole app are inside the app.',
       'Voice input, sharing, photos, Share → Kura, Obsidian and email all go through Android.',
     ] },
@@ -6593,15 +6587,21 @@ const GUIDE = [
       'Check everything is there, then remove the old Kura icon.',
     ] },
     { h: 'Updating the app' },
-    { p: 'Updates come as a new app file (APK). Install it over the top of the old one: your notes stay, because each version is signed with the same key.' },
+    { steps: [
+      'Once: Settings → **App**, paste your Kura website address (the one you open in Chrome, like https://yourname.github.io/kura/) and tap **Save and check**.',
+      'From then on, upload each new kura-app.zip to your website as usual. When Kura opens it checks (every few hours at most), and the banner offers **Update**. It takes a few seconds and your notes stay.',
+      'If a new version ever fails to start, Kura goes back to the one before by itself. Settings → App → **Use the built-in version** does it by hand.',
+    ] },
+    { p: 'Now and then an update changes the Android side too; then it comes as a new app file (APK) from the Releases page of your kura-android repository. Install it over the top: your notes stay, because each version is signed with the same key.' },
     { note: 'Keep the signing key file safe. An update signed with a different key cannot replace the app, and you would have to export, uninstall and import.' },
+    { try: [['App settings', 'appsettings']] },
   ] },
   { id: 'backup', icon: 'list', title: 'Backup, updates and installing', blocks: [
     { h: 'Your data' },
     { p: 'In the **Kura Android app**, notes, the notebook, the glossary, projects, experiments, photos and settings are stored inside the app on this phone. In the web version they are stored in Chrome\'s storage for the Kura site. Either way nothing goes to a Kura server; there isn\'t one.' },
     { list: ['Settings → Backup → **Export backup** saves one .json file with everything, including photos and settings (not your AI key). **Import backup** adds it back on any phone or in the app.', 'The app also keeps its own saved copy, updated after every change, and a daily copy of your notes in **Documents/Kura** that stays even if the app is removed: after a reinstall, import the newest one. Photos are only in exported backups, so export one now and then too.', 'Web version only: clearing Chrome\'s data for the Kura site can erase your notes. Export first.'] },
     { h: 'Updating' },
-    { steps: ['Upload the new index.html and sw.js (and manifest.webmanifest when included) to your GitHub Pages repository.', 'Open Kura, close it, and open it again. Settings shows the new version number.'] },
+    { steps: ['Upload the new index.html and sw.js (and manifest.webmanifest when included) to your GitHub Pages repository.', 'Web version: open Kura, close it, and open it again. Settings shows the new version number.', 'Android app: it picks the new version up from the same website and offers **Update** (see Kura as an Android app).'] },
     { h: 'Installing' },
     { list: ['Android: open your Kura address in **Chrome** → ⋮ → **Add to Home screen / Install app**.', 'iPhone: open it in **Safari** → Share → **Add to Home Screen**.', 'After an update with a new icon, Chrome refreshes the home-screen icon within about a day. Reinstalling makes it immediate (export a backup first).'] },
   ] },
@@ -6610,7 +6610,8 @@ const GUIDE = [
       ['AI ! appears at the top', 'Tap it. Usually the free quota ran out (try later) or the key was pasted incorrectly (save it again).'],
       ["Obsidian didn't open", 'Check the vault name matches exactly, and that Obsidian is installed with that vault opened once.'],
       ['Google Tasks 404 / not connected', 'See the Google Tasks chapter: the deployment must be a Web app with access set to Anyone, using its /exec URL.'],
-      ['Voice does nothing', 'Allow the microphone for the Kura site in Chrome and check you are online.'],
+      ['Voice does nothing', 'Allow the microphone (Chrome site settings, or Android Settings → Apps → Kura → Permissions in the app) and check you are online.'],
+      ['The app didn\'t offer an update', 'Settings → App → **Check now**. Check the website address, and that the new index.html is on the website.'],
       ['Kura is missing from the share sheet', 'Chrome refreshes the installed app within about a day. Reinstalling makes it immediate, but export a backup first.'],
       ['The camera photo won\'t open', 'Turn off High efficiency pictures in the Samsung camera settings.'],
       ['The top bar is white', 'Reinstall Kura from Chrome (export a backup first).'],
@@ -6629,9 +6630,11 @@ const GUIDE_ACTIONS = {
   obsidian: () => openSettings('obsidian'),
   aisettings: () => openSettings('ai'),
   calendar: () => openDay(TODAY),
-  lab: () => openLab('log'),
-  bench: () => openLab('bench'),
-  labsetup: () => openLab('setup'),
+  journal: () => openDesk('journal'),
+  meetings: () => openDesk('meet'),
+  newmeeting: () => openDesk('meet', { mview: 'edit', edit: { id: null, name: '', who: '', every: 'week', next: TODAY, time: '' } }),
+  timers: () => openDesk('timers'),
+  appsettings: () => openSettings('app'),
   diag: () => openDiag(),
   pad: () => { closeSheet(); if (state.nb) closeNotebook(); setTimeout(() => els.input.focus(), 80); },
   log: () => openLog(),
@@ -6829,7 +6832,7 @@ function critterStatsRaw() {
   const stats = {};
   for (const [d, ids] of Object.entries(state.doneLog || {})) {
     for (const id of ids) {
-      const p = state.petEpoch && d < state.petEpoch ? petForV1(id) : petFor(id);
+      const p = petAt(id, d);
       const st = stats[p.id] || (stats[p.id] = { n: 0, first: d });
       st.n++;
       if (d < st.first) st.first = d;
@@ -6889,7 +6892,7 @@ function drawCritters() {
   const body = h('div', { class: 'sheet-body' },
     h('p', { class: 'muted', text: 'Every open task has a critter keeping an eye on it. Finish the task and the critter becomes your friend. Rare critters turn up about once in every 16 tasks, ultra about once in 40 and legendary about once in 150, purely by luck. Your whole task history counts, whichever theme you use.' }),
     h('div', { class: 'rv-stats' }, tile(String(friends), 'friends made'), tile(`${met}/${PETS.length}`, 'critters met'), tile(`${rarest} · ${high}`, 'rare · ultra+')),
-    h('div', { class: 'critter-grid' }, PETS.map(p => {
+    h('div', { class: 'critter-grid' }, petsByRarity().map(p => {
       const c = st[p.id];
       const art = h('span', { class: 'critter-art lcd' + (c ? '' : ' unmet'), 'aria-hidden': 'true' });
       art.innerHTML = petSvg(p);
@@ -7256,8 +7259,7 @@ function capRow(c, x, i) {
   const todayBtn = x.today === TODAY ? null : h('button', { type: 'button', class: 'cap-chip', onclick: () => { x.today = TODAY; x.bucket = 'make'; x.userBucket = false; redraw(); } }, 'Today');
   const clearDate = x.today ? h('button', { type: 'button', class: 'cap-chip', 'aria-label': 'Clear the date', onclick: () => { x.today = null; x.repeat = null; redraw(); } }, '×') : null;
   const rep = x.today && x.repeat ? h('button', { type: 'button', class: 'cap-chip date on', title: 'Tap to stop repeating', onclick: () => { x.repeat = null; redraw(); } }, '↻ ' + repeatLabel(x.repeat) + ' ×') : null;
-  const labOn = isLab(x);
-  const labChip = h('button', { type: 'button', class: 'cap-chip lab', 'aria-pressed': String(labOn), title: 'Include in the LabArchives daily log', 'aria-label': labOn ? 'In the LabArchives log. Tap to leave out.' : 'Not in the LabArchives log. Tap to include.', onclick: () => { x.lab = !labOn; redraw(); } }, 'Lab');
+  const labChip = null;
   const cat = h('button', { type: 'button', class: 'cap-chip cat', 'data-cat': x.cat, title: 'Tap to change the category', 'aria-label': `Category ${CAT_NAME[x.cat]}. Tap to change.`, onclick: () => { x.cat = CATS[(CATS.indexOf(x.cat) + 1) % CATS.length]; redraw(); } }, h('i', { class: 'cc' }), CAT_NAME[x.cat]);
   const proj = (state.projects || []).some(p => !p.archived) ? projPicker(x.proj, v => { x.proj = v; const p = projById(v); if (p) x.cat = p.cat; redraw(); }, () => x.cat) : null;
   const syms = h('span', { class: 'cap-syms' }, state.symbols.map(s => h('button', {
@@ -7342,6 +7344,7 @@ document.getElementById('capture').addEventListener('keydown', e => {
 async function submitPad() {
   const raw = els.input.value.trim();
   if (!raw) { closeCapture(); return; }
+  if (hasRaiseTag(raw)) { await raiseFromPad(raw); return; }
   const c = state.cap;
   if (c && !c.stale && c.raw === raw) { acceptCapture(); return; }
   if (state.route === 'auto' && capPrefs.preview) { openCapture(raw); return; }
@@ -7360,11 +7363,12 @@ function bannerMsgs() {
     out.push({ id: 'restore', text: `Kura found its saved copy from ${new Date(d.exportedAt || Date.now()).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })} with ${(n => n + (n === 1 ? ' note' : ' notes'))(d.items.filter(i => i && !i.example).length)}. Restore it?`,
       act: ['Restore', async () => { state.restoreOffer = null; drawBanner(); const ex = state.items.filter(i => i.example).map(i => i.id); for (const id of ex) await store.remove(id).catch(() => {}); await doImport({ ...d, items: d.items.filter(i => i && !i.example) }); toast('Restored from the saved copy'); }], later: () => { state.restoreOffer = null; }, laterLabel: 'No' });
   }
+  out.push(...v22Msgs());
   if (bannerMsg) out.push({ id: 'msg', text: bannerMsg });
   if (reviewDue() && !state.reviewDismissed) out.push({ id: 'review', text: 'Weekly review time: tidy loose ends and plan next week.', act: ['Start review', () => openReview()], later: () => { state.reviewDismissed = true; } });
   if (state.seenVersion !== undefined && state.seenVersion !== APP_VERSION) {
     const fresh = !state.seenVersion && !state.items.some(i => !i.example);
-    out.push({ id: 'ver', text: fresh ? 'New to Kura? The user guide shows how everything works.' : `Updated to ${APP_VERSION}: the calendar is on the cover screen too, and backups now include photos.`,
+    out.push({ id: 'ver', text: fresh ? 'New to Kura? The user guide shows how everything works.' : `Updated to ${APP_VERSION}: Journal and Meetings replace the Lab section, 24 new critters, and voice keeps recording until you tap the mic again.`,
       act: [fresh ? 'Open the guide' : "What's new", () => openGuide(fresh ? 'start' : 'new'), 'banner-guide'], later: () => markSeen(), laterLabel: 'Got it' });
   }
   const missing = [!state.sample && 'a free AI key', !state.obs && 'your Obsidian vault'].filter(Boolean);
@@ -7388,21 +7392,21 @@ function drawBanner() {
   els.banner.hidden = false;
 }
 
-const SET_TABS = [['basics', 'Basics'], ['ai', 'AI'], ['obsidian', 'Obsidian'], ['tasks', 'Google Tasks'], ['look', 'Look'], ['backup', 'Backup']];
-const SET_TAB_OF = { ai: 'ai', obsidian: 'obsidian', tasks: 'tasks', gtasks: 'tasks', look: 'look', theme: 'look', backup: 'backup' };
-const SET_HELP = { basics: 'start', ai: 'ai', obsidian: 'obsidian', tasks: 'gtasks', look: 'themes', backup: 'backup' };
+const SET_TABS = [['basics', 'Basics'], ['ai', 'AI'], ['obsidian', 'Obsidian'], ['tasks', 'Google Tasks'], ['look', 'Look'], ['backup', 'Backup'], ...(NATIVE ? [['app', 'App']] : [])];
+const SET_TAB_OF = { ai: 'ai', obsidian: 'obsidian', tasks: 'tasks', gtasks: 'tasks', look: 'look', theme: 'look', backup: 'backup', app: 'app', updates: 'app' };
+const SET_HELP = { basics: 'start', ai: 'ai', obsidian: 'obsidian', tasks: 'gtasks', look: 'themes', backup: 'backup', app: 'android' };
 
 /* ---------- v19.1: only items marked Lab go to LabArchives ---------- */
 // "#lab" anywhere in a note marks it; a lab project marks everything in it; item.lab === false opts one out
-function hasLabTag(t) { return /(^|\s)#lab(?=[\s,.;:!?]|$)/i.test(String(t || '')); }
+function hasLabTag() { return false; }   // v22: #lab no longer means anything special
 function takeLab(t) {
   const src = String(t || '');
   if (!hasLabTag(src)) return { text: src, lab: false };
   return { text: src.replace(/(^|\s)#lab(?=[\s,.;:!?]|$)/gi, '$1').replace(/\s{2,}/g, ' ').replace(/\s+([,.;:!?])/g, '$1').trim(), lab: true };
 }
 function projLab(id) { const p = projById(id); return !!(p && p.lab); }
-function isLab(x) { return !!x && (x.lab === true || (x.lab !== false && projLab(x.proj))); }
-function labTag(x) { return isLab(x) ? h('span', { class: 'tg lab', text: 'LAB' }) : null; }
+function isLab(x) { return !!x && !!x.id && raisedIds().has(x.id); }   // v22: 'on the meeting agenda'
+function labTag(x) { return isLab(x) ? h('span', { class: 'tg lab', text: 'RAISE' }) : null; }
 
 /* ---------- v19: LabArchives section — daily log, experiments, bench mode ---------- */
 const LAB_DEFAULT = { inbox: '', focus: true, notes: true, next: true, workOnly: true };
@@ -7747,6 +7751,7 @@ function timerDone(t) {
   if (late) toast(`Timer "${t.label}" finished at ${hhmm(t.ends)} while Kura was in the background`);
   else { alarm(); toast(`Timer done: ${t.label}`); }
   if (state.sheet && state.sheet.kind === 'lab') setTimeout(drawLab);
+  if (state.sheet && state.sheet.kind === 'desk') setTimeout(drawDesk);
 }
 let timerIv = null;
 function runTimers() {
@@ -7769,7 +7774,7 @@ function drawTimerBits() {
   const pill = document.getElementById('bench-pill');
   if (!pill) return;
   const run = runningTimers().sort((a, b) => a.ends - b.ends);
-  const onBench = !!(state.sheet && state.sheet.kind === 'lab' && state.sheet.tab === 'bench');
+  const onBench = !!(state.sheet && ((state.sheet.kind === 'lab' && state.sheet.tab === 'bench') || (state.sheet.kind === 'desk' && state.sheet.tab === 'timers')));
   pill.hidden = !run.length || onBench;
   document.body.classList.toggle('timing', !!run.length && !onBench);
   if (run.length && !onBench) pill.replaceChildren(icon('timer', 2), h('b', { text: fmtClock(run[0].ends - Date.now()) }), h('span', { text: run[0].label + (run.length > 1 ? ` +${run.length - 1}` : '') }));
@@ -8091,8 +8096,8 @@ function labSetupView(s) {
   return [body, null];
 }
 
-$('#btn-lab').addEventListener('click', () => openLab());
-$('#bench-pill').addEventListener('click', () => openLab('bench'));
+$('#btn-desk').addEventListener('click', () => openDesk());
+$('#bench-pill').addEventListener('click', () => openDesk('timers'));
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState !== 'visible') return;
   tickTimers();
@@ -8184,7 +8189,7 @@ function occursOn(it, ds) {
 }
 function calData(days) {
   const from = days[0], to = days[days.length - 1];
-  const m = new Map(days.map(d => [d, { open: 0, late: 0, done: 0, rep: 0, exp: 0, logged: false }]));
+  const m = new Map(days.map(d => [d, { open: 0, late: 0, done: 0, rep: 0, jr: 0, meet: [] }]));
   for (const it of state.items) {
     if (it.example) continue;
     if (!it.done && it.today && m.has(it.today)) { const c = m.get(it.today); c.open++; if (it.today < TODAY) c.late++; }
@@ -8194,8 +8199,9 @@ function calData(days) {
       for (let g = 0; g < 60; g++) { const n = nextOccurrence(it.repeat, d); if (!n || n <= d || n > to) break; d = n; if (m.has(d)) m.get(d).rep++; }
     }
   }
-  for (const x of state.exps || []) for (const o of x.obs) { if (o.kind === 'timer') continue; const c = m.get(dayStr(new Date(o.t))); if (c) c.exp++; }
-  for (const [d, v] of m) if ((state.labLogs || {})[d]) v.logged = true;
+  for (const [d, v] of m) if (jrHas(d)) v.jr = jrDay(d).sentAt ? 2 : 1;
+  for (const sx of meetData().series) if (sx.next && m.has(sx.next)) m.get(sx.next).meet.push(sx.name);
+  for (const n of meetData().notes) { const c = m.get(n.day); if (c && !c.meet.includes(n.title)) c.meet.push(n.title); }
   return m;
 }
 let calSig = '';
@@ -8234,7 +8240,7 @@ function drawCal() {
     title = new Date(y, mo - 1, 1).toLocaleDateString('en-AU', { month: 'long', year: 'numeric' });
   }
   const data = calData(days);
-  const sig = [weekMode ? 'w' : 'm', days[0], mk, TODAY, wide, ...days.map(d => { const v = data.get(d); return `${v.open}.${v.late}.${v.done}.${v.rep}.${v.exp}.${v.logged ? 1 : 0}`; })].join('|');
+  const sig = [weekMode ? 'w' : 'm', days[0], mk, TODAY, wide, ...days.map(d => { const v = data.get(d); return `${v.open}.${v.late}.${v.done}.${v.rep}.${v.jr}.${v.meet.join('/')}`; })].join('|');
   if (sig === calSig && el.children.length) return;
   calSig = sig;
   el.classList.toggle('week', weekMode);
@@ -8253,8 +8259,8 @@ function drawCal() {
     if (v.open) bits.push(`${v.open} planned${v.late ? ` (${v.late} overdue)` : ''}`);
     if (v.rep) bits.push(`${v.rep} repeating`);
     if (v.done) bits.push(`${v.done} done`);
-    if (v.exp) bits.push(`${v.exp} lab results`);
-    if (v.logged) bits.push('LabArchives log sent');
+    if (v.meet.length) bits.push('meeting: ' + v.meet.join(', '));
+    if (v.jr) bits.push(v.jr > 1 ? 'journal in Obsidian' : 'journal written');
     const label = parseDay(d).toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long' }) + (d === TODAY ? ', today' : '') + (bits.length ? ': ' + bits.join(', ') : '');
     return h('button', {
       class: 'cal-day' + (!weekMode && monthKey(d) !== mk ? ' other' : '') + (d === TODAY ? ' is-today' : '') + (d < TODAY ? ' past' : '') + (i % 7 >= 5 ? ' we' : ''),
@@ -8264,7 +8270,8 @@ function drawCal() {
       h('span', { class: 'cal-m', 'aria-hidden': 'true' },
         v.open ? h('b', { class: 'm-open' + (v.late ? ' late' : ''), text: String(v.open) }) : v.rep ? h('i', { class: 'm-rep' }) : null,
         v.done ? h('i', { class: 'm-done', text: '✓' }) : null,
-        v.logged || v.exp ? h('i', { class: 'm-lab' + (v.logged ? ' on' : '') }) : null));
+        v.meet.length ? h('i', { class: 'm-meet' }) : null,
+        v.jr ? h('i', { class: 'm-lab' + (v.jr > 1 ? ' on' : '') }) : null));
   }));
   el.replaceChildren(head, wd, grid);
 }
@@ -8333,12 +8340,13 @@ function drawDay() {
     sec(`Planned · ${planned.length}`, planned.map(it => row(it, true))),
     sec('Repeats that land here', reps.map(it => h('div', { class: 'day-row rep' }, h('span', { class: 'day-ico', text: '↻' }), h('button', { class: 'day-txt', type: 'button', onclick: () => openQuick(it.id, back) }, h('span', { text: firstLine(rowText(it)) }), h('span', { class: 'meta' }, h('span', { class: 'tg', text: repeatLabel(it.repeat) })))))),
     sec(`Done · ${done.length}`, done.map(it => row(it, true))),
-    exps.length || focus || logged || (state.exps || []).length ? h('div', { class: 'stack' },
-      h('span', { class: 'lbl', text: 'Lab and focus' }),
+    focus || d <= TODAY || meetData().series.some(x => x.next === d) || meetData().notes.some(n => n.day === d) ? h('div', { class: 'stack' },
+      h('span', { class: 'lbl', text: 'Journal and meetings' }),
       h('div', { class: 'day-lab' },
         focus ? h('span', { class: 'tg', text: `Focus ${fmtMin(focus)}` }) : null,
-        ...exps.map(x => h('button', { class: 'btn', type: 'button', onclick: () => { state.benchExp = x.id; closeSheet(); openLab('exps', { exp: x.id, expView: 'edit' }); } }, icon('tube', 1.8), x.title)),
-        h('button', { class: 'btn', type: 'button', id: 'day-log', onclick: () => { closeSheet(); openLab('log', { day: d, text: null, edited: false }); } }, logged ? 'Daily log · logged ✓' : 'Daily log for this day'))) : null,
+        ...meetData().series.filter(x => x.next === d).map(x => h('button', { class: 'btn', type: 'button', onclick: () => { closeSheet(); openDesk('meet', { mview: 'series', series: x.id }); } }, icon('plan', 1.8), x.name + (x.time ? ' · ' + x.time : ''))),
+        ...meetData().notes.filter(n => n.day === d).map(n => h('button', { class: 'btn', type: 'button', onclick: () => { closeSheet(); openDesk('meet', { mview: 'run', note: n.id }); } }, icon('plan', 1.8), n.title + ' · notes')),
+        d <= TODAY ? h('button', { class: 'btn', type: 'button', id: 'day-journal', onclick: () => { closeSheet(); openDesk('journal', { day: d }); } }, icon('pen', 1.8), jrHas(d) ? 'Journal ✓' : 'Write the journal') : null)) : null,
     unplanned.length ? h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'Plan something from MAKE' }),
       h('div', { class: 'day-plan' }, unplanned.map(it => h('button', { class: 'plan-chip', type: 'button', 'data-id': it.id, onclick: async () => {
         await patch(it.id, { today: d, done: false, doneAt: null, pending: false, gtaskGone: false });
@@ -8383,7 +8391,7 @@ function drawQuick() {
     it.today ? tile('unplan', 'close', 'Unplan', async () => { await patchWithUndo(it.id, { today: null, repeat: null }, 'Unplanned'); after(); }) : null,
     tile('done', 'check', it.done ? 'Not done' : 'Done', async () => { await toggleDone(it.id); after(); }, it.done),
     !it.done ? tile('focus', 'timer', 'Focus', () => { closeSheet(); startFocus(it.id); }) : null,
-    tile('lab', 'tube', isLab(it) ? 'Lab ✓' : 'Mark Lab', async () => { await patch(it.id, { lab: !isLab(it) }); toast(isLab(byId(it.id)) ? 'Marked Lab' : 'Not Lab'); drawQuick(); }, isLab(it)),
+    tile('raise', 'plan', isLab(it) ? 'Raising ✓' : 'Raise at meeting', () => { toggleRaise(it); drawQuick(); }, isLab(it)),
     tile('open', 'pen', 'Open', () => openItem(it.id)),
     tile('delete', 'close', 'Delete', async () => { closeSheet(); await removeWithUndo([it.id]); }));
   const seg = segControl(it.bucket, async b => { await patchWithUndo(it.id, { bucket: b }, `Moved to ${LABEL[b]}`); after(); }, true);
@@ -8410,7 +8418,7 @@ PET_W.ultra = 0;
 PET_W.legendary = 0;
 PETS.push(...NEW_PETS);
 const ULTRAS = NEW_PETS.filter(p => p.rarity === 'ultra'), LEGENDS = NEW_PETS.filter(p => p.rarity === 'legendary');
-function petFor(id) {
+function petForV20(id) {
   const r = hashStr('rare2:' + id) % 3600;
   if (r < 24) return LEGENDS[hashStr('leg:' + id) % LEGENDS.length];
   if (r < 114) return ULTRAS[hashStr('ult:' + id) % ULTRAS.length];
@@ -8422,7 +8430,7 @@ const RARITY_ORDER = ['common', 'uncommon', 'rare', 'ultra', 'legendary'];
 let critMemo = null, critKey = '';
 function critterStats() {
   const lg = state.doneLog || {};
-  let key = (state.petEpoch || '') + '|';
+  let key = (state.petEpoch || '') + '/' + (state.petEpoch2 || '') + '|';
   for (const d in lg) key += d + ':' + lg[d].join(',') + ';';
   if (key !== critKey || !critMemo) { critKey = key; critMemo = critterStatsRaw(); }
   return critMemo;
@@ -8434,8 +8442,8 @@ async function backupData(withPhotos) {
   const data = {
     app: 'kura', version: 2, exportedAt: new Date().toISOString(), from: NATIVE ? 'android-app' : 'web',
     symbols: state.symbols, obsidian: state.obs || null, items: state.items, notes: state.notes || [], glossary: state.glossary || [], projects: state.projects || [],
-    doneLog: state.doneLog || {}, focusSessions: state.focusSessions || [], trophies: state.trophies || {}, experiments: state.exps || [], labLogs: state.labLogs || {}, labarchives: state.lab || {},
-    settings: { theme: state.theme || 'invaders', fx: { ...fx }, field: state.field || '', capture: { ...capPrefs }, petEpoch: state.petEpoch || '' },
+    doneLog: state.doneLog || {}, focusSessions: state.focusSessions || [], trophies: state.trophies || {}, experiments: state.exps || [], labLogs: state.labLogs || {}, labarchives: state.lab || {}, journal: state.journal || {}, meetings: state.meet || null,
+    settings: { theme: state.theme || 'invaders', fx: { ...fx }, field: state.field || '', capture: { ...capPrefs }, petEpoch: state.petEpoch || '', petEpoch2: state.petEpoch2 || '' },
   };
   if (withPhotos) {
     const ids = new Set();
@@ -8465,6 +8473,7 @@ async function importExtras(data) {
     if (st.fx && typeof st.fx === 'object') { Object.assign(fx, st.fx); await saveFx(); }
     if (typeof st.field === 'string' && st.field && !state.field) { state.field = st.field; if (store.kvSet) await store.kvSet('field', st.field).catch(() => {}); }
     if (st.capture && typeof st.capture === 'object') { Object.assign(capPrefs, st.capture); await saveCapPrefs(); syncCapUI(); }
+    if (st.petEpoch2 && (!state.petEpoch2 || st.petEpoch2 < state.petEpoch2)) { state.petEpoch2 = st.petEpoch2; if (store.kvSet) await store.kvSet('petEpoch2', st.petEpoch2).catch(() => {}); }
     if (st.petEpoch && (!state.petEpoch || st.petEpoch < state.petEpoch)) { state.petEpoch = st.petEpoch; if (store.kvSet) await store.kvSet('petEpoch', st.petEpoch).catch(() => {}); }
   }
   return photos;
@@ -8547,7 +8556,7 @@ function nativeTimersSync() {
     if (t.doneAt) continue;
     live.add(t.id);
     const x = expById(t.exp);
-    notifyAt(t.id, t.ends, `Timer done: ${t.label}`, x ? x.title : 'Kura bench timer');
+    notifyAt(t.id, t.ends, `Timer done: ${t.label}`, x ? x.title : 'Kura timer');
   }
   for (const k of [...notifAt.keys()]) if (k !== 'focus' && !live.has(k)) unnotify(k);
 }
@@ -8585,6 +8594,808 @@ function flushShare() {
   pendingShare = null;
   window.__kuraPendingShare = null;
   if (p) window.__kuraShareIn(p);
+}
+
+/* ---------- v22: 24 more critters (48 in all). Tasks finished before v22 keep the critter they had. ---------- */
+const MORE_PETS = [
+  {"id": "crumb", "name": "Crumb", "rarity": "common", "blurb": "Always the first one up. Smells faintly of toast.", "art": ["..XXXXXXXX..", ".X........X.", "X..........X", "X..........X", ".X.X....X.X.", ".X........X.", ".X..X..X..X.", ".X...XX...X.", ".X........X.", ".X........X.", ".XXXXXXXXXX.", "............"]},
+  {"id": "nibs", "name": "Nibs", "rarity": "common", "blurb": "Worn down to a stub from all your notes.", "art": [".....XX.....", ".....XX.....", "....X..X....", "....X..X....", "...XXXXXX...", "...X....X...", "...X.XX.X...", "...X....X...", "...X.XX.X...", "...X....X...", "...XXXXXX...", "...X.XX.X..."]},
+  {"id": "trundle", "name": "Trundle", "rarity": "common", "blurb": "Slow, steady, and always gets there in the end.", "art": ["............", ".X.X........", ".X.X..XXXX..", "..X..X....X.", "..X.X..XX..X", ".XX.X.X..X.X", ".XX.X.X.XX.X", ".XX..X....X.", ".XXXXXXXXXX.", "XXXXXXXXXXXX", "............", "............"]},
+  {"id": "pebble", "name": "Pebble", "rarity": "common", "blurb": "Happy to sit on your notes and keep them from blowing away.", "art": ["............", "............", "............", ".....XXXX...", "...XX....X..", "..X.......X.", ".X..XX.XX..X", ".X.........X", "X...X..X...X", "X....XX....X", ".XXXXXXXXXX.", "............"]},
+  {"id": "chirp", "name": "Chirp", "rarity": "common", "blurb": "Sings when a task goes from MAKE to done.", "art": ["............", "....XXX.....", "...X...X....", "..X.X...X...", "XXX......X..", "..X...XXXX..", "..X..X....X.", "..X...XXX.X.", "...X......X.", "....XXXXXX..", ".....X..X...", "....XX..XX.."]},
+  {"id": "sticky", "name": "Sticky", "rarity": "common", "blurb": "Remembers one thing for you, very loudly.", "art": ["XXXXXXXXXXXX", "X..........X", "X..........X", "X..X....X..X", "X..........X", "X...X..X...X", "X....XX....X", "X..........X", "X.......XXXX", "X.......X.X.", "X.......XX..", "XXXXXXXXX..."]},
+  {"id": "tapey", "name": "Tapey", "rarity": "common", "blurb": "Holds things together, mostly your deadlines.", "art": ["...XXXXXX...", ".XXXXXXXXXX.", ".XX.XXXX.XX.", "XXXX....XXXX", "XXX......XXX", "XXX......XXX", "XXXX....XXXX", ".XXXXXXXXXXX", ".XXXXXXXXXXX", "...XXXXXX.XX", "..........XX", ".........XX."]},
+  {"id": "nutkin", "name": "Nutkin", "rarity": "common", "blurb": "Stores small ideas for the winter.", "art": [".....X......", "..XXXXXXXX..", ".XX.X.X.X.XX", ".XXXXXXXXXX.", "..X......X..", "..X.X..X.X..", "..X......X..", "..X..XX..X..", "...X....X...", "....X..X....", ".....XX.....", "............"]},
+  {"id": "spike", "name": "Spike", "rarity": "uncommon", "blurb": "Prickly on the outside. Needs water once a week.", "art": [".....XX.....", "....X..X....", ".X..X..X....", "X.X.X..X..X.", "X.X.X..X.X.X", ".XXXX..XXX.X", "...X.XX.X.X.", "...X....XX..", "..XXXXXXXX..", "..X......X..", "...X....X...", "...XXXXXX..."]},
+  {"id": "frogget", "name": "Frogget", "rarity": "uncommon", "blurb": "Leaps to the next task without looking back.", "art": ["............", ".XXXX..XXXX.", "X.XX.XX.XX.X", "X....XX....X", ".XXXX..XXXX.", "X..........X", "X.X......X.X", "X..XXXXXX..X", ".X........X.", "..XXXXXXXX..", ".XX......XX.", "XX........XX"]},
+  {"id": "hum", "name": "Hum", "rarity": "uncommon", "blurb": "Hums along to whatever helps you focus.", "art": ["...XXXXXX...", "..X......X..", ".X........X.", ".X..XXXX..X.", "XXX.X..X.XXX", "XXX......XXX", "XXX.X..X.XXX", "XXX......XXX", ".X...XX...X.", ".X........X.", "..XXXXXXXX..", "............"]},
+  {"id": "batty", "name": "Batty", "rarity": "uncommon", "blurb": "Does its best work after midnight. Please don't copy it.", "art": ["............", "....X..X....", "X...XXXX...X", "XX.X.XX.X.XX", "XXXXXXXXXXXX", "XXX.XXXX.XXX", "XX..XXXX..XX", "X....XX....X", ".....XX.....", "....X..X....", "............", "............"]},
+  {"id": "whisk", "name": "Whisk", "rarity": "uncommon", "blurb": "Sits on the one page you need right now.", "art": ["X..........X", "XX........XX", "X.X......X.X", "X..XXXXXX..X", "X..........X", "X..X....X..X", "X..........X", "XX...XX...XX", "X....XX....X", ".X..X..X..X.", "..XXXXXXXX..", "............"]},
+  {"id": "sandy", "name": "Sandy", "rarity": "rare", "blurb": "Knows exactly how long you have left.", "art": ["XXXXXXXXXXXX", ".X........X.", ".X.X....X.X.", "..X......X..", "...X.XX.X...", "....X..X....", "....X..X....", "...X.XX.X...", "..X..XX..X..", ".X.XXXXXX.X.", ".XXXXXXXXXX.", "XXXXXXXXXXXX"]},
+  {"id": "norra", "name": "Norra", "rarity": "rare", "blurb": "Always points you back to the next task.", "art": ["....XXXX....", "..XX.XX.XX..", ".X...XX...X.", ".X..XXXX..X.", "X..........X", "X.X......X.X", "X..........X", "X.....X....X", ".X....X...X.", ".X....X...X.", "..XX..X.XX..", "....XXXX...."]},
+  {"id": "botley", "name": "Botley", "rarity": "rare", "blurb": "Runs on checklists. Beeps when one is finished.", "art": [".....X......", "....XXX.....", "..XXXXXXXX..", "..X......X..", "..X.XX.XX.X.", "..X......X..", "..X.XXXX.X..", "..XXXXXXXX..", ".X.X....X.X.", ".X.X.XX.X.X.", "...XXXXXX...", "...X....X..."]},
+  {"id": "nebbie", "name": "Nebbie", "rarity": "ultra", "blurb": "Drifts through the backlog, glowing faintly.", "art": ["....XXXX....", "..XX....XX..", ".X..X..X..X.", ".X........X.", "X...XXXX...X", "XXXXXXXXXXXX", ".X..X..X..X.", "X..X..X..X..", ".X..X..X..X.", "..X..X..X..X", ".X..X..X..X.", "X.........X."]},
+  {"id": "crystalis", "name": "Crystalis", "rarity": "ultra", "blurb": "Grows a new facet every time you finish something hard.", "art": ["............", "..XXXXXXXX..", ".X.X.XX.X.X.", "XXXXXXXXXXXX", "X..........X", ".X.X....X.X.", "..X......X..", "...X.XX.X...", "....X..X....", ".....XX.....", "X..........X", ".X........X."]},
+  {"id": "voltra", "name": "Voltra", "rarity": "ultra", "blurb": "Arrives in a flash, right before a deadline.", "art": ["......XXXXX.", ".....XXXXX..", "....XXXXX...", "...XXXXX....", "..XX.XXX.XX.", "..XXXXXXXXX.", "......XXXX..", ".....XXXX...", "....XXX.....", "...XXX......", "..XX........", ".X.........."]},
+  {"id": "aurox", "name": "Aurox", "rarity": "ultra", "blurb": "A fox made of northern lights. Only shows up on clear nights.", "art": ["X..........X", "XX........XX", "XXX......XXX", "X.XXXXXXXX.X", "X..........X", ".X.XX..XX.X.", ".X........X.", "..X......X..", "...X.XX.X...", "....X..X....", ".....XX.....", "............"]},
+  {"id": "lunabun", "name": "Lunabun", "rarity": "ultra", "blurb": "Hops down from the moon when you work late.", "art": ["..XX....XX..", ".X..X..X..X.", ".X..X..X..X.", ".X..X..X..X.", "..X.X..X.X..", ".XX......XX.", "X..........X", "X..X....X..X", "X....XX....X", "X...X..X...X", ".X........X.", "..XXXXXXXX.."]},
+  {"id": "pyrra", "name": "Pyrra", "rarity": "legendary", "blurb": "Rises from every draft you thought was dead.", "art": ["....X..X....", ".....XX.....", "X...XXXX...X", "XX.X.XX.X.XX", "XXX.XXXX.XXX", ".XXX.XX.XXX.", "..XXXXXXXX..", "...XXXXXX...", "....XXXX....", "...X.XX.X...", "..X..XX..X..", ".X..X..X..X."]},
+  {"id": "wyrmwick", "name": "Wyrmwick", "rarity": "legendary", "blurb": "Guards the hardest task on your list until you face it.", "art": ["........X...", ".......XXX..", "......XX.XX.", "..X...XXXXXX", ".XX..XXX.XX.", "XXX.XXXX....", "XXXXXXXX....", ".XXXXXXX....", "..XXXXXXX...", "...X...XX...", "..XX..XX.XX.", ".........XX."]},
+  {"id": "tomewarden", "name": "Tomewarden", "rarity": "legendary", "blurb": "Built from every notebook you ever filled.", "art": ["...XXXXXX...", "..X......X..", "..X.X..X.X..", "..X......X..", "..XXXXXXXX..", "XXXXXXXXXXXX", "X.X......X.X", "X.XXXXXXXX.X", "X.X......X.X", "..XXXXXXXX..", "..XX....XX..", ".XXX....XXX."]},
+];
+PETS.push(...MORE_PETS);
+const BASE2 = PETS.filter(p => p.rarity === 'common' || p.rarity === 'uncommon' || p.rarity === 'rare');
+const PET_W2 = { common: 4, uncommon: 3, rare: 1 };   // 16×4 + 10×3 + 6×1 = 100
+const ULTRAS2 = PETS.filter(p => p.rarity === 'ultra'), LEGENDS2 = PETS.filter(p => p.rarity === 'legendary');
+function petFor(id) {
+  const r = hashStr('rare3:' + id) % 3600;
+  if (r < 24) return LEGENDS2[hashStr('leg2:' + id) % LEGENDS2.length];
+  if (r < 114) return ULTRAS2[hashStr('ult2:' + id) % ULTRAS2.length];
+  const x = hashStr('pet2:' + id) % 100;
+  let acc = 0;
+  for (const p of BASE2) { acc += PET_W2[p.rarity]; if (x < acc) return p; }
+  return BASE2[0];
+}
+// which critter a task finished on a given day befriended
+function petAt(id, day) {
+  if (state.petEpoch && day < state.petEpoch) return petForV1(id);
+  if (state.petEpoch2 && day < state.petEpoch2) return petForV20(id);
+  return petFor(id);
+}
+const petsByRarity = () => RARITY_ORDER.flatMap(r => PETS.filter(p => p.rarity === r));
+
+/* ---------- v22: voice keeps listening until you tap the mic again ---------- */
+let dict = null;
+function stopDictation() { if (dict) dict.stop(); }
+function micButton(getTarget, opts = {}) {
+  if (!SpeechRec) return null;
+  const b = h('button', { class: (opts.cls || 'btn') + ' mic', type: 'button', id: opts.id, 'aria-label': 'Dictate: tap to start, tap again to stop', 'aria-pressed': 'false', title: 'Dictate' }, icon('mic', 1.8), opts.label || null);
+  b.addEventListener('pointerdown', e => { if (opts.keepFocus) e.preventDefault(); });
+  b.addEventListener('click', () => dictate(getTarget(), b));
+  b._micTarget = getTarget;
+  return b;
+}
+// a sheet redraw replaces its text boxes: keep dictating into the new copy
+function rebindDictation(root) {
+  const d = dict;
+  if (!d || d.target.isConnected || !d.key) return;
+  const n = (root || document).querySelector(`[data-k="${CSS.escape(d.key)}"]`);
+  if (!n) { d.stop(); return; }
+  d.target = n;
+  d.last = n.value;
+  for (const b of (root || document).querySelectorAll('.mic')) {
+    if (b._micTarget && b._micTarget() === n) { d.btn = b; b.classList.add('rec'); b.setAttribute('aria-pressed', 'true'); }
+  }
+}
+function dictate(target, btn) {
+  if (!SpeechRec || !target) return;
+  if (dict) { const same = dict.btn === btn || dict.target === target; dict.stop(); if (same) return; }
+  const d = { target, btn, key: target.dataset ? target.dataset.k || '' : '', base: target.value, done: '', live: '', last: target.value, active: true, r: null, quick: 0, t0: 0, err: '' };
+  const join = (a, b) => (a && b ? a + (/\s$/.test(a) ? '' : ' ') + b : a || b);
+  const paint = () => {
+    const t = d.target;
+    if (t.value !== d.last) { d.base = t.value; d.done = ''; d.live = ''; }   // you typed while dictating: keep your edit
+    t.value = join(d.base, join(d.done, d.live).trim());
+    d.last = t.value;
+    t.dispatchEvent(new Event('input', { bubbles: true }));
+  };
+  const fatal = ['not-allowed', 'service-not-allowed', 'audio-capture', 'network', 'language-not-supported'];
+  const finish = () => {
+    if (dict !== d) return;
+    dict = null;
+    d.active = false;
+    clearTimeout(d.guard);
+    if (d.btn) { d.btn.classList.remove('rec'); d.btn.setAttribute('aria-pressed', 'false'); }
+    if (!(state.focus && state.focus.phase === 'focus' && !state.focus.paused)) holdWake(false);
+  };
+  const one = () => {
+    if (!d.active || dict !== d) return;
+    const r = new SpeechRec();
+    r.lang = navigator.language || 'en-AU';
+    r.interimResults = true;
+    r.continuous = !/Android/i.test(navigator.userAgent); // Chrome on Android repeats words in continuous mode, so Kura restarts it after each pause instead
+    r.onresult = e => {
+      if (d.r !== r) return;
+      let t = '';
+      for (let i = 0; i < e.results.length; i++) t += e.results[i][0].transcript;
+      d.live = t.trim();
+      paint();
+    };
+    r.onerror = e => {
+      const why = (e && e.error) || '';
+      d.err = why;
+      if (why === 'not-allowed' || why === 'service-not-allowed') toast(NATIVE ? 'Allow the microphone for Kura to dictate (Android Settings → Apps → Kura → Permissions).' : 'Allow the microphone for Kura to dictate (site settings in Chrome).');
+      else if (why === 'network') toast('Voice input needs an internet connection.');
+      else if (why === 'audio-capture') toast('The microphone is busy or missing.');
+    };
+    r.onend = () => {
+      if (d.r !== r) return;
+      d.r = null;
+      if (d.live) { d.done = join(d.done, d.live); d.live = ''; }
+      d.quick = Date.now() - d.t0 < 1500 ? d.quick + 1 : 0;
+      if (d.active && !fatal.includes(d.err) && d.quick < 4 && document.visibilityState === 'visible') { d.err = ''; setTimeout(one, 120); }
+      else finish();
+    };
+    d.r = r;
+    d.t0 = Date.now();
+    try { r.start(); } catch (e) { d.r = null; if (d.quick++ < 3) setTimeout(one, 400); else { finish(); toast("Couldn't start voice input."); } }
+  };
+  d.stop = () => {
+    if (!d.active) return;
+    d.active = false;
+    const r = d.r;
+    if (!r) { finish(); return; }
+    try { r.stop(); } catch (e) {}
+    clearTimeout(d.guard);
+    d.guard = setTimeout(() => { if (d.r === r) { d.r = null; if (d.live) { d.done = join(d.done, d.live); d.live = ''; } } finish(); }, 2500);
+  };
+  dict = d;
+  btn.classList.add('rec');
+  btn.setAttribute('aria-pressed', 'true');
+  holdWake(true);
+  toast('Recording… tap the mic again to stop');
+  one();
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') stopDictation(); });
+
+/* ---------- v22: Journal, Meetings and Timers (in place of the Lab section) ---------- */
+const MOODS = ['Rough', 'Meh', 'OK', 'Good', 'Great'];
+let jrT = null, mtT = null, meetVer = 0;
+function saveJournal(now) {
+  clearTimeout(jrT);
+  const go = () => (store.kvSet ? store.kvSet('journal', state.journal || {}).catch(onWriteError) : null);
+  if (now) return go();
+  jrT = setTimeout(go, 500);
+}
+const journal = () => state.journal || (state.journal = {});
+const jrDay = d => journal()[d] || null;
+function jrSet(d, p) { journal()[d] = { ...(journal()[d] || {}), ...p, updated: Date.now() }; saveJournal(); }
+const jrHas = d => { const x = jrDay(d); return !!x && !!(x.mood || ['wins', 'blockers', 'notes'].some(k => String(x[k] || '').trim())); };
+const meetData = () => state.meet || (state.meet = { series: [], agenda: [], notes: [] });
+function saveMeet(now) {
+  meetVer++;
+  clearTimeout(mtT);
+  const go = () => (store.kvSet ? store.kvSet('meetings', meetData()).catch(onWriteError) : null);
+  if (now) return go();
+  mtT = setTimeout(go, 400);
+}
+const seriesById = id => meetData().series.find(x => x.id === id) || null;
+const mnoteById = id => meetData().notes.find(x => x.id === id) || null;
+const agendaFor = sid => meetData().agenda.filter(a => !a.done && (a.series === sid || !a.series));
+const upcomingSeries = () => [...meetData().series].sort((a, b) => ((a.next || '9') < (b.next || '9') ? -1 : (a.next || '9') > (b.next || '9') ? 1 : 0));
+const nextSeries = () => upcomingSeries().find(x => x.next && x.next >= TODAY) || null;
+let raiseMemo = null, raiseKey = -1;
+function raisedIds() {
+  if (raiseKey !== meetVer || !raiseMemo) { raiseKey = meetVer; raiseMemo = new Set(meetData().agenda.filter(a => !a.done && a.item).map(a => a.item)); }
+  return raiseMemo;
+}
+function addMonth(ds) {
+  const d = parseDay(ds), y = d.getFullYear(), m = d.getMonth() + 1;
+  return dayStr(new Date(y, m, Math.min(d.getDate(), new Date(y, m + 1, 0).getDate())));
+}
+function stepSeries(sx, from) {
+  if (!sx.every) return null;
+  let d = sx.next || from;
+  for (let g = 0; g < 200 && d <= from; g++) d = sx.every === 'week' ? addDays(d, 7) : sx.every === 'fortnight' ? addDays(d, 14) : addMonth(d);
+  return d;
+}
+const EVERY = [['', 'Once'], ['week', 'Every week'], ['fortnight', 'Every 2 weeks'], ['month', 'Every month']];
+const everyLabel = e => (EVERY.find(x => x[0] === (e || '')) || EVERY[0])[1];
+const meetWhen = sx => (sx.next ? (sx.next === TODAY ? 'today' : sx.next < TODAY ? 'was ' + dayName(sx.next) : futureLabel(sx.next)) + (sx.time ? ' ' + sx.time : '') : 'no date set');
+const safeFile = t => String(t || '').replace(/[\\/:*?"<>|#^[\]]+/g, '-').replace(/\s+/g, ' ').trim().slice(0, 80) || 'Meeting';
+function obsFolder(k) { const cfg = state.obs || DEFAULT_OBS; return String(cfg[k] || DEFAULT_OBS[k]).replace(/^\/+|\/+$/g, ''); }
+function obsWrite(file, content, done) {
+  const cfg = state.obs;
+  if (!cfg || !cfg.vault) { toast('Connect your Obsidian vault in Settings first.'); openSettings('obsidian'); return; }
+  const enc = encodeURIComponent;
+  launchObsidian(`obsidian://new?vault=${enc(cfg.vault)}&file=${enc(file)}&content=${enc(content)}&overwrite=true&silent=true`, done);
+}
+async function copyText(text, what) {
+  try { await navigator.clipboard.writeText(text); toast(`${what} copied`); } catch (e) { toast("Couldn't copy. Long-press the text, Select all, then Copy."); }
+}
+
+// things to raise: from the pad (#raise), a task's long-press menu or its sheet, or typed in Meetings
+const RX_RAISE = /(^|\s)#(raise|agenda)(?=[\s,.;:!?]|$)/i;
+const hasRaiseTag = t => RX_RAISE.test(String(t || ''));
+function addAgenda(text, opts = {}) {
+  const t = String(text || '').replace(new RegExp(RX_RAISE.source, 'gi'), '$1').replace(/\s{2,}/g, ' ').trim();
+  if (!t) return null;
+  const a = { id: uid('a'), text: t.slice(0, 400), series: opts.series || null, item: opts.item || null, at: Date.now(), done: false };
+  meetData().agenda.push(a);
+  saveMeet();
+  return a;
+}
+function raiseWhere(sid) {
+  const sx = sid ? seriesById(sid) : nextSeries();
+  return sx ? `${sx.name}${sx.next ? ' · ' + meetWhen(sx) : ''}` : 'your next meeting';
+}
+async function raiseFromPad(raw) {
+  const lines = String(raw).replace(RX_RAISE, '$1').split('\n').map(l => l.replace(RX_BULLET, '').trim()).filter(Boolean);
+  const added = lines.map(l => addAgenda(l)).filter(Boolean);
+  if (!added.length) return;
+  els.input.value = '';
+  if (state.cap) closeCapture();
+  drawWhen();
+  play('done');
+  toast(`${added.length > 1 ? added.length + ' things' : 'Added'} to raise at ${raiseWhere(null)}`, { label: 'Undo', fn: () => { const ids = new Set(added.map(a => a.id)); meetData().agenda = meetData().agenda.filter(a => !ids.has(a.id)); saveMeet(); drawBanner(); } });
+  drawBanner();
+}
+function toggleRaise(it) {
+  const on = raisedIds().has(it.id);
+  if (on) { meetData().agenda = meetData().agenda.filter(a => a.done || a.item !== it.id); saveMeet(); toast('No longer on the agenda'); }
+  else { addAgenda(firstLine(rowText(it)), { item: it.id }); toast(`Will raise at ${raiseWhere(null)}`); }
+  render();
+}
+
+function journalMarkdown(d) {
+  const j = jrDay(d) || {};
+  const items = state.items.filter(i => !i.example);
+  const done = items.filter(i => i.done && i.doneAt && dayStr(new Date(i.doneAt)) === d).sort((a, b) => a.doneAt - b.doneAt);
+  const mins = (state.focusSessions || []).filter(f => f.d === d).reduce((a, f) => a + f.m, 0);
+  const next = addDays(d, 1);
+  const tom = items.filter(i => !i.done && i.today === next);
+  const notes = meetData().notes.filter(n => n.day === d);
+  const lines = v => String(v || '').split('\n').map(l => l.replace(/^\s*(?:[-*•]\s*)?/, '').trim()).filter(Boolean);
+  const L = ['---', 'type: journal', `date: ${d}`, j.mood ? `day: ${j.mood}` : null, 'tags: [kura/journal]', '---', '', `# ${longDay(d)}`, ''].filter(x => x !== null);
+  if (j.mood) L.push(`**Day:** ${j.mood}${mins ? ` · **Focus:** ${fmtMin(mins)}` : ''}`, '');
+  else if (mins) L.push(`**Focus:** ${fmtMin(mins)}`, '');
+  L.push('## Done', ...(done.length ? done.map(i => `- [x] ${firstLine(rowText(i))}${projOf(i) ? ' #project/' + projSlug(projOf(i).name) : ''}`) : ['- (nothing ticked off)']), '');
+  if (lines(j.wins).length) L.push('## Wins', ...lines(j.wins).map(x => '- ' + x), '');
+  if (lines(j.blockers).length) L.push('## Blockers', ...lines(j.blockers).map(x => '- ' + x), '');
+  if (String(j.notes || '').trim()) L.push('## Notes', String(j.notes).trim(), '');
+  if (notes.length) L.push('## Meetings', ...notes.map(n => `- [[${obsFolder('meetingsFolder')}/${n.day} ${safeFile(n.title)}|${mdSafe(n.title)}]]`), '');
+  if (tom.length) L.push(`## ${d === TODAY ? 'Tomorrow' : 'Next day'}`, ...tom.map(i => `- [ ] ${firstLine(rowText(i))} 📅 ${next}`), '');
+  return L.join('\n');
+}
+function journalText(d) {
+  return journalMarkdown(d).replace(/^---[\s\S]*?---\n\n/, '').replace(/^# /m, '').replace(/^## /gm, '\n').replace(/\*\*/g, '').replace(/\n{3,}/g, '\n\n').trim();
+}
+function meetingMarkdown(n) {
+  const sx = seriesById(n.series);
+  const L = ['---', 'type: meeting', `meeting: "${String(n.title).replace(/"/g, "'")}"`, `date: ${n.day}`, sx && sx.who ? `with: "${String(sx.who).replace(/"/g, "'")}"` : null, 'tags: [kura/meeting]', '---', '', `# ${n.title} · ${longDay(n.day)}`, ''].filter(x => x !== null);
+  if (n.agenda.length) L.push('## Agenda', ...n.agenda.map(a => `- [${a.on ? 'x' : ' '}] ${a.text}${a.on ? '' : ' (next time)'}`), '');
+  if (String(n.text || '').trim()) L.push('## Notes', String(n.text).trim(), '');
+  if (n.actions.length) L.push('## Actions', ...n.actions.map(a => { const it = a.task && byId(a.task); return `- [${it && it.done ? 'x' : ' '}] ${a.text}${it && it.today ? ' 📅 ' + it.today : ''}`; }), '');
+  return L.join('\n');
+}
+const meetingText = n => meetingMarkdown(n).replace(/^---[\s\S]*?---\n\n/, '').replace(/^# /m, '').replace(/^## /gm, '\n').replace(/\n{3,}/g, '\n\n').trim();
+async function taskFromAction(a, n) {
+  if (a.task && byId(a.task)) return a.task;
+  const x = capItem(a.text);
+  const data = capData({ ...x, userBucket: false }, Date.now());
+  data.bucket = 'make';
+  data.source = 'meeting';
+  const id = store.newId();
+  try { await store.set(id, data); } catch (e) { onWriteError(e); return null; }
+  a.task = id;
+  if (n) n.updated = Date.now();
+  saveMeet();
+  return id;
+}
+function startMeeting(sid) {
+  const sx = sid ? seriesById(sid) : null;
+  const n = { id: uid('m'), series: sx ? sx.id : null, title: sx ? sx.name : 'Meeting', day: TODAY, agenda: agendaFor(sx ? sx.id : null).map(a => ({ id: a.id, text: a.text, item: a.item || null, on: false })), text: '', actions: [], started: Date.now(), finished: 0, sentAt: 0 };
+  meetData().notes.unshift(n);
+  meetData().notes = meetData().notes.slice(0, 300);
+  saveMeet(true);
+  return n;
+}
+async function finishMeeting(n, makeTasks) {
+  const ag = meetData().agenda;
+  for (const row of n.agenda) {
+    const a = ag.find(x => x.id === row.id);
+    if (a) { if (row.on) { a.done = true; a.doneIn = n.id; a.doneAt = Date.now(); } }
+    else if (!row.on) ag.push({ id: row.id, text: row.text, series: n.series, item: row.item || null, at: Date.now(), done: false });
+    else ag.push({ id: row.id, text: row.text, series: n.series, item: row.item || null, at: Date.now(), done: true, doneIn: n.id, doneAt: Date.now() });
+  }
+  meetData().agenda = ag.filter(a => !a.done || Date.now() - (a.doneAt || 0) < 90 * 86400000);
+  let made = 0;
+  if (makeTasks) for (const a of n.actions) if (!a.task || !byId(a.task)) { if (await taskFromAction(a, n)) made++; }
+  const sx = seriesById(n.series);
+  if (sx) { sx.last = n.day; sx.next = sx.every ? stepSeries(sx, n.day) : (sx.next && sx.next <= n.day ? null : sx.next); }
+  n.finished = Date.now();
+  saveMeet(true);
+  render();
+  const carried = n.agenda.filter(a => !a.on).length;
+  toast(`Meeting saved${made ? ` · ${made} task${made === 1 ? '' : 's'} in MAKE` : ''}${carried ? ` · ${carried} carried to next time` : ''}`);
+}
+
+const DESK_TABS = [['journal', 'Journal'], ['meet', 'Meetings'], ['timers', 'Timers']];
+function openDesk(tab, extra = {}) {
+  const prev = state.sheet && state.sheet.kind === 'desk' ? state.sheet : null;
+  if (prev) { Object.assign(prev, { tab: tab || prev.tab }, extra); drawDesk(); return; }
+  state.sheet = { kind: 'desk', tab: tab || 'journal', day: TODAY, mview: 'list', series: null, note: null, edit: null, delArmed: null, timerPanel: true, tLabel: '', tMins: '', addTask: '', mkTasks: true, ...extra };
+  drawDesk();
+}
+function drawDesk() {
+  const s = state.sheet;
+  if (!s || s.kind !== 'desk') return;
+  const act = document.activeElement;
+  const key = act && els.sheet.contains(act) ? act.dataset.k : null;
+  const sel = key && typeof act.selectionStart === 'number' ? [act.selectionStart, act.selectionEnd] : null;
+  const viewKey = s.tab + ':' + (s.tab === 'journal' ? s.day : s.tab === 'meet' ? s.mview + ':' + (s.series || '') + ':' + (s.note || '') : '');
+  const prevBody = $('.sheet-body', els.sheet);
+  const scroll = prevBody && s.viewKey === viewKey ? prevBody.scrollTop : 0;
+  const nRun = runningTimers().length;
+  const tabs = h('div', { class: 'set-tabs', role: 'tablist', 'aria-label': 'Journal, meetings and timers' }, DESK_TABS.map(([k, label]) => h('button', {
+    type: 'button', role: 'tab', id: 'desk-tab-' + k, 'aria-selected': String(s.tab === k),
+    onclick: () => { if (s.tab !== k) { s.tab = k; if (k === 'meet') s.mview = 'list'; drawDesk(); } },
+  }, label, k === 'timers' && nRun ? h('i', { class: 'warn', text: '⏱' + nRun }) : k === 'meet' && meetData().series.some(x => x.next === TODAY) ? h('i', { class: 'warn', text: '•' }) : null)));
+  const [body, foot] = s.tab === 'journal' ? journalView(s) : s.tab === 'meet' ? meetView(s) : timersView(s);
+  body.classList.add('sheet-body');
+  body.setAttribute('role', 'tabpanel');
+  const j = jrDay(s.day);
+  const stamp = s.tab === 'journal' ? (j && j.sentAt ? 'in Obsidian ✓' : jrHas(s.day) ? 'written' : 'not written yet') : s.tab === 'meet' ? (nextSeries() ? 'next ' + meetWhen(nextSeries()) : `${meetData().series.length} set up`) : nRun ? `${nRun} running` : 'timers';
+  showSheet(h('div', { class: 'sheet lab desk', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Journal, meetings and timers' },
+    head(s.tab === 'journal' ? 'JOURNAL' : s.tab === 'meet' ? 'MEETINGS' : 'TIMERS', stamp, s.tab === 'journal' ? 'journal' : s.tab === 'meet' ? 'meetings' : 'timers'), tabs, body, foot));
+  body.scrollTop = scroll;
+  s.viewKey = viewKey;
+  if (key) {
+    const el = els.sheet.querySelector(`[data-k="${CSS.escape(key)}"]`);
+    if (el) { el.focus({ preventScroll: true }); if (sel && el.setSelectionRange) try { el.setSelectionRange(sel[0], sel[1]); } catch (e) {} }
+  }
+  const tb = document.getElementById('desk-tab-' + s.tab);
+  if (tb) tb.parentNode.scrollLeft = Math.max(0, tb.offsetLeft - 40);
+  rebindDictation(els.sheet);
+  drawTimerBits();
+}
+const deskArea = (k, label, value, ph, onInput, rows) => {
+  const a = h('textarea', { class: 'field-in jr-area', id: 'jr-' + k, 'data-k': k, 'aria-label': label, placeholder: ph, rows: String(rows || 3) });
+  a.value = value || '';
+  a.addEventListener('input', () => onInput(a.value));
+  return h('div', { class: 'stack' }, h('div', { class: 'row lab-lbl-row' }, h('span', { class: 'lbl', text: label }), h('span', { class: 'grow' }), micButton(() => a, { cls: 'icon-btn', keepFocus: true })), a);
+};
+const deskFoot = (onCopy, onShare, primary, primaryLabel, pid) => h('div', { class: 'sheet-foot lab-foot' },
+  h('button', { class: 'btn', type: 'button', id: 'desk-copy', onclick: onCopy }, 'Copy'),
+  h('button', { class: 'btn', type: 'button', id: 'desk-share', onclick: onShare }, 'Share'),
+  h('span', { class: 'grow' }),
+  h('button', { class: 'btn primary', type: 'button', id: pid || 'desk-obs', onclick: primary }, primaryLabel || 'Save to Obsidian'));
+
+/* the journal: one short page a day */
+function journalView(s) {
+  const d = s.day;
+  const j = jrDay(d) || {};
+  const items = state.items.filter(i => !i.example);
+  const done = items.filter(i => i.done && i.doneAt && dayStr(new Date(i.doneAt)) === d).sort((a, b) => a.doneAt - b.doneAt);
+  const focus = (state.focusSessions || []).filter(f => f.d === d).reduce((a, f) => a + f.m, 0);
+  const next = addDays(d, 1);
+  const tom = items.filter(i => !i.done && i.today === next).sort(todaySort);
+  const unplanned = d >= addDays(TODAY, -1) ? items.filter(i => !i.done && !i.today && i.bucket === 'make').sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)).slice(0, 6) : [];
+  const notes = meetData().notes.filter(n => n.day === d);
+  const back = () => openDesk('journal', { day: d });
+  const go = n => { s.day = addDays(s.day, n); drawDesk(); };
+  const mood = h('div', { class: 'mood', role: 'group', 'aria-label': 'How the day went' }, MOODS.map(m => h('button', {
+    type: 'button', 'data-m': m, 'aria-pressed': String(j.mood === m),
+    onclick: () => { jrSet(d, { mood: j.mood === m ? '' : m }); drawDesk(); if (typeof drawCal === 'function') drawCal(); },
+  }, m)));
+  const add = h('input', { class: 'field-in', type: 'text', id: 'jr-add', 'data-k': 'jr-add', enterkeyhint: 'done', autocomplete: 'off', placeholder: d === TODAY ? 'Add a task for tomorrow' : 'Add a task for the next day', 'aria-label': 'Add a task for the next day' });
+  add.value = s.addTask || '';
+  add.addEventListener('input', () => { s.addTask = add.value; });
+  const addIt = async () => {
+    const v = add.value.trim();
+    if (!v) { add.focus(); return; }
+    const data = capData({ ...capItem(v), today: next, bucket: 'make', userBucket: false }, Date.now());
+    try { await store.set(store.newId(), data); } catch (e) { onWriteError(e); return; }
+    s.addTask = '';
+    toast(`Planned ${futureLabel(next)}`);
+    drawDesk();
+    const again = document.getElementById('jr-add'); if (again) again.focus({ preventScroll: true });
+  };
+  add.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing && e.keyCode !== 229) { e.preventDefault(); addIt(); } });
+  const row = (it, ico) => h('div', { class: 'day-row' + (it.done ? ' done' : ''), 'data-id': it.id },
+    h('span', { class: 'day-ico', text: ico }),
+    h('button', { class: 'day-txt', type: 'button', onclick: () => openQuick(it.id, back) },
+      h('span', { text: firstLine(rowText(it)) }),
+      h('span', { class: 'meta' }, projOf(it) ? h('span', { class: 'tg', text: '#' + projOf(it).name }) : null)));
+  const body = h('div', {},
+    h('div', { class: 'lab-day' },
+      h('button', { class: 'btn', type: 'button', id: 'jr-prev', 'aria-label': 'Previous day', onclick: () => go(-1) }, '‹'),
+      h('b', { class: 'lab-date', text: (d === TODAY ? 'Today · ' : '') + longDay(d) }),
+      h('button', { class: 'btn', type: 'button', id: 'jr-next', 'aria-label': 'Next day', disabled: d >= TODAY, onclick: () => go(1) }, '›'),
+      h('span', { class: 'grow' }),
+      h('span', { class: 'lab-status ok', id: 'jr-status', text: j.sentAt ? `In Obsidian ✓ ${hhmm(j.sentAt)}` : jrHas(d) ? (state.obs ? 'Not in Obsidian yet' : 'Saved on this phone') : '' })),
+    h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'How did the day go?' }), mood),
+    h('div', { class: 'stack' }, h('span', { class: 'lbl', text: `Done · ${done.length}${focus ? ' · focus ' + fmtMin(focus) : ''}` }),
+      done.length ? h('div', { class: 'day-list', id: 'jr-done' }, done.map(it => row(it, '✓'))) : h('p', { class: 'muted', text: 'Nothing ticked off this day. Tasks you finish appear here by themselves.' })),
+    deskArea('wins', 'Wins', j.wins, 'What went well, one per line', v => jrSet(d, { wins: v })),
+    deskArea('blockers', 'Blockers', j.blockers, "What's stuck, or who you're waiting on", v => jrSet(d, { blockers: v })),
+    deskArea('notes', 'Notes', j.notes, 'Anything else about the day', v => jrSet(d, { notes: v }), 4),
+    notes.length ? h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'Meetings' }),
+      h('div', { class: 'day-lab' }, notes.map(n => h('button', { class: 'btn', type: 'button', onclick: () => openDesk('meet', { mview: 'run', note: n.id }) }, n.title)))) : null,
+    h('div', { class: 'stack' }, h('span', { class: 'lbl', text: `${d === TODAY ? 'Tomorrow' : 'Next day'} · ${tom.length}` }),
+      tom.length ? h('div', { class: 'day-list', id: 'jr-tom' }, tom.map(it => row(it, '○'))) : null,
+      d >= addDays(TODAY, -1) ? h('div', { class: 'row day-add-row' }, add, h('button', { class: 'btn', type: 'button', id: 'jr-add-btn', onclick: addIt }, 'Add')) : null,
+      unplanned.length ? h('div', { class: 'day-plan' }, unplanned.map(it => h('button', { class: 'plan-chip', type: 'button', 'data-id': it.id, onclick: async () => {
+        await patch(it.id, { today: next, done: false, doneAt: null, pending: false, gtaskGone: false });
+        toast(`Planned ${futureLabel(next)}: ${firstLine(rowText(it)).slice(0, 40)}`, { label: 'Undo', fn: () => patch(it.id, { today: null }) });
+        drawDesk();
+      } }, '+ ' + firstLine(rowText(it))))) : null),
+    h('p', { class: 'muted', text: `Saved on this phone as you type. Save to Obsidian writes it as ${obsFolder('journalFolder')}/${d}.md (sending again updates it).` }));
+  const foot = deskFoot(
+    () => copyText(journalText(d), 'Journal'),
+    () => shareOut(`Journal · ${longDay(d)}`, journalText(d)),
+    () => obsWrite(`${obsFolder('journalFolder')}/${d}`, journalMarkdown(d), () => { jrSet(d, { sentAt: Date.now() }); saveJournal(true); toast('Journal saved to Obsidian'); if (state.sheet === s) drawDesk(); if (typeof drawCal === 'function') drawCal(); }),
+    'Save to Obsidian', 'jr-obs');
+  return [body, foot];
+}
+
+/* meetings: collect what to raise, take notes, turn actions into tasks */
+function meetView(s) {
+  if (s.mview === 'run' && mnoteById(s.note)) return meetRunView(s, mnoteById(s.note));
+  if (s.mview === 'edit') return meetEditView(s);
+  if (s.mview === 'series' && seriesById(s.series)) return meetSeriesView(s, seriesById(s.series));
+  s.mview = 'list';
+  return meetListView(s);
+}
+function agendaAdder(s, sid) {
+  const inp = h('input', { class: 'field-in', type: 'text', id: 'ag-add', 'data-k': 'ag-add', enterkeyhint: 'done', autocomplete: 'off', placeholder: 'Something to raise', 'aria-label': 'Something to raise' });
+  const go = () => { if (addAgenda(inp.value, { series: sid })) { inp.value = ''; drawDesk(); render(); const n = document.getElementById('ag-add'); if (n) n.focus({ preventScroll: true }); } else inp.focus(); };
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing && e.keyCode !== 229) { e.preventDefault(); go(); } });
+  return h('div', { class: 'row day-add-row' }, inp, micButton(() => inp, { cls: 'icon-btn', keepFocus: true }), h('button', { class: 'btn', type: 'button', id: 'ag-add-btn', onclick: go }, 'Add'));
+}
+function agendaRows(list, s) {
+  return h('div', { class: 'day-list ag-list' }, list.map(a => h('div', { class: 'day-row ag-row', 'data-id': a.id },
+    h('span', { class: 'day-ico', text: '?' }),
+    h('span', { class: 'day-txt' }, h('span', { text: a.text }), h('span', { class: 'meta' },
+      a.item ? h('span', { class: 'tg', text: 'from a task' }) : null,
+      !a.series && meetData().series.length > 1 ? h('span', { class: 'tg', text: 'any meeting' }) : null,
+      h('span', { class: 'tg', text: 'added ' + dayName(dayStr(new Date(a.at))) }))),
+    h('button', { class: 'ghost', type: 'button', 'aria-label': 'Remove from the agenda', onclick: () => { meetData().agenda = meetData().agenda.filter(x => x.id !== a.id); saveMeet(); drawDesk(); render(); } }, icon('close')))));
+}
+function meetListView(s) {
+  const md = meetData();
+  const loose = md.agenda.filter(a => !a.done && !a.series);
+  const recent = md.notes.slice(0, 8);
+  const card = sx => {
+    const n = agendaFor(sx.id).length;
+    return h('button', { class: 'mt-card' + (sx.next === TODAY ? ' today' : ''), type: 'button', 'data-id': sx.id, onclick: () => { s.mview = 'series'; s.series = sx.id; drawDesk(); } },
+      h('b', { text: sx.name }),
+      h('span', { class: 'lbl', text: [meetWhen(sx), sx.who ? 'with ' + sx.who : '', everyLabel(sx.every).toLowerCase()].filter(Boolean).join(' · ') }),
+      h('span', { class: 'mt-n', text: n ? `${n} to raise` : 'nothing to raise yet' }));
+  };
+  const body = h('div', {},
+    md.series.length ? h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'Your meetings' }), h('div', { class: 'mt-cards' }, upcomingSeries().map(card)))
+      : h('p', { class: 'muted', text: 'Set up the meetings you have regularly, like your supervisor 1:1 or group meeting. During the week, collect what to raise (type #raise in the pad, or long-press a task → Raise). In the meeting, tick things off, take notes, and turn action items into tasks in one tap.' }),
+    h('div', { class: 'row' },
+      h('button', { class: 'btn primary', type: 'button', id: 'mt-new', onclick: () => { s.mview = 'edit'; s.edit = { id: null, name: '', who: '', every: 'week', next: TODAY, time: '' }; drawDesk(); } }, '+ New meeting'),
+      h('button', { class: 'btn', type: 'button', id: 'mt-oneoff', onclick: () => { const n = startMeeting(null); s.mview = 'run'; s.note = n.id; drawDesk(); } }, 'Start a one-off meeting')),
+    h('div', { class: 'stack' }, h('span', { class: 'lbl', text: `To raise at any meeting · ${loose.length}` }),
+      loose.length ? agendaRows(loose, s) : null,
+      agendaAdder(s, null)),
+    recent.length ? h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'Recent notes' }),
+      h('div', { class: 'day-list' }, recent.map(n => h('button', { class: 'day-row mt-note', type: 'button', 'data-id': n.id, onclick: () => { s.mview = 'run'; s.note = n.id; drawDesk(); } },
+        h('span', { class: 'day-ico', text: n.finished ? '✓' : '…' }),
+        h('span', { class: 'day-txt' }, h('span', { text: n.title }), h('span', { class: 'meta' }, h('span', { class: 'tg', text: shortDay(n.day) }), n.actions.length ? h('span', { class: 'tg', text: `${n.actions.length} action${n.actions.length === 1 ? '' : 's'}` }) : null, !n.finished ? h('span', { class: 'tg lab', text: 'IN PROGRESS' }) : null)))))) : null);
+  return [body, null];
+}
+function meetSeriesView(s, sx) {
+  const list = agendaFor(sx.id);
+  const past = meetData().notes.filter(n => n.series === sx.id).slice(0, 10);
+  const live = meetData().notes.find(n => n.series === sx.id && !n.finished && n.day === TODAY);
+  const body = h('div', {},
+    h('div', { class: 'row' }, h('button', { class: 'link-btn plain lab-back', type: 'button', onclick: () => { s.mview = 'list'; drawDesk(); } }, '‹ All meetings'), h('span', { class: 'grow' }),
+      h('button', { class: 'link-btn plain', type: 'button', id: 'mt-edit', onclick: () => { s.mview = 'edit'; s.edit = { ...sx }; drawDesk(); } }, 'Edit')),
+    h('div', { class: 'mt-head' }, h('b', { class: 'mt-title', text: sx.name }), h('span', { class: 'lbl', text: [meetWhen(sx), sx.who ? 'with ' + sx.who : '', everyLabel(sx.every).toLowerCase()].filter(Boolean).join(' · ') })),
+    h('button', { class: 'bench-btn primary mt-start', type: 'button', id: 'mt-start', onclick: () => { const n = live || startMeeting(sx.id); s.mview = 'run'; s.note = n.id; drawDesk(); } }, icon('plan', 2), live ? 'Back to the meeting' : 'Start the meeting'),
+    h('div', { class: 'stack' }, h('span', { class: 'lbl', text: `To raise · ${list.length}` }),
+      list.length ? agendaRows(list, s) : h('p', { class: 'muted', text: 'Nothing yet. Add things here, type #raise in the pad, or long-press a task → Raise.' }),
+      agendaAdder(s, sx.id)),
+    past.length ? h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'Past meetings' }),
+      h('div', { class: 'day-list' }, past.map(n => h('button', { class: 'day-row mt-note', type: 'button', onclick: () => { s.mview = 'run'; s.note = n.id; drawDesk(); } },
+        h('span', { class: 'day-ico', text: n.finished ? '✓' : '…' }),
+        h('span', { class: 'day-txt' }, h('span', { text: longDay(n.day) }), h('span', { class: 'meta' }, h('span', { class: 'tg', text: `${n.agenda.filter(a => a.on).length} discussed · ${n.actions.length} actions` }))))))) : null);
+  return [body, null];
+}
+function meetEditView(s) {
+  const e = s.edit || (s.edit = { id: null, name: '', who: '', every: 'week', next: TODAY, time: '' });
+  const inp = (k, label, ph, type) => {
+    const i = h('input', { class: 'field-in', type: type || 'text', id: 'mt-' + k, 'data-k': 'mt-' + k, placeholder: ph || '', 'aria-label': label, autocomplete: 'off' });
+    i.value = e[k] || '';
+    i.addEventListener('input', () => { e[k] = i.value; });
+    return h('div', { class: 'stack' }, h('span', { class: 'lbl', text: label }), i);
+  };
+  const every = h('select', { class: 'field-in', id: 'mt-every', 'aria-label': 'Repeats' }, EVERY.map(([v, l]) => h('option', { value: v, text: l })));
+  every.value = e.every || '';
+  every.addEventListener('change', () => { e.every = every.value; });
+  const armed = s.delArmed === 'series:' + e.id;
+  const save = () => {
+    const name = String(e.name || '').trim();
+    if (!name) { toast('Give the meeting a name'); const n = document.getElementById('mt-name'); if (n) n.focus(); return; }
+    const md = meetData();
+    const rec = { id: e.id || uid('s'), name: name.slice(0, 60), who: String(e.who || '').trim().slice(0, 60), every: e.every || '', next: e.next || null, time: String(e.time || '').trim().slice(0, 12) };
+    const i = md.series.findIndex(x => x.id === rec.id);
+    if (i >= 0) md.series[i] = { ...md.series[i], ...rec }; else md.series.push(rec);
+    for (const n of md.notes) if (n.series === rec.id && !n.finished) n.title = rec.name;
+    saveMeet(true);
+    s.mview = 'series'; s.series = rec.id; s.edit = null;
+    toast(i >= 0 ? 'Meeting updated' : 'Meeting added');
+    drawDesk();
+    if (typeof drawCal === 'function') drawCal();
+  };
+  const body = h('div', {},
+    h('button', { class: 'link-btn plain lab-back', type: 'button', onclick: () => { s.mview = e.id ? 'series' : 'list'; s.series = e.id; drawDesk(); } }, '‹ Back'),
+    inp('name', 'Name', 'e.g. Supervisor 1:1'),
+    inp('who', 'With (optional)', 'e.g. Alister'),
+    h('div', { class: 'row mt-when' },
+      h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'Next one' }), (() => { const i = h('input', { class: 'field-in', type: 'date', id: 'mt-next', 'aria-label': 'Next meeting date' }); i.value = e.next || ''; i.addEventListener('change', () => { e.next = i.value || null; }); return i; })()),
+      h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'Time (optional)' }), (() => { const i = h('input', { class: 'field-in', type: 'time', id: 'mt-time', 'aria-label': 'Time' }); i.value = e.time || ''; i.addEventListener('change', () => { e.time = i.value; }); return i; })()),
+      h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'Repeats' }), every)),
+    h('p', { class: 'muted', text: 'After each meeting Kura moves the date on by itself, and anything you didn\'t get to is carried to the next one.' }));
+  const foot = h('div', { class: 'sheet-foot' },
+    e.id ? h('button', { class: 'btn danger', type: 'button', id: 'mt-del', onclick: () => {
+      if (!armed) { s.delArmed = 'series:' + e.id; drawDesk(); return; }
+      const md = meetData();
+      md.series = md.series.filter(x => x.id !== e.id);
+      for (const a of md.agenda) if (a.series === e.id) a.series = null;
+      for (const n of md.notes) if (n.series === e.id) n.series = null;
+      saveMeet(true); s.mview = 'list'; s.edit = null; s.delArmed = null; toast('Meeting removed. Its notes are kept.'); drawDesk();
+    } }, armed ? 'Tap again to remove' : 'Remove') : null,
+    h('span', { class: 'grow' }),
+    h('button', { class: 'btn primary', type: 'button', id: 'mt-save', onclick: save }, 'Save'));
+  return [body, foot];
+}
+function meetRunView(s, n) {
+  const touch = () => { n.updated = Date.now(); saveMeet(); };
+  const title = h('input', { class: 'field-in mt-title-in', type: 'text', id: 'mt-note-title', 'data-k': 'mt-note-title', 'aria-label': 'Meeting title' });
+  title.value = n.title;
+  title.addEventListener('input', () => { n.title = title.value.trim() || n.title; touch(); });
+  const agRows = h('div', { class: 'day-list ag-list', id: 'mt-agenda' }, n.agenda.map(a => {
+    const cb = h('input', { type: 'checkbox', 'aria-label': 'Discussed: ' + a.text });
+    cb.checked = !!a.on;
+    cb.addEventListener('change', () => { a.on = cb.checked; touch(); lbl.classList.toggle('on', cb.checked); });
+    const lbl = h('label', { class: 'lab-pick ag-pick' + (a.on ? ' on' : '') }, cb, h('span', { class: 'lp-t', text: a.text }), h('button', { class: 'ghost', type: 'button', 'aria-label': 'Remove', onclick: ev => { ev.preventDefault(); n.agenda = n.agenda.filter(x => x !== a); touch(); drawDesk(); } }, icon('close')));
+    return lbl;
+  }));
+  const agIn = h('input', { class: 'field-in', type: 'text', id: 'mt-ag-in', 'data-k': 'mt-ag-in', enterkeyhint: 'done', autocomplete: 'off', placeholder: 'Add an agenda item', 'aria-label': 'Add an agenda item' });
+  const agAdd = () => { const v = agIn.value.trim(); if (!v) { agIn.focus(); return; } n.agenda.push({ id: uid('a'), text: v, item: null, on: false }); touch(); drawDesk(); const x = document.getElementById('mt-ag-in'); if (x) x.focus({ preventScroll: true }); };
+  agIn.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing && e.keyCode !== 229) { e.preventDefault(); agAdd(); } });
+  const acIn = h('input', { class: 'field-in', type: 'text', id: 'mt-ac-in', 'data-k': 'mt-ac-in', enterkeyhint: 'done', autocomplete: 'off', placeholder: 'Action, e.g. send draft to Pierre fri', 'aria-label': 'Add an action item' });
+  const acAdd = () => { const v = acIn.value.trim(); if (!v) { acIn.focus(); return; } n.actions.push({ id: uid('x'), text: v.slice(0, 300), task: null }); touch(); drawDesk(); const x = document.getElementById('mt-ac-in'); if (x) x.focus({ preventScroll: true }); };
+  acIn.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing && e.keyCode !== 229) { e.preventDefault(); acAdd(); } });
+  const acRows = n.actions.length ? h('div', { class: 'day-list', id: 'mt-actions' }, n.actions.map(a => {
+    const it = a.task && byId(a.task);
+    return h('div', { class: 'day-row' + (it && it.done ? ' done' : ''), 'data-id': a.id },
+      h('span', { class: 'day-ico', text: '→' }),
+      h('span', { class: 'day-txt' }, h('span', { text: a.text }), it ? h('span', { class: 'meta' }, h('span', { class: 'tg', text: it.done ? 'done' : it.today ? 'task · ' + whenLabel(it.today) : 'task in MAKE' })) : null),
+      it ? h('button', { class: 'btn', type: 'button', onclick: () => openQuick(it.id, () => openDesk('meet', { mview: 'run', note: n.id })) }, 'Task ✓')
+        : [h('button', { class: 'btn', type: 'button', 'data-act': 'task', onclick: async () => { if (await taskFromAction(a, n)) { toast('Added to MAKE'); drawDesk(); render(); } } }, '+ Task'),
+          h('button', { class: 'ghost', type: 'button', 'aria-label': 'Remove action', onclick: () => { n.actions = n.actions.filter(x => x !== a); touch(); drawDesk(); } }, icon('close'))]);
+  })) : null;
+  const open = !n.finished;
+  const mk = h('input', { type: 'checkbox', id: 'mt-mk' });
+  mk.checked = s.mkTasks !== false;
+  mk.addEventListener('change', () => { s.mkTasks = mk.checked; });
+  const body = h('div', {},
+    h('div', { class: 'row' }, h('button', { class: 'link-btn plain lab-back', type: 'button', onclick: () => { s.mview = n.series && seriesById(n.series) ? 'series' : 'list'; s.series = n.series; drawDesk(); } }, n.series && seriesById(n.series) ? '‹ ' + seriesById(n.series).name : '‹ All meetings'),
+      h('span', { class: 'grow' }), h('span', { class: 'lab-status' + (n.sentAt ? ' ok' : ''), id: 'mt-status', text: n.sentAt ? `In Obsidian ✓ ${hhmm(n.sentAt)}` : open ? 'In progress' : 'Finished' })),
+    h('div', { class: 'row' }, title, h('span', { class: 'lbl', text: longDay(n.day) })),
+    h('div', { class: 'stack' }, h('span', { class: 'lbl', text: `Agenda · tick what you covered · ${n.agenda.filter(a => a.on).length}/${n.agenda.length}` }),
+      n.agenda.length ? agRows : h('p', { class: 'muted', text: 'No agenda items. Add some below, or just take notes.' }),
+      h('div', { class: 'row day-add-row' }, agIn, h('button', { class: 'btn', type: 'button', id: 'mt-ag-btn', onclick: agAdd }, 'Add'))),
+    deskArea('mt-notes', 'Notes', n.text, 'What was said and decided. Tap the mic to dictate; it keeps listening until you tap it again.', v => { n.text = v; touch(); }, 7),
+    h('div', { class: 'stack' }, h('span', { class: 'lbl', text: `Actions · ${n.actions.length}` }), acRows,
+      h('div', { class: 'row day-add-row' }, acIn, micButton(() => acIn, { cls: 'icon-btn', keepFocus: true }), h('button', { class: 'btn', type: 'button', id: 'mt-ac-btn', onclick: acAdd }, 'Add'))),
+    open ? h('label', { class: 'keep', for: 'mt-mk' }, mk, 'When I finish, add the actions to MAKE as tasks (dates like "fri" plan them)') : null);
+  const foot = open
+    ? h('div', { class: 'sheet-foot' },
+      h('button', { class: 'btn danger', type: 'button', id: 'mt-discard', onclick: () => {
+        if (s.delArmed !== 'note:' + n.id) { s.delArmed = 'note:' + n.id; drawDesk(); return; }
+        meetData().notes = meetData().notes.filter(x => x.id !== n.id); saveMeet(true); s.delArmed = null; s.mview = n.series ? 'series' : 'list'; s.series = n.series; toast('Meeting discarded'); drawDesk();
+      } }, s.delArmed === 'note:' + n.id ? 'Tap again to discard' : 'Discard'),
+      h('span', { class: 'grow' }),
+      h('button', { class: 'btn primary', type: 'button', id: 'mt-finish', onclick: async () => { await finishMeeting(n, s.mkTasks !== false); drawDesk(); } }, 'Finish meeting'))
+    : deskFoot(
+      () => copyText(meetingText(n), 'Meeting notes'),
+      () => shareOut(`${n.title} · ${longDay(n.day)}`, meetingText(n)),
+      () => obsWrite(`${obsFolder('meetingsFolder')}/${n.day} ${safeFile(n.title)}`, meetingMarkdown(n), () => { n.sentAt = Date.now(); saveMeet(true); toast('Meeting notes saved to Obsidian'); if (state.sheet === s) drawDesk(); }),
+      'Save to Obsidian', 'mt-obs');
+  return [body, foot];
+}
+
+/* general timers (bench timers without the lab): alarms ring through Android in the app */
+function timersView(s) {
+  const timers = (state.timers || []).filter(t => !t.doneAt || !t.seen).sort((a, b) => (a.doneAt ? 1 : 0) - (b.doneAt ? 1 : 0) || a.ends - b.ends);
+  const tLabel = h('input', { class: 'field-in', type: 'text', id: 'timer-label', 'data-k': 'tlabel', maxlength: '60', placeholder: 'Label, e.g. laundry, tea, gel run', 'aria-label': 'Timer label' });
+  tLabel.value = s.tLabel || '';
+  tLabel.addEventListener('input', () => { s.tLabel = tLabel.value; });
+  const tMins = h('input', { class: 'field-in', type: 'number', id: 'timer-mins', 'data-k': 'tmins', min: '1', max: '1440', inputmode: 'numeric', placeholder: 'min', 'aria-label': 'Minutes' });
+  tMins.value = s.tMins || '';
+  tMins.addEventListener('input', () => { s.tMins = tMins.value; });
+  const go = m => { startTimer(s.tLabel || '', m, null); s.tLabel = ''; s.tMins = ''; drawDesk(); };
+  const rows = timers.length ? h('div', { class: 'stack' }, timers.map(t => h('div', { class: 'timer-row' + (t.doneAt ? ' done' : ''), 'data-id': t.id },
+    h('span', { class: 'tt', 'data-timer': t.id, text: t.doneAt ? 'DONE' : fmtClock(t.ends - Date.now()) }),
+    h('span', { class: 'tl' }, h('b', { text: t.label }), h('span', { class: 'lbl', text: t.doneAt ? `finished ${hhmm(t.doneAt)}` : `ends ${hhmm(t.ends)}` })),
+    t.doneAt ? h('button', { class: 'btn', type: 'button', onclick: () => { t.seen = true; saveTimers(); drawDesk(); } }, 'OK')
+      : [h('button', { class: 'btn', type: 'button', 'aria-label': 'Add one minute', onclick: () => { t.ends += 60000; t.dur += 60000; saveTimers(); drawTimerBits(); } }, '+1′'),
+        h('button', { class: 'btn', type: 'button', 'aria-label': 'Stop timer', onclick: () => { t.doneAt = Date.now(); t.seen = true; saveTimers(); runTimers(); drawDesk(); } }, 'Stop')]))) : h('p', { class: 'muted', text: 'No timers running.' });
+  const body = h('div', {},
+    rows,
+    h('div', { class: 'timer-panel stack', id: 'timer-panel' },
+      tLabel,
+      h('div', { class: 'timer-presets' }, [1, 3, 5, 10, 15, 20, 30, 45, 60, 90, 120].map(m => h('button', { type: 'button', 'data-m': String(m), onclick: () => go(m) }, m >= 60 ? `${m / 60 % 1 ? (m / 60).toFixed(1) : m / 60} h` : `${m}′`))),
+      h('div', { class: 'row' }, tMins, h('button', { class: 'btn primary', type: 'button', id: 'timer-go', onclick: () => { const m = Number(s.tMins); if (!(m > 0)) { tMins.focus(); return; } go(m); } }, 'Start timer'))),
+    h('p', { class: 'muted', text: NATIVE ? 'Timers ring through Android, even when Kura is closed. While one runs, a pill at the bottom of the home screen counts down.' : 'While a timer runs, a pill at the bottom of the home screen counts down. In the web version the alarm only sounds while Kura is open.' }));
+  return [body, null];
+}
+
+/* ---------- v22: the Android app updates itself from your Kura website ---------- */
+const upd = { busy: false, latest: '', html: null, err: '', checkedAt: 0 };
+const updCfg = () => ({ site: '', auto: true, ...(state.upd || {}) });
+async function saveUpd() { if (store.kvSet) await store.kvSet('updates', updCfg()).catch(() => {}); }
+const verNum = v => String(v || '').replace(/^v/i, '').split('.').map(x => parseInt(x, 10) || 0);
+function verCmp(a, b) { const x = verNum(a), y = verNum(b); for (let i = 0; i < Math.max(x.length, y.length); i++) { const d = (x[i] || 0) - (y[i] || 0); if (d) return d > 0 ? 1 : -1; } return 0; }
+function siteBase() {
+  let u = String(updCfg().site || '').trim();
+  if (!u) return '';
+  if (!/^https?:\/\//i.test(u)) u = 'https://' + u;
+  u = u.replace(/[?#].*$/, '').replace(/index\.html?$/i, '');
+  return u.endsWith('/') ? u : u + '/';
+}
+async function fetchText(url) {
+  try {
+    const r = await fetch(url, { cache: 'no-store' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return await r.text();
+  } catch (e) {
+    const H = Plug.CapacitorHttp;
+    if (!NATIVE || !H) throw e;
+    const r = await H.get({ url, responseType: 'text', headers: { 'Cache-Control': 'no-cache' } });
+    if (!r || r.status >= 400) throw new Error('HTTP ' + (r && r.status));
+    return typeof r.data === 'string' ? r.data : String(r.data || '');
+  }
+}
+async function checkUpdate(manual) {
+  const base = siteBase();
+  if (!NATIVE || upd.busy) return null;
+  if (!base) { if (manual) toast('Add your Kura website address first'); return null; }
+  upd.busy = true;
+  upd.err = '';
+  if (manual) drawAppTab();
+  try {
+    const html = await fetchText(base + 'index.html?check=' + Date.now());
+    const v = (/const APP_VERSION = '([^']+)'/.exec(html) || [])[1];
+    if (!v || html.length < 20000) throw new Error("that address doesn't serve Kura's index.html");
+    upd.latest = v;
+    upd.html = verCmp(v, APP_VERSION) > 0 ? html : null;
+    upd.checkedAt = Date.now();
+    try { localStorage.setItem('kura.updCheckedAt', String(upd.checkedAt)); } catch (e) {}
+    if (manual) toast(upd.html ? `Kura ${v} is ready to install` : `Kura is up to date (${APP_VERSION})`);
+    drawBanner();
+    return v;
+  } catch (e) {
+    upd.err = String((e && e.message) || e);
+    if (manual) toast("Couldn't check for updates: " + upd.err);
+    return null;
+  } finally { upd.busy = false; drawAppTab(); }
+}
+const APP_FILES = ['fonts/fonts.css', 'fonts/dm-mono-latin-300-normal.woff2', 'fonts/dm-mono-latin-400-normal.woff2', 'fonts/dm-mono-latin-500-normal.woff2',
+  'fonts/zen-kaku-gothic-new-latin-400-normal.woff2', 'fonts/zen-kaku-gothic-new-latin-500-normal.woff2', 'fonts/zen-kaku-gothic-new-latin-700-normal.woff2',
+  'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png'];
+async function installUpdate() {
+  const F = Plug.Filesystem, W = Plug.WebView;
+  if (!NATIVE || !upd.html || !F || !W || upd.busy) return;
+  const v = upd.latest;
+  upd.busy = true;
+  drawAppTab();
+  toast(`Installing Kura ${v}…`);
+  try {
+    await nativeAutosave(true);   // a fresh saved copy first, just in case
+    const dir = `web/${v.replace(/[^\w.-]/g, '_')}-${Date.now().toString(36)}`;
+    let html = upd.html
+      .replace(/[ \t]*<link rel="preconnect" href="https:\/\/fonts\.(googleapis|gstatic)\.com"[^>]*>\r?\n?/g, '')
+      .replace(/<link rel="stylesheet" href="https:\/\/fonts\.googleapis\.com\/[^"]*">/, '<link rel="stylesheet" href="fonts/fonts.css">');
+    await F.writeFile({ path: dir + '/index.html', data: html, directory: 'DATA', encoding: 'utf8', recursive: true });
+    // fonts and icons come along from the version that's running now
+    for (const f of APP_FILES) {
+      try {
+        const r = await fetch('/' + f);
+        if (!r.ok) continue;
+        await F.writeFile({ path: dir + '/' + f, data: await blobToB64(await r.blob()), directory: 'DATA', recursive: true });
+      } catch (e) {}
+    }
+    const { uri } = await F.getUri({ path: dir, directory: 'DATA' });
+    const path = decodeURIComponent(String(uri).replace(/^file:\/\//, ''));
+    localStorage.setItem('kura.updPending', JSON.stringify({ v, dir, from: APP_VERSION, at: Date.now() }));
+    await W.setServerBasePath({ path });   // Kura restarts into the new version; it keeps it only if it starts properly
+  } catch (e) {
+    upd.busy = false;
+    toast("Couldn't install the update: " + String((e && e.message) || e));
+    drawAppTab();
+  }
+}
+async function confirmUpdate() {
+  if (!NATIVE) return;
+  let p = null;
+  try { p = JSON.parse(localStorage.getItem('kura.updPending') || 'null'); } catch (e) {}
+  if (!p) return;
+  try { localStorage.removeItem('kura.updPending'); } catch (e) {}
+  if (p.v !== APP_VERSION) {
+    // the new version didn't start properly, so Android reopened the one before it
+    try { localStorage.setItem('kura.updSkip', p.v); } catch (e) {}
+    setTimeout(() => toast(`The update to Kura ${p.v} didn't start properly, so Kura stayed on ${APP_VERSION}. Try again from Settings → App.`), 1500);
+    return;
+  }
+  try { await Plug.WebView.persistServerBasePath(); } catch (e) {}
+  // tidy away older downloaded versions
+  try {
+    const F = Plug.Filesystem;
+    const list = await F.readdir({ path: 'web', directory: 'DATA' });
+    for (const f of list.files || []) {
+      const name = typeof f === 'string' ? f : f.name;
+      if (name && name !== p.dir.split('/').pop()) await F.rmdir({ path: 'web/' + name, directory: 'DATA', recursive: true }).catch(() => {});
+    }
+  } catch (e) {}
+}
+async function useBuiltIn() {
+  const W = Plug.WebView;
+  if (!W) return;
+  try { await W.setServerAssetPath({ path: 'public' }); await W.persistServerBasePath(); } catch (e) { toast("Couldn't switch: " + String((e && e.message) || e)); }
+}
+let runningFrom = '';
+async function detectRunningFrom() {
+  if (!NATIVE || !Plug.WebView) return;
+  try { const r = await Plug.WebView.getServerBasePath(); runningFrom = /\/files\/web\//.test(String((r && r.path) || '')) ? 'update' : 'built-in'; } catch (e) {}
+}
+function drawAppTab() { if (state.sheet && state.sheet.kind === 'settings' && state.sheet.tab === 'app') drawSettings(); }
+function appSection() {
+  const cfg = updCfg();
+  const site = h('input', { class: 'field-in', type: 'url', id: 'upd-site', 'data-k': 'upd-site', inputmode: 'url', autocomplete: 'off', placeholder: 'https://yourname.github.io/kura/', 'aria-label': 'Your Kura website address' });
+  site.value = cfg.site || '';
+  const saveSite = async () => { state.upd = { ...updCfg(), site: site.value.trim() }; await saveUpd(); };
+  site.addEventListener('change', saveSite);
+  const auto = h('input', { type: 'checkbox', id: 'upd-auto' });
+  auto.checked = cfg.auto !== false;
+  auto.addEventListener('change', async () => { state.upd = { ...updCfg(), auto: auto.checked }; await saveUpd(); });
+  const status = upd.busy ? 'Working…' : upd.err ? `Last check failed: ${upd.err}` : upd.html ? `Kura ${upd.latest} is ready to install.` : upd.latest ? `Up to date: your website has ${upd.latest}.` : 'Not checked yet.';
+  return [
+    h('span', { class: 'lbl', text: 'This app' }),
+    h('p', { class: 'muted', id: 'upd-ver', text: `Kura ${APP_VERSION}${runningFrom === 'update' ? ', installed as an update' : runningFrom === 'built-in' ? ', the version built into the app' : ''}.` }),
+    h('hr', { class: 'rule' }),
+    h('span', { class: 'lbl', text: 'Updates' }),
+    h('p', { class: 'muted', text: 'Kura updates itself from your Kura website: when you upload a new kura-app.zip there as usual, the app offers the new version and installs it in a few seconds. Your notes stay put. You only need a new APK when the Android side changes, and you\'ll be told when.' }),
+    h('div', { class: 'row' }, site, h('button', { class: 'btn', type: 'button', id: 'upd-save', onclick: async () => { await saveSite(); await checkUpdate(true); } }, 'Save and check')),
+    h('p', { class: 'muted', text: 'The address you open Kura at in Chrome, like https://yourname.github.io/kura/' }),
+    h('label', { class: 'keep', for: 'upd-auto' }, auto, 'Check when Kura opens (at most every few hours)'),
+    h('p', { class: 'muted ok', id: 'upd-status', text: status }),
+    h('div', { class: 'row' },
+      h('button', { class: 'btn', type: 'button', id: 'upd-check', disabled: upd.busy, onclick: () => checkUpdate(true) }, 'Check now'),
+      upd.html ? h('button', { class: 'btn primary', type: 'button', id: 'upd-install', disabled: upd.busy, onclick: installUpdate }, `Install ${upd.latest}`) : null),
+    runningFrom === 'update' ? h('div', { class: 'stack' },
+      h('hr', { class: 'rule' }),
+      h('p', { class: 'muted', text: 'If an update misbehaves, go back to the version that came with the app. Your notes are not affected.' }),
+      h('div', { class: 'row' }, h('button', { class: 'btn', type: 'button', id: 'upd-builtin', onclick: useBuiltIn }, 'Use the built-in version'))) : null,
+  ];
+}
+function updBoot() {
+  if (!NATIVE) return;
+  confirmUpdate();
+  detectRunningFrom();
+  let last = 0;
+  try { last = Number(localStorage.getItem('kura.updCheckedAt')) || 0; } catch (e) {}
+  const cfg = updCfg();
+  if (cfg.site && cfg.auto !== false && Date.now() - last > 4 * 3600000) setTimeout(() => checkUpdate(false), 8000);
+}
+
+/* ---------- v22: banner messages for meetings, the journal and updates ---------- */
+function v22Msgs() {
+  const out = [];
+  const skip = (k, v) => { try { return localStorage.getItem(k) === v; } catch (e) { return false; } };
+  const later = (k, v) => () => { try { localStorage.setItem(k, v); } catch (e) {} };
+  if (NATIVE && upd.html && !skip('kura.updSkip', upd.latest) && !skip('kura.updLater', upd.latest)) {
+    out.push({ id: 'upd', text: `Kura ${upd.latest} is ready. Install it now? It takes a few seconds and your notes stay.`, act: ['Update', installUpdate, 'banner-update'], later: later('kura.updLater', upd.latest) });
+  }
+  const today = meetData().series.filter(x => x.next === TODAY && !meetData().notes.some(n => n.series === x.id && n.day === TODAY && n.finished));
+  if (today.length && !skip('kura.meetSeen', TODAY)) {
+    const sx = today[0], n = agendaFor(sx.id).length;
+    out.push({ id: 'meet', text: `${sx.name} today${sx.time ? ' at ' + sx.time : ''} · ${n ? n + ' thing' + (n === 1 ? '' : 's') + ' to raise' : 'nothing on the agenda yet'}.`, act: ['Open', () => openDesk('meet', { mview: 'series', series: sx.id }), 'banner-meet'], later: later('kura.meetSeen', TODAY) });
+  }
+  if (new Date().getHours() >= 18 && !jrHas(TODAY) && state.items.some(i => !i.example) && !skip('kura.jrNudge', TODAY)) {
+    out.push({ id: 'journal', text: "Write today's journal? Two minutes: how it went, wins, blockers, tomorrow.", act: ['Write it', () => openDesk('journal'), 'banner-journal'], later: later('kura.jrNudge', TODAY) });
+  }
+  if (NATIVE && !updCfg().site && !skip('kura.updAsk', '1')) {
+    out.push({ id: 'updset', text: 'Let the app update itself: add your Kura website address once.', act: ['Set up', () => openSettings('app')], later: later('kura.updAsk', '1') });
+  }
+  return out;
 }
 
 // v14 wiring
@@ -8868,8 +9679,7 @@ function drawSettings() {
       conn('AI', !!state.sample, !!(state.sample && state.aiErr), state.sample ? `${providerName(state.api && state.api.provider)} · ${state.aiErr ? 'has a problem' : 'ready'}` : 'Optional · free Gemini key', 'ai'),
       conn('Obsidian', !!state.obs, false, state.obs ? `Vault "${state.obs.vault}"` : 'Optional · not connected', 'obsidian'),
       conn('Google Tasks', !!state.gt, !!gErr, state.gt ? (gErr ? 'Sync problem' : `List "${state.gt.list || 'Kura'}"`) : 'Optional · not connected', 'tasks'),
-      h('button', { class: 'set-conn', type: 'button', id: 'set-conn-lab', onclick: () => openLab('setup') },
-        h('span', { class: 'dot' + (labInbox() ? ' on' : ''), 'aria-hidden': 'true' }), h('b', { text: 'LabArchives' }), h('span', { class: 'muted', text: labInbox() ? 'Inbox ' + labInbox() : 'Optional · add your Inbox address' }), h('span', { class: 'arr', 'aria-hidden': 'true', text: '›' }))),
+    ),
     h('hr', { class: 'rule' }),
     h('span', { class: 'lbl', text: 'Smart capture' }),
     capChk('cap-preview', 'preview', 'Preview before saving (with AUTO)'),
@@ -8940,7 +9750,7 @@ function drawSettings() {
         h('button', { class: 'btn', type: 'button', onclick: () => { s.confirmImport = null; drawSettings(); } }, 'Cancel'))) : null,
     s.importMsg ? h('p', { class: 'muted ok', text: s.importMsg }) : null,
   ];
-  const content = { basics, ai: aiSection, obsidian: obsSection, tasks: gtSection, look: lookSection, backup: backupSection }[s.tab] || basics;
+  const content = { basics, ai: aiSection, obsidian: obsSection, tasks: gtSection, look: lookSection, backup: backupSection, app: s.tab === 'app' && NATIVE ? appSection() : [] }[s.tab] || basics;
   const flat = content.flat(4).filter(Boolean);
   while (flat.length && flat[flat.length - 1].tagName === 'HR') flat.pop();
   const tabs = h('div', { class: 'set-tabs', role: 'tablist', 'aria-label': 'Settings sections' }, SET_TABS.map(([k, label]) => h('button', {
@@ -9029,6 +9839,16 @@ async function doImport(data) {
     state.exps = [...mine.values()].sort((a, b) => (b.created || 0) - (a.created || 0));
     saveExps(true);
   }
+  if (data.journal && typeof data.journal === 'object') { state.journal = { ...data.journal, ...(state.journal || {}) }; await saveJournal(true); }
+  if (data.meetings && typeof data.meetings === 'object' && Array.isArray(data.meetings.series)) {
+    const md = meetData();
+    for (const k of ['series', 'agenda', 'notes']) {
+      const have = new Set(md[k].map(x => x.id));
+      for (const x of data.meetings[k] || []) if (x && typeof x.id === 'string' && !have.has(x.id)) md[k].push(x);
+    }
+    md.notes.sort((a, b) => (b.started || 0) - (a.started || 0));
+    await saveMeet(true);
+  }
   if (data.labLogs && typeof data.labLogs === 'object') { state.labLogs = { ...data.labLogs, ...(state.labLogs || {}) }; await saveLabLogs(); }
   if (data.labarchives && data.labarchives.inbox && !labInbox()) { state.lab = { ...labCfg(), ...data.labarchives }; await saveLab(); }
   if (Array.isArray(data.projects)) {
@@ -9086,6 +9906,10 @@ async function boot() {
   state.labLogs = store.kvGet ? ((await store.kvGet('labLogs').catch(() => null)) || {}) : {};
   state.labDrafts = store.kvGet ? ((await store.kvGet('labDrafts').catch(() => null)) || {}) : {};
   state.labPicks = store.kvGet ? ((await store.kvGet('labPicks').catch(() => null)) || {}) : {};
+  state.journal = store.kvGet ? ((await store.kvGet('journal').catch(() => null)) || {}) : {};
+  state.meet = store.kvGet ? ((await store.kvGet('meetings').catch(() => null)) || null) : null;
+  if (!state.meet || !Array.isArray(state.meet.series)) state.meet = { series: [], agenda: [], notes: [] };
+  state.upd = store.kvGet ? ((await store.kvGet('updates').catch(() => null)) || {}) : {};
   try { state.timers = JSON.parse(localStorage.getItem('kura.timers') || '[]') || []; } catch (e) { state.timers = []; }
   runTimers();
   syncCapUI();
@@ -9136,8 +9960,11 @@ async function boot() {
   await loadApi();
   state.petEpoch = store.kvGet ? ((await store.kvGet('petEpoch').catch(() => '')) || '') : '';
   if (!state.petEpoch) { state.petEpoch = TODAY; if (store.kvSet) store.kvSet('petEpoch', TODAY).catch(() => {}); }
+  state.petEpoch2 = store.kvGet ? ((await store.kvGet('petEpoch2').catch(() => '')) || '') : '';
+  if (!state.petEpoch2) { state.petEpoch2 = TODAY; if (store.kvSet) store.kvSet('petEpoch2', TODAY).catch(() => {}); }
   if (kvRestore) kvRestore();
   nativeBoot();
+  updBoot();
   state.booting = false;
   render();
   scheduleGtSync(1500);
