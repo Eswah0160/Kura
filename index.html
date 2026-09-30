@@ -833,6 +833,80 @@ body.timing.focusing .toast { top: calc(var(--vvt, 0px) + var(--vvh, 100vh) - en
 .pick-list.off .lp-t { color: var(--ink-2); }
 @media (max-width: 719px) { .lab-pick { grid-template-columns: 18px minmax(0, 1fr); } .lab-pick .lp-m { grid-column: 2; } }
 .item-lab { margin-top: 2px; }
+/* v20: calendar, day sheet, quick actions, faster lists, rarer critters */
+.dayseg-slot { margin-left: auto; display: flex; }
+.dayseg { display: inline-flex; border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; flex: none; }
+.dayseg button { border: 0; background: none; padding: 3px 8px; font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2); }
+.dayseg button + button { border-left: 1px solid var(--rule); }
+.dayseg button[aria-pressed="true"] { background: var(--ink); color: var(--sheet); }
+.cal { grid-area: cal; overflow: hidden; }
+.cal-head { gap: 6px; }
+.cal-head .name { white-space: nowrap; }
+.cal-head .dayseg { margin-left: 4px; }
+.cal-nav { font-size: 18px; height: 26px; min-width: 28px; padding: 0 4px; color: var(--ink); letter-spacing: 0; }
+.cal-wd { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); padding: 5px 8px 0; font-family: var(--f-mono); font-size: 9.5px; color: var(--ink-2); text-align: center; letter-spacing: 0.08em; flex: none; }
+.cal-grid { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); grid-auto-rows: minmax(0, 1fr); gap: 2px; padding: 3px 8px 8px; }
+.cal-day { min-width: 0; min-height: 0; border: 0; border-radius: 6px; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 2px; padding: 3px 0 2px; color: var(--ink); font-family: var(--f-mono); overflow: hidden; }
+.cal-day:hover, .cal-day:focus-visible { background: var(--paper); }
+.cal-day.we { background: color-mix(in srgb, var(--paper) 45%, transparent); }
+.cal-n { font-size: 12px; line-height: 16px; min-width: 18px; text-align: center; font-variant-numeric: tabular-nums; border-radius: 999px; }
+.cal-day.past .cal-n { color: var(--ink-2); }
+.cal-day.other { opacity: 0.4; }
+.cal-day.is-today .cal-n { background: var(--red); color: var(--sheet); padding: 0 4px; }
+.cal-m { display: flex; gap: 2px; align-items: center; justify-content: center; min-height: 12px; }
+.m-open { font-size: 9px; font-weight: 600; color: var(--sheet); background: var(--ink); border-radius: 999px; padding: 0 4px; line-height: 12px; }
+.m-open.late { background: var(--red); }
+.m-rep { width: 6px; height: 6px; border-radius: 50%; border: 1px solid var(--ink-2); }
+.m-done { font-style: normal; font-size: 9px; line-height: 12px; color: var(--ink-2); }
+.m-lab { width: 6px; height: 6px; border: 1px solid var(--ink); }
+.m-lab.on { background: var(--ink); }
+@media (min-width: 720px) {
+  .work { grid-template-areas: "pad cal today" "drop stock make"; }
+  .app.capturing .work { grid-template-areas: "pad pad today" "drop stock make"; }
+  .app.capturing .cal { display: none; }
+  #pad-date { display: none; }
+  .dayseg button[data-v="month"] { display: none; }
+}
+@media (max-width: 719px) {
+  .work > .cal { grid-area: pane; display: none; }
+  .app[data-tab="today"][data-dayview="month"] .work > .cal { display: flex; overflow: auto; }
+  .app[data-tab="today"][data-dayview="month"] .work > .today { display: none; }
+  .cal-grid { grid-auto-rows: 54px; flex: none; }
+  .cal-n { font-size: 14px; line-height: 20px; min-width: 22px; }
+  .m-open { font-size: 10px; line-height: 14px; }
+}
+.lane-more { list-style: none; padding: 12px 0; text-align: center; }
+.list > .li { -webkit-touch-callout: none; }
+.list > .li .li-body { -webkit-user-select: none; user-select: none; }
+.day-nav { flex-wrap: nowrap; }
+.day-add-row { flex-wrap: nowrap; }
+.day-add-row .field-in { flex: 1; min-width: 0; width: auto; }
+.day-nav .btn { padding: 6px 13px; font-size: 16px; letter-spacing: 0; }
+.day-title { font-size: 15px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; text-align: center; }
+.day-list { display: flex; flex-direction: column; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
+.day-row { display: flex; align-items: center; gap: 10px; padding: 5px 10px; border-bottom: 1px solid var(--rule); background: var(--sheet); }
+.day-row:last-child { border-bottom: 0; }
+.day-row .check { flex: none; }
+.day-row.done .day-txt > span:first-child { text-decoration: line-through; color: var(--ink-2); }
+.day-ico { width: 22px; text-align: center; color: var(--ink-2); flex: none; font-family: var(--f-mono); }
+.day-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; border: 0; background: none; padding: 5px 0; text-align: left; font-size: 14.5px; color: var(--ink); }
+.day-txt > span:first-child { overflow-wrap: anywhere; }
+.day-txt .meta { display: flex; gap: 6px; flex-wrap: wrap; font-family: var(--f-mono); font-size: 10.5px; color: var(--ink-2); }
+.day-lab, .day-plan { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.plan-chip { border: 1px dashed var(--ink-2); border-radius: 999px; background: transparent; padding: 7px 12px; font-size: 13.5px; color: var(--ink); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.q-title { margin: 0; font-size: 16px; font-weight: 600; line-height: 1.4; white-space: pre-wrap; max-height: 5.6em; overflow: hidden; }
+.q-grid { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); }
+.q-tile { position: relative; min-height: 64px; }
+.q-tile.on { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.pet.ultra::before, .pet.legendary::before { content: "✦"; position: absolute; top: -8px; left: -7px; font-size: 9px; line-height: 1; color: var(--lcd-ink, var(--ink)); animation: twinkle 1.4s ease-in-out infinite; }
+.pet.legendary svg { filter: drop-shadow(0 0 2px var(--lcd-ink, var(--ink))); }
+.pet.legendary::before { font-size: 11px; }
+@keyframes twinkle { 0%, 100% { opacity: 0.25; transform: scale(0.7); } 50% { opacity: 1; transform: scale(1.15); } }
+.critter.r-ultra.met { border-style: double; border-width: 3px; }
+.critter.r-legendary.met { border: 2px solid var(--ink); box-shadow: inset 0 0 0 2px var(--sheet), inset 0 0 0 3px var(--ink); }
+.critter.r-ultra.met b::after, .critter.r-legendary.met b::after { content: " ✦"; }
+.critter.r-legendary.met .critter-art svg { filter: drop-shadow(0 0 2px var(--lcd-ink, var(--ink))); }
+@media (prefers-reduced-motion: reduce) { .pet.ultra::before, .pet.legendary::before { animation: none; opacity: 1; } }
 /* short screens: keyboard up on the Fold leaves roughly a 4:3 area */
 .short .field, .short .wordmark, .short .tags-lbl { display: none; }
 .short .widget { padding-block: 4px; }
@@ -988,6 +1062,8 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
       </div>
     </form>
 
+    <section class="cal card-box" id="cal" aria-label="Calendar"></section>
+
     <nav class="tabs" role="tablist" aria-label="Sections">
       <button class="tab" type="button" role="tab" data-t="today" aria-selected="true">TODAY <small id="n-today"></small></button>
       <button class="tab" type="button" role="tab" data-t="drop" aria-selected="false">DROP <small id="n-drop"></small></button>
@@ -1000,7 +1076,7 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
         <svg class="mini-inv" id="today-inv" viewBox="0 0 11 8" shape-rendering="crispEdges" aria-hidden="true"></svg>
         <span class="name" id="today-h">TODAY</span>
         <span class="lbl" id="today-count"></span>
-        <button class="link-btn plain day-toggle" id="day-toggle" type="button" aria-pressed="false">WEEK →</button>
+        <div class="dayseg-slot" id="dayseg"></div>
       </div>
       <ul class="list" id="today-list"></ul>
       <p class="empty" id="today-empty"></p>
@@ -1034,7 +1110,7 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
 (() => {
 'use strict';
 
-const APP_VERSION = 'v19.1';
+const APP_VERSION = 'v20';
 /* ---------- helpers ---------- */
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -1102,6 +1178,17 @@ const dayStr = (d = new Date()) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}
 const parseDay = s => { const [y, m, d] = String(s).split('-').map(Number); return new Date(y, (m || 1) - 1, d || 1); };
 const startOfDay = ms => { const d = new Date(ms); d.setHours(0, 0, 0, 0); return d.getTime(); };
 let TODAY = dayStr();
+// Reuse one Intl formatter per option set: toLocaleDateString builds a new one on every call, which was the slowest part of drawing lists
+(() => {
+  const orig = Date.prototype.toLocaleDateString, cache = new Map();
+  Date.prototype.toLocaleDateString = function (loc, opts) {
+    if (loc !== 'en-AU') return orig.call(this, loc, opts);
+    const k = opts ? JSON.stringify(opts) : '';
+    let f = cache.get(k);
+    if (!f) { f = new Intl.DateTimeFormat('en-AU', opts); cache.set(k, f); }
+    return f.format(this);
+  };
+})();
 
 function rel(ms) {
   if (!ms) return '';
@@ -1269,6 +1356,14 @@ async function localStore() {
     kvGet(k) { return idbReq(db, 'kv', 'readonly', st => st.get(k)); },
     kvSet(k, v) { return idbReq(db, 'kv', 'readwrite', st => st.put(v, k)); },
     kvDel(k) { return idbReq(db, 'kv', 'readwrite', st => st.delete(k)); },
+    kvAll() {
+      return new Promise((res, rej) => {
+        const tx = db.transaction('kv', 'readonly'), st = tx.objectStore('kv');
+        const rk = st.getAllKeys(), rv = st.getAll();
+        tx.oncomplete = () => { const m = new Map(); rk.result.forEach((k, i) => m.set(k, rv.result[i])); res(m); };
+        tx.onerror = () => rej(tx.error);
+      });
+    },
     async listNotes() { return (await idbReq(db, 'notes', 'readonly', st => st.getAll())) || []; },
     putNote(n) { return idbReq(db, 'notes', 'readwrite', st => st.put(n)); },
     deleteNote(id) { return idbReq(db, 'notes', 'readwrite', st => st.delete(id)); },
@@ -1687,6 +1782,8 @@ function laneRow(it) {
 }
 
 function render() {
+  if (state.booting) return;
+  symKey = state.symbols.map(x => x.id + x.mark + x.name).join('|');
   const q = state.q.trim().toLowerCase();
   const match = it => (!q || String(it.text || '').toLowerCase().includes(q) || String(it.page || '').toLowerCase().includes(q))
     && (!state.tag || knownTags(it).includes(state.tag));
@@ -1697,36 +1794,22 @@ function render() {
   const t = items.filter(inToday).sort(todaySort);
   const left = t.filter(i => !i.done).length;
   els.todayCount.textContent = t.length ? `/ ${pad2(left)} left` : '';
-  els.todayList.replaceChildren(...t.map(it => {
-    const carried = !it.done && it.today < TODAY;
-    return h('li', { class: 'li' + (it.done ? ' done' : ''), 'data-id': it.id },
-      h('button', {
-        class: 'check', type: 'button', role: 'checkbox', 'aria-checked': String(!!it.done),
-        'aria-label': it.done ? 'Mark not done' : 'Mark done', onclick: () => toggleDone(it.id),
-      }, icon('check', 2.6)),
-      h('button', { class: 'li-body', type: 'button', onclick: () => openItem(it.id) },
-        h('span', { class: 'main' },
-          h('span', { class: 'txt', text: rowText(it) }),
-          (carried || knownTags(it).length || it.example || it.repeat || projOf(it) || isLab(it) || stepsOf(it.text).length) ? h('span', { class: 'meta' },
-            carried ? h('span', { class: 'carry', text: 'since ' + dayName(it.today) }) : null,
-            it.repeat ? h('span', { class: 'tg', text: '↻ ' + repeatLabel(it.repeat) }) : null,
-            projOf(it) ? h('span', { class: 'tg', text: '#' + projOf(it).name }) : null,
-            labTag(it),
-            stepMeta(it),
-            tagMeta(it),
-            it.example ? h('span', { class: 'ex', text: 'Example' }) : null) : null)));
-  }));
+  setKids(els.todayList, t.map(it => cachedRow('t:' + it.id, rowSig(it, 't'), () => todayRow(it))));
   els.todayEmpty.hidden = t.length > 0;
   els.todayEmpty.textContent = filtering ? 'No matches.' : 'Nothing planned yet. Tap + TODAY on a MAKE note, or pick Today before you save.';
   $('#n-today').textContent = left || '';
-  if (state.dayView === 'week') drawWeek(items, filtering);
+  if (dayViewNow() === 'week') drawWeek(items, filtering);
 
   // lanes
   for (const b of BUCKETS) {
     const lane = $(`.lane[data-b="${b}"]`);
     const list = items.filter(it => it.bucket === b && !isNow(it) && !it.done).sort((x, y) => (y.createdAt || 0) - (x.createdAt || 0));
     $('.lane-count', lane).textContent = pad2(list.length);
-    $('.list', lane).replaceChildren(...list.map(laneRow));
+    const all = filtering || (state.laneAll || {})[b];
+    const shownL = all ? list : list.slice(0, LANE_CAP);
+    const nodes = shownL.map(it => laneRowC(it, 'l'));
+    if (shownL.length < list.length) nodes.push(laneMore(b, list.length - shownL.length));
+    setKids($('.list', lane), nodes);
     const empty = $('.empty', lane);
     empty.hidden = list.length > 0;
     empty.textContent = filtering ? 'No matches.' : empty.dataset.empty;
@@ -1739,6 +1822,10 @@ function render() {
   drawTiles();
   drawVault();
   drawBanner();
+  const dsl = document.getElementById('dayseg');
+  if (dsl) dsl.replaceChildren(daySeg());
+  drawCal();
+  pruneRows();
 }
 
 function drawField() {
@@ -1755,6 +1842,7 @@ function drawField() {
       const pt = petFor(it.id);
       b.innerHTML = petSvg(pt);
       b.dataset.pet = pt.id;
+      if (pt.rarity === 'ultra' || pt.rarity === 'legendary') b.classList.add(pt.rarity);
       b.style.setProperty('--d', (-(hashStr(it.id) % 7000) / 1000).toFixed(2) + 's');
     } else b.innerHTML = INV_SVG;
     return b;
@@ -2463,13 +2551,15 @@ Reply with only JSON: {"bucket": "drop" | "stock" | "make", "tags": [], "categor
 function setTab(t) {
   state.tab = t;
   els.app.dataset.tab = t;
+  if (t === 'today' && typeof drawCal === 'function' && state.items) setTimeout(drawCal);
   $$('.tab').forEach(b => b.setAttribute('aria-selected', String(b.dataset.t === t)));
   try { localStorage.setItem('keitan.tab', t); } catch (e) {}
 }
 $$('.tab').forEach(b => b.addEventListener('click', () => setTab(b.dataset.t)));
 try { const saved = localStorage.getItem('keitan.tab'); if (saved) setTab(saved); } catch (e) {}
 
-els.q.addEventListener('input', () => { state.q = els.q.value; render(); });
+els.q.addEventListener('input', () => { state.q = els.q.value; clearTimeout(qTimer); qTimer = setTimeout(render, 90); });
+let qTimer = null;
 $('#btn-search').addEventListener('click', () => {
   const on = !els.app.classList.contains('searching');
   els.app.classList.toggle('searching', on);
@@ -3999,21 +4089,20 @@ function drawWeek(items, filtering) {
       day = it.today;
       nodes.push(h('li', { class: 'wk-day', text: parseDay(day).toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' }) + (day === addDays(TODAY, 1) ? ' · tomorrow' : '') }));
     }
-    nodes.push(laneRow(it));
+    nodes.push(laneRowC(it, 'w'));
   }
-  if (later.length) nodes.push(h('li', { class: 'wk-day', text: `Later · ${later.length}` }), ...later.slice(0, 5).map(laneRow));
+  if (later.length) nodes.push(h('li', { class: 'wk-day', text: `Later · ${later.length}` }), ...later.slice(0, 5).map(it => laneRowC(it, 'w')));
   els.todayList.replaceChildren(...nodes);
   els.todayCount.textContent = up.length ? `/ ${pad2(up.length)} planned` : '';
   els.todayEmpty.hidden = nodes.length > 0;
   els.todayEmpty.textContent = filtering ? 'No matches.' : 'Nothing planned for the next 7 days. Type a date with a task, like "Submit abstract fri" or "Lab meeting prep every mon".';
 }
 function setDayView(v) {
-  state.dayView = v;
-  try { localStorage.setItem('kura.dayview', v); } catch (e) {}
-  const b = document.getElementById('day-toggle');
-  if (b) { b.textContent = v === 'week' ? '← TODAY' : 'WEEK →'; b.setAttribute('aria-pressed', String(v === 'week')); }
+  state.dayView = ['today', 'week', 'month'].includes(v) ? v : 'today';
+  try { localStorage.setItem('kura.dayview', state.dayView); } catch (e) {}
+  els.app.dataset.dayview = state.dayView;
   const nm = document.getElementById('today-h');
-  if (nm) nm.textContent = v === 'week' ? 'WEEK' : 'TODAY';
+  if (nm) nm.textContent = dayViewNow() === 'week' ? 'WEEK' : 'TODAY';
   render();
 }
 
@@ -4524,7 +4613,6 @@ els.input.addEventListener('input', drawWhen);
 els.route.addEventListener('click', () => setTimeout(drawWhen));
 $('#when').addEventListener('pointerdown', e => e.preventDefault());
 $('#when').addEventListener('click', () => { state.whenOff = !state.whenOff; drawWhen(); });
-$('#day-toggle').addEventListener('click', () => setDayView(state.dayView === 'week' ? 'today' : 'week'));
 $('#btn-review').addEventListener('click', () => openReview());
 if (SpeechRec) {
   const mb = $('#btn-mic');
@@ -4723,23 +4811,31 @@ function swipeActions(it, where) {
     left: { hint: 'LET GO', run: () => removeWithUndo([it.id], 'Let go') },
   };
 }
-let swipe = null, swipeClickBlock = 0;
+let swipe = null, swipeClickBlock = 0, lpBlock = false;
 function swipeWhere(li) {
-  if (li.closest('#today-list')) return state.dayView === 'week' ? 'week' : 'today';
+  if (li.closest('#today-list')) return dayViewNow() === 'week' ? 'week' : 'today';
   return 'lane';
 }
 function initSwipes(root) {
   root.addEventListener('pointerdown', e => {
+    lpBlock = false;
     if (e.button && e.button !== 0) return;
     const li = e.target.closest('.list > .li[data-id]');
     if (!li || e.target.closest('.check, .to-today')) return;
     const it = byId(li.dataset.id);
     if (!it) return;
-    swipe = { li, it, x: e.clientX, y: e.clientY, dx: 0, on: false, id: e.pointerId, acts: swipeActions(it, swipeWhere(li)) };
+    const me = swipe = { li, it, x: e.clientX, y: e.clientY, dx: 0, on: false, id: e.pointerId, acts: swipeActions(it, swipeWhere(li)) };
+    me.lp = setTimeout(() => {
+      if (swipe !== me || me.on) return;
+      swipe = null;
+      lpBlock = true;
+      openQuick(li.dataset.id);
+    }, 480);
   });
   root.addEventListener('pointermove', e => {
     if (!swipe || e.pointerId !== swipe.id) return;
     const dx = e.clientX - swipe.x, dy = e.clientY - swipe.y;
+    if (Math.abs(dx) > 8 || Math.abs(dy) > 8) clearTimeout(swipe.lp);
     if (!swipe.on) {
       if (Math.abs(dy) > 12 && Math.abs(dy) > Math.abs(dx)) { swipe = null; return; }
       if (Math.abs(dx) < 12 || Math.abs(dx) < Math.abs(dy) * 1.4) return;
@@ -4758,6 +4854,7 @@ function initSwipes(root) {
   const end = e => {
     if (!swipe || (e && e.pointerId !== swipe.id)) return;
     const s = swipe;
+    clearTimeout(s.lp);
     swipe = null;
     if (!s.on) return;
     swipeClickBlock = Date.now();
@@ -4776,7 +4873,14 @@ function initSwipes(root) {
   };
   root.addEventListener('pointerup', end);
   root.addEventListener('pointercancel', end);
-  root.addEventListener('click', e => { if (Date.now() - swipeClickBlock < 350) { e.stopPropagation(); e.preventDefault(); } }, true);
+  root.addEventListener('click', e => { if (Date.now() - swipeClickBlock < 350 || lpBlock) { lpBlock = false; e.stopPropagation(); e.preventDefault(); } }, true);
+  root.addEventListener('contextmenu', e => {
+    const li = e.target.closest('.list > .li[data-id]');
+    if (!li) return;
+    e.preventDefault();
+    if (swipe) { clearTimeout(swipe.lp); swipe = null; }
+    if (Date.now() - lastQuickAt > 800) { lpBlock = true; openQuick(li.dataset.id); }
+  });
 }
 
 /* ---------- More: a small launcher ---------- */
@@ -5919,6 +6023,12 @@ function drawNlm() {
 // Block types: p (paragraph), h (small heading), steps (numbered), list (bullets), table ([left, right] rows), note (aside), try ([label, action] buttons)
 const GUIDE = [
   { id: 'new', icon: 'trophy', title: "What's new", blocks: [
+    { h: 'v20' }, { list: [
+      '**Calendar** on the home screen: a month beside TODAY on the unfolded screen (the Day · Week · Month switch on the cover screen). Tap a day to see it, add to it, or plan tasks from MAKE onto it.',
+      '**Long-press any task** for quick actions: Today, Tomorrow, Next week, pick a day, Done, Focus, Lab, move list or delete.',
+      '**Faster**: lists redraw only what changed, long lists show 50 at a time, and start-up reads your data in one go.',
+      '**Ultra and legendary critters** in Pocket pets: 5 ultra (about 1 in 40 tasks) and 3 legendary (about 1 in 150), by pure luck, with sparkles.',
+    ] },
     { h: 'v19.1' }, { list: [
       '**Only what you choose goes to LabArchives**: mark items **Lab** (LAB in the save preview, **#lab** in the text, the tick box in a note\'s sheet, or a whole lab project). The daily log lists them ticked; untick any, or tick others from the day.',
     ] },
@@ -5962,6 +6072,7 @@ const GUIDE = [
       ['STREAK', 'How many days in a row you have finished at least one task. Tap it for Stats.'],
       ['AI ! · TASKS !', 'Only appear when AI or Google Tasks has a problem. Tap one to see what to fix.'],
       ['Search', 'Filters every list as you type. On the cover screen, tap the magnifier first.'],
+      ['Calendar', 'The month beside TODAY (unfolded), or Month in the TODAY switch (cover screen). Tap a day to open it.'],
       ['Notebook', 'Opens the Notebook (Bank, Projects, Glossary, Ask). The K U R A → wordmark does the same.'],
       ['Lab', 'The LabArchives section: daily log, experiments, bench mode and setup.'],
       ['Vault + number', 'Appears when notes are waiting to go to Obsidian. Tap it to send them.'],
@@ -6035,11 +6146,30 @@ const GUIDE = [
       ['MAKE', 'Tasks. Tap **+ TODAY** to plan one for today. Planned tasks show "due Fri" here until their day comes.'],
       ['TODAY', "Today's tasks. Tick the box when done. Tasks you didn't finish stay, marked \"since Mon\"."],
     ] },
-    { h: 'Week view' },
-    { p: 'Tap **WEEK →** on the TODAY card to see the next 7 days, grouped by day, plus a peek at later tasks. **← TODAY** goes back.' },
+    { h: 'Day, Week and Month' },
+    { p: 'The switch on the TODAY card shows **Day** (today\'s list), **Week** (the next 7 days, grouped by day, plus a peek at later tasks) or, on the cover screen, **Month** (the calendar). See the Calendar chapter.' },
+    { p: 'Long lists show the newest 50; tap **Show more** at the bottom for the rest. Searching always shows every match.' },
     { h: 'Finishing tasks' },
     { list: ['Tick a task in TODAY (or swipe it right). You get +10 score, and **Undo** appears for a few seconds.', 'Finished tasks are listed in the **Done log** (⋯ More → Done log), grouped by day. From there you can put one back in TODAY.'] },
     { try: [['Done log', 'log']] },
+  ] },
+  { id: 'calendar', icon: 'cal', title: 'The calendar', blocks: [
+    { p: 'Unfolded, the month sits between the pad and TODAY. On the cover screen, choose **Month** in the TODAY switch. Swipe the calendar sideways, or use ‹ ›, to change month; **Today** jumps back.' },
+    { table: [
+      ['Black number', 'Tasks planned for that day'],
+      ['Red number', 'Planned tasks that are now overdue'],
+      ['Small circle', 'A repeating task lands that day'],
+      ['✓', 'Something was finished that day'],
+      ['Small square', 'Lab results that day (filled: the LabArchives log was sent)'],
+    ] },
+    { h: 'A day' },
+    { list: [
+      'Tap a day to open it: what is planned, repeats that land there, what was done, lab results and focus time.',
+      'Type in the box and tap **Add** to plan a task for that day (a past day records it as done).',
+      '**Plan something from MAKE** puts one of your unplanned tasks on that day in one tap.',
+      'Tap a task to move it, finish it or change it. ‹ › steps through the days.',
+    ] },
+    { try: [['Open today', 'calendar']] },
   ] },
   { id: 'task-sheet', icon: 'pen', title: 'Editing a note or task', blocks: [
     { p: 'Tap any note to open its sheet. Changes to the text are saved when you close it.' },
@@ -6093,6 +6223,8 @@ const GUIDE = [
       ['DROP', 'Right: keep (to STOCK) · Left: let go'],
     ] },
     { p: 'Drag a row sideways. When the label turns red, let go. A short drag springs back. After most actions, **Undo** appears at the bottom of the screen for about 5 seconds.' },
+    { h: 'Long-press for quick actions' },
+    { p: 'Press and hold any task (or right-click it) for a menu: **Today**, **Tomorrow**, **Next week**, **Pick a day**, **Unplan**, **Done**, **Focus**, **Mark Lab**, move to DROP · STOCK · MAKE, **Open** or **Delete**. Most show **Undo** afterwards.' },
   ] },
   { id: 'camera', icon: 'page', title: 'Brain Camera and pasting a page', blocks: [
     { h: 'With an AI key' },
@@ -6309,7 +6441,7 @@ const GUIDE = [
     ] },
     { h: 'Critters' },
     { list: [
-      'There are 16 original critters: 8 common, 5 uncommon and 3 rare (about 1 in 16 tasks). Which critter guards a task is decided by the task itself, so it never changes.',
+      'There are 24 original critters: 8 common, 5 uncommon, 3 rare (about 1 in 16 tasks), 5 ultra (about 1 in 40) and 3 legendary (about 1 in 150). It is pure luck, and which critter guards a task is decided by the task itself. Ultra and legendary critters sparkle.',
       'A critter with **!** is guarding a task that is due today. Tap any critter to open its task.',
       'Tap **♥** in the corner of the screen, or ⋯ More → **Critter Log**, to see who you have met, how many times, and when you first met. Critters you haven\'t met are shadows marked ???.',
       'Your whole task history counts, so switching themes never loses friends.',
@@ -6348,6 +6480,7 @@ const GUIDE_ACTIONS = {
   settings: () => openSettings(),
   obsidian: () => openSettings('obsidian'),
   aisettings: () => openSettings('ai'),
+  calendar: () => openDay(TODAY),
   lab: () => openLab('log'),
   bench: () => openLab('bench'),
   labsetup: () => openLab('setup'),
@@ -6517,7 +6650,7 @@ function hashStr(s) {
   for (const c of String(s)) { x ^= c.codePointAt(0); x = Math.imul(x, 16777619); }
   return x >>> 0;
 }
-function petFor(id) {
+function petForV1(id) {
   const r = hashStr('pet:' + id) % 100;
   let acc = 0;
   for (const p of PETS) { acc += PET_W[p.rarity]; if (r < acc) return p; }
@@ -6544,11 +6677,11 @@ async function setTheme(t) {
   play(t === 'pets' ? 'friend' : 'done');
   toast(t === 'pets' ? 'Pocket pets on. Finish a task to befriend a critter.' : 'Invaders are back');
 }
-function critterStats() {
+function critterStatsRaw() {
   const stats = {};
   for (const [d, ids] of Object.entries(state.doneLog || {})) {
     for (const id of ids) {
-      const p = petFor(id);
+      const p = state.petEpoch && d < state.petEpoch ? petForV1(id) : petFor(id);
       const st = stats[p.id] || (stats[p.id] = { n: 0, first: d });
       st.n++;
       if (d < st.first) st.first = d;
@@ -6560,7 +6693,9 @@ function doneMsg(it) {
   if (state.theme !== 'pets') return 'Done · +10';
   const p = petFor(it.id);
   const first = !critterStats()[p.id];
-  return `${first ? 'New critter! ' : ''}${p.name} befriended${p.rarity === 'rare' ? ' (rare)' : ''} · +10`;
+  if (p.rarity === 'ultra' || p.rarity === 'legendary') setTimeout(() => play('trophy'), 350);
+  const tag = p.rarity === 'legendary' ? '★ LEGENDARY! ' : p.rarity === 'ultra' ? '✦ Ultra! ' : '';
+  return `${tag}${first ? 'New critter! ' : ''}${p.name} befriended${['rare', 'ultra', 'legendary'].includes(p.rarity) ? ` (${p.rarity})` : ''} · +10`;
 }
 async function befriend(id) {
   if (reduceMotion() || document.body.classList.contains('short')) return;
@@ -6601,15 +6736,16 @@ function drawCritters() {
   const met = PETS.filter(p => st[p.id]).length;
   const friends = Object.values(st).reduce((a, x) => a + x.n, 0);
   const rarest = PETS.filter(p => st[p.id] && p.rarity === 'rare').length;
+  const high = PETS.filter(p => st[p.id] && (p.rarity === 'ultra' || p.rarity === 'legendary')).length;
   const tile = (v, l) => h('div', {}, h('b', { text: v }), h('span', { class: 'lbl', text: l }));
   const body = h('div', { class: 'sheet-body' },
-    h('p', { class: 'muted', text: 'Every open task has a critter keeping an eye on it. Finish the task and the critter becomes your friend. Rare critters turn up about once in every 16 tasks. Your whole task history counts, whichever theme you use.' }),
-    h('div', { class: 'rv-stats' }, tile(String(friends), 'friends made'), tile(`${met}/${PETS.length}`, 'critters met'), tile(String(rarest), 'rare met')),
+    h('p', { class: 'muted', text: 'Every open task has a critter keeping an eye on it. Finish the task and the critter becomes your friend. Rare critters turn up about once in every 16 tasks, ultra about once in 40 and legendary about once in 150, purely by luck. Your whole task history counts, whichever theme you use.' }),
+    h('div', { class: 'rv-stats' }, tile(String(friends), 'friends made'), tile(`${met}/${PETS.length}`, 'critters met'), tile(`${rarest} · ${high}`, 'rare · ultra+')),
     h('div', { class: 'critter-grid' }, PETS.map(p => {
       const c = st[p.id];
       const art = h('span', { class: 'critter-art lcd' + (c ? '' : ' unmet'), 'aria-hidden': 'true' });
       art.innerHTML = petSvg(p);
-      return h('div', { class: 'critter' + (c ? ' met' : ''), 'data-id': p.id },
+      return h('div', { class: 'critter r-' + p.rarity + (c ? ' met' : ''), 'data-id': p.id },
         art,
         h('b', { text: c ? p.name : '???' }),
         h('span', { class: 'lbl', text: p.rarity + (c ? ` · ×${c.n}` : '') }),
@@ -6997,6 +7133,7 @@ function drawCapture() {
   if (!box) return;
   const c = state.cap;
   els.app.classList.toggle('capturing', !!c);
+  if (!c) setTimeout(drawCal);
   if (!c) { box.hidden = true; box.replaceChildren(); drawWhen(); return; }
   const act = document.activeElement;
   const key = act && box.contains(act) ? act.dataset.k : null;
@@ -7074,7 +7211,7 @@ function bannerMsgs() {
   if (reviewDue() && !state.reviewDismissed) out.push({ id: 'review', text: 'Weekly review time: tidy loose ends and plan next week.', act: ['Start review', () => openReview()], later: () => { state.reviewDismissed = true; } });
   if (state.seenVersion !== undefined && state.seenVersion !== APP_VERSION) {
     const fresh = !state.seenVersion && !state.items.some(i => !i.example);
-    out.push({ id: 'ver', text: fresh ? 'New to Kura? The user guide shows how everything works.' : /^v19/.test(state.seenVersion || '') ? `Updated to ${APP_VERSION}: only items you mark Lab (or tick) go into the LabArchives log.` : `Updated to ${APP_VERSION}: a LabArchives section (tap Lab at the top) for daily logs, experiments and bench work.`,
+    out.push({ id: 'ver', text: fresh ? 'New to Kura? The user guide shows how everything works.' : `Updated to ${APP_VERSION}: a calendar on the home screen, long-press menus on tasks, a faster app, and ultra and legendary critters.`,
       act: [fresh ? 'Open the guide' : "What's new", () => openGuide(fresh ? 'start' : 'new'), 'banner-guide'], later: () => markSeen(), laterLabel: 'Got it' });
   }
   const missing = [!state.sample && 'a free AI key', !state.obs && 'your Obsidian vault'].filter(Boolean);
@@ -7810,6 +7947,314 @@ document.addEventListener('visibilitychange', () => {
   if (ls && ls.kind === 'lab' && ls.tab === 'bench') holdWake(true);
 });
 
+/* ---------- v20: faster lists — reuse rows that haven't changed, cap long lanes ---------- */
+const rowCache = new Map();
+let rowUsed = new Set();
+let symKey = '';
+function rowSig(it, kind) {
+  const p = projOf(it);
+  return [kind, it.text, (it.tags || []).join(','), it.bucket, it.today || '', it.done ? 1 : 0, it.repeat ? repeatLabel(it.repeat) : '', p ? p.name : '', isLab(it) ? 1 : 0,
+    it.page || '', it.example ? 1 : 0, it.pending && Date.now() - (it.createdAt || 0) < 120000 ? 1 : 0, kind === 't' ? '' : rel(it.createdAt), TODAY, symKey].join('\u0001');
+}
+function cachedRow(key, sig, make) {
+  rowUsed.add(key);
+  const c = rowCache.get(key);
+  if (c && c.sig === sig && !c.node.style.transform && !c.node.classList.contains('swiping')) return c.node;
+  const node = make();
+  rowCache.set(key, { sig, node });
+  return node;
+}
+function setKids(parent, nodes) {
+  const cur = parent.children;
+  if (cur.length === nodes.length) {
+    let same = true;
+    for (let i = 0; i < nodes.length; i++) if (cur[i] !== nodes[i]) { same = false; break; }
+    if (same) return;
+  }
+  parent.replaceChildren(...nodes);
+}
+function pruneRows() {
+  for (const k of rowCache.keys()) if (!rowUsed.has(k)) rowCache.delete(k);
+  rowUsed = new Set();
+}
+const LANE_CAP = 50;
+function laneMore(b, n) {
+  return cachedRow('more:' + b, String(n), () => h('li', { class: 'lane-more' },
+    h('button', { class: 'link-btn plain', type: 'button', onclick: () => { state.laneAll = { ...(state.laneAll || {}), [b]: true }; render(); } }, `Show ${n} more`)));
+}
+function todayRow(it) {
+  const carried = !it.done && it.today < TODAY;
+  return h('li', { class: 'li' + (it.done ? ' done' : ''), 'data-id': it.id },
+    h('button', {
+      class: 'check', type: 'button', role: 'checkbox', 'aria-checked': String(!!it.done),
+      'aria-label': it.done ? 'Mark not done' : 'Mark done', onclick: () => toggleDone(it.id),
+    }, icon('check', 2.6)),
+    h('button', { class: 'li-body', type: 'button', onclick: () => openItem(it.id) },
+      h('span', { class: 'main' },
+        h('span', { class: 'txt', text: rowText(it) }),
+        (carried || knownTags(it).length || it.example || it.repeat || projOf(it) || isLab(it) || stepsOf(it.text).length) ? h('span', { class: 'meta' },
+          carried ? h('span', { class: 'carry', text: 'since ' + dayName(it.today) }) : null,
+          it.repeat ? h('span', { class: 'tg', text: '↻ ' + repeatLabel(it.repeat) }) : null,
+          projOf(it) ? h('span', { class: 'tg', text: '#' + projOf(it).name }) : null,
+          labTag(it),
+          stepMeta(it),
+          tagMeta(it),
+          it.example ? h('span', { class: 'ex', text: 'Example' }) : null) : null)));
+}
+const laneRowC = (it, k) => cachedRow(k + ':' + it.id, rowSig(it, k), () => laneRow(it));
+let renderT = null;
+const renderSoon = () => { clearTimeout(renderT); renderT = setTimeout(render, 90); };
+
+/* ---------- v20: day views and the calendar ---------- */
+const isWide = () => innerWidth >= 720;
+const dayViewNow = () => (isWide() && state.dayView === 'month' ? 'today' : state.dayView || 'today');
+function daySeg() {
+  const v = dayViewNow();
+  return h('div', { class: 'dayseg', role: 'group', 'aria-label': 'View' }, [['today', 'Day'], ['week', 'Week'], ['month', 'Month']].map(([k, l]) => h('button', {
+    type: 'button', 'data-v': k, 'aria-pressed': String(v === k), onclick: () => setDayView(k),
+  }, l)));
+}
+const monthKey = ds => String(ds).slice(0, 7);
+function shiftMonth(mk, n) { const [y, m] = mk.split('-').map(Number); return dayStr(new Date(y, m - 1 + n, 1)).slice(0, 7); }
+function calRange(mk) {
+  const start = mondayOf(mk + '-01');
+  const days = [];
+  for (let i = 0; i < 42; i++) days.push(addDays(start, i));
+  while (days.length > 35 && monthKey(days[days.length - 7]) !== mk) days.splice(days.length - 7, 7);
+  return days;
+}
+function occursOn(it, ds) {
+  if (!it.repeat || !it.today || ds <= it.today) return false;
+  let d = it.today;
+  for (let g = 0; g < 400 && d < ds; g++) { const n = nextOccurrence(it.repeat, d); if (!n || n <= d) return false; d = n; }
+  return d === ds;
+}
+function calData(days) {
+  const from = days[0], to = days[days.length - 1];
+  const m = new Map(days.map(d => [d, { open: 0, late: 0, done: 0, rep: 0, exp: 0, logged: false }]));
+  for (const it of state.items) {
+    if (it.example) continue;
+    if (!it.done && it.today && m.has(it.today)) { const c = m.get(it.today); c.open++; if (it.today < TODAY) c.late++; }
+    if (it.done && it.doneAt) { const c = m.get(dayStr(new Date(it.doneAt))); if (c) c.done++; }
+    if (!it.done && it.repeat && it.today && it.today < to) {
+      let d = it.today;
+      for (let g = 0; g < 60; g++) { const n = nextOccurrence(it.repeat, d); if (!n || n <= d || n > to) break; d = n; if (m.has(d)) m.get(d).rep++; }
+    }
+  }
+  for (const x of state.exps || []) for (const o of x.obs) { if (o.kind === 'timer') continue; const c = m.get(dayStr(new Date(o.t))); if (c) c.exp++; }
+  for (const [d, v] of m) if ((state.labLogs || {})[d]) v.logged = true;
+  return m;
+}
+let calSig = '';
+function drawCal() {
+  const el = document.getElementById('cal');
+  if (!el) return;
+  const shown = isWide() ? !els.app.classList.contains('capturing') : state.tab === 'today' && state.dayView === 'month';
+  if (!shown) return;
+  const mk = state.calMonth || monthKey(TODAY);
+  const days = calRange(mk);
+  const data = calData(days);
+  const sig = [mk, TODAY, isWide(), dayViewNow(), ...days.map(d => { const v = data.get(d); return `${v.open}.${v.late}.${v.done}.${v.rep}.${v.exp}.${v.logged ? 1 : 0}`; })].join('|');
+  if (sig === calSig && el.children.length) return;
+  calSig = sig;
+  const [y, mo] = mk.split('-').map(Number);
+  const title = new Date(y, mo - 1, 1).toLocaleDateString('en-AU', { month: 'long', year: 'numeric' });
+  const go = mk2 => { state.calMonth = mk2 === monthKey(TODAY) ? null : mk2; drawCal(); };
+  const head = h('div', { class: 'box-head cal-head' },
+    h('span', { class: 'name', id: 'cal-title', text: title.toUpperCase() }),
+    mk !== monthKey(TODAY) ? h('button', { class: 'link-btn', type: 'button', id: 'cal-today', onclick: () => go(monthKey(TODAY)) }, 'Today') : null,
+    h('span', { class: 'grow' }),
+    h('button', { class: 'ghost cal-nav', type: 'button', id: 'cal-prev', 'aria-label': 'Previous month', onclick: () => go(shiftMonth(mk, -1)) }, '‹'),
+    h('button', { class: 'ghost cal-nav', type: 'button', id: 'cal-next', 'aria-label': 'Next month', onclick: () => go(shiftMonth(mk, 1)) }, '›'),
+    isWide() ? null : daySeg());
+  const wd = h('div', { class: 'cal-wd', 'aria-hidden': 'true' }, ['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(x => h('span', { text: x })));
+  const grid = h('div', { class: 'cal-grid', 'aria-label': title + '. Tap a day to see and plan it.' }, days.map((d, i) => {
+    const v = data.get(d);
+    const bits = [];
+    if (v.open) bits.push(`${v.open} planned${v.late ? ` (${v.late} overdue)` : ''}`);
+    if (v.rep) bits.push(`${v.rep} repeating`);
+    if (v.done) bits.push(`${v.done} done`);
+    if (v.exp) bits.push(`${v.exp} lab results`);
+    if (v.logged) bits.push('LabArchives log sent');
+    const label = parseDay(d).toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long' }) + (d === TODAY ? ', today' : '') + (bits.length ? ': ' + bits.join(', ') : '');
+    return h('button', {
+      class: 'cal-day' + (monthKey(d) !== mk ? ' other' : '') + (d === TODAY ? ' is-today' : '') + (d < TODAY ? ' past' : '') + (i % 7 >= 5 ? ' we' : ''),
+      type: 'button', 'data-day': d, 'aria-label': label, onclick: () => openDay(d),
+    },
+      h('span', { class: 'cal-n', text: String(parseDay(d).getDate()) }),
+      h('span', { class: 'cal-m', 'aria-hidden': 'true' },
+        v.open ? h('b', { class: 'm-open' + (v.late ? ' late' : ''), text: String(v.open) }) : v.rep ? h('i', { class: 'm-rep' }) : null,
+        v.done ? h('i', { class: 'm-done', text: '✓' }) : null,
+        v.logged || v.exp ? h('i', { class: 'm-lab' + (v.logged ? ' on' : '') }) : null));
+  }));
+  el.replaceChildren(head, wd, grid);
+}
+// swipe the calendar sideways to change month
+let calBlock = 0;
+(() => {
+  const el = document.getElementById('cal');
+  let sx = null, sy = 0;
+  el.addEventListener('pointerdown', e => { sx = e.clientX; sy = e.clientY; });
+  el.addEventListener('pointerup', e => {
+    if (sx == null) return;
+    const dx = e.clientX - sx, dy = e.clientY - sy;
+    sx = null;
+    if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
+      const mk = state.calMonth || monthKey(TODAY);
+      const next = shiftMonth(mk, dx < 0 ? 1 : -1);
+      state.calMonth = next === monthKey(TODAY) ? null : next;
+      calBlock = Date.now();
+      drawCal();
+    }
+  });
+  el.addEventListener('click', e => { if (Date.now() - calBlock < 350) { e.stopPropagation(); e.preventDefault(); } }, true);
+})();
+
+/* ---------- v20: a day at a glance, with planning in one tap ---------- */
+function openDay(ds) { state.sheet = { kind: 'day', day: ds }; drawDay(); }
+function drawDay() {
+  const s = state.sheet;
+  if (!s || s.kind !== 'day') return;
+  const d = s.day;
+  const items = state.items.filter(i => !i.example);
+  const inDay = ms => !!ms && dayStr(new Date(ms)) === d;
+  const planned = items.filter(i => !i.done && i.today === d).sort(todaySort);
+  const reps = items.filter(i => !i.done && occursOn(i, d));
+  const done = items.filter(i => i.done && inDay(i.doneAt)).sort((a, b) => a.doneAt - b.doneAt);
+  const exps = (state.exps || []).filter(x => x.obs.some(o => o.kind !== 'timer' && inDay(o.t)));
+  const focus = (state.focusSessions || []).filter(f => f.d === d).reduce((a, f) => a + f.m, 0);
+  const logged = (state.labLogs || {})[d];
+  const future = d >= TODAY;
+  const unplanned = future ? items.filter(i => !i.done && !i.today && i.bucket === 'make').sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)).slice(0, 8) : [];
+  const back = () => openDay(d);
+  const row = (it, withCheck) => h('div', { class: 'day-row' + (it.done ? ' done' : ''), 'data-id': it.id },
+    withCheck ? h('button', { class: 'check', type: 'button', role: 'checkbox', 'aria-checked': String(!!it.done), 'aria-label': it.done ? 'Mark not done' : 'Mark done', onclick: async () => { await toggleDone(it.id); setTimeout(() => { if (state.sheet === s) drawDay(); }, 60); } }, icon('check', 2.6)) : h('span', { class: 'day-ico', text: '✓' }),
+    h('button', { class: 'day-txt', type: 'button', onclick: () => openQuick(it.id, back) },
+      h('span', { text: firstLine(rowText(it)) }),
+      h('span', { class: 'meta' }, projOf(it) ? h('span', { class: 'tg', text: '#' + projOf(it).name }) : null, it.repeat ? h('span', { class: 'tg', text: '↻ ' + repeatLabel(it.repeat) }) : null, labTag(it))));
+  const add = h('input', { class: 'field-in', type: 'text', id: 'day-add', 'data-k': 'day-add', enterkeyhint: 'done', autocomplete: 'off', placeholder: future ? 'Add a task for this day' : 'Add something you did this day', 'aria-label': 'Add a task for this day' });
+  const addIt = async () => {
+    const v = add.value.trim();
+    if (!v) { add.focus(); return; }
+    const x = capItem(v);
+    const now = Date.now();
+    const data = capData({ ...x, today: d, bucket: 'make', userBucket: false }, now);
+    if (!future) Object.assign(data, { done: true, doneAt: parseDay(d).getTime() + 12 * 3600000, today: d });
+    try { await store.set(store.newId(), data); } catch (e) { onWriteError(e); return; }
+    add.value = '';
+    toast(future ? `Planned ${d === TODAY ? 'today' : futureLabel(d)}` : 'Added to that day as done');
+    drawDay();
+    const again = document.getElementById('day-add'); if (again) again.focus({ preventScroll: true });
+  };
+  add.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing && e.keyCode !== 229) { e.preventDefault(); addIt(); } });
+  const sec = (label, kids) => (kids && kids.length ? h('div', { class: 'stack' }, h('span', { class: 'lbl', text: label }), h('div', { class: 'day-list' }, kids)) : null);
+  const long = parseDay(d).toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long' });
+  const rel2 = d === TODAY ? 'today' : d === addDays(TODAY, 1) ? 'tomorrow' : d === addDays(TODAY, -1) ? 'yesterday' : d > TODAY ? `in ${Math.round((parseDay(d) - parseDay(TODAY)) / 86400000)} days` : `${Math.round((parseDay(TODAY) - parseDay(d)) / 86400000)} days ago`;
+  const body = h('div', { class: 'sheet-body' },
+    h('div', { class: 'row day-nav' },
+      h('button', { class: 'btn', type: 'button', id: 'day-prev', 'aria-label': 'Previous day', onclick: () => { s.day = addDays(d, -1); drawDay(); } }, '‹'),
+      h('b', { class: 'day-title', text: long }),
+      h('button', { class: 'btn', type: 'button', id: 'day-next', 'aria-label': 'Next day', onclick: () => { s.day = addDays(d, 1); drawDay(); } }, '›'),
+      d !== TODAY ? h('button', { class: 'link-btn', type: 'button', onclick: () => { s.day = TODAY; drawDay(); } }, 'Today') : null),
+    h('div', { class: 'row day-add-row' }, add, h('button', { class: 'btn primary', type: 'button', id: 'day-add-btn', onclick: addIt }, 'Add')),
+    sec(`Planned · ${planned.length}`, planned.map(it => row(it, true))),
+    sec('Repeats that land here', reps.map(it => h('div', { class: 'day-row rep' }, h('span', { class: 'day-ico', text: '↻' }), h('button', { class: 'day-txt', type: 'button', onclick: () => openQuick(it.id, back) }, h('span', { text: firstLine(rowText(it)) }), h('span', { class: 'meta' }, h('span', { class: 'tg', text: repeatLabel(it.repeat) })))))),
+    sec(`Done · ${done.length}`, done.map(it => row(it, true))),
+    exps.length || focus || logged || (state.exps || []).length ? h('div', { class: 'stack' },
+      h('span', { class: 'lbl', text: 'Lab and focus' }),
+      h('div', { class: 'day-lab' },
+        focus ? h('span', { class: 'tg', text: `Focus ${fmtMin(focus)}` }) : null,
+        ...exps.map(x => h('button', { class: 'btn', type: 'button', onclick: () => { state.benchExp = x.id; closeSheet(); openLab('exps', { exp: x.id, expView: 'edit' }); } }, icon('tube', 1.8), x.title)),
+        h('button', { class: 'btn', type: 'button', id: 'day-log', onclick: () => { closeSheet(); openLab('log', { day: d, text: null, edited: false }); } }, logged ? 'Daily log · logged ✓' : 'Daily log for this day'))) : null,
+    unplanned.length ? h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'Plan something from MAKE' }),
+      h('div', { class: 'day-plan' }, unplanned.map(it => h('button', { class: 'plan-chip', type: 'button', 'data-id': it.id, onclick: async () => {
+        await patch(it.id, { today: d, done: false, doneAt: null, pending: false, gtaskGone: false });
+        toast(`Planned ${d === TODAY ? 'today' : futureLabel(d)}: ${firstLine(rowText(it)).slice(0, 40)}`, { label: 'Undo', fn: () => patch(it.id, { today: null }) });
+        drawDay();
+      } }, '+ ' + firstLine(rowText(it)))))) : null,
+    !planned.length && !done.length && !reps.length ? h('p', { class: 'muted', text: future ? 'Nothing planned. Add a task above, or pick one from MAKE.' : 'Nothing recorded for this day.' }) : null);
+  showSheet(h('div', { class: 'sheet day', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Day' }, head('DAY', rel2, 'calendar'), body));
+}
+
+/* ---------- v20: long-press a task for quick actions ---------- */
+let lastQuickAt = 0;
+function openQuick(id, back) {
+  if (!byId(id)) return;
+  lastQuickAt = Date.now();
+  state.sheet = { kind: 'quick', id, back: back || null };
+  buzz(12);
+  drawQuick();
+}
+function drawQuick() {
+  const s = state.sheet;
+  if (!s || s.kind !== 'quick') return;
+  const it = byId(s.id);
+  if (!it) { closeSheet(); return; }
+  const after = () => { if (s.back && state.sheet === s) s.back(); else if (state.sheet === s) closeSheet(); };
+  const plan = async (ds, label) => {
+    await patchWithUndo(it.id, { today: ds, done: false, doneAt: null, pending: false, gtaskGone: false, bucket: it.bucket === 'drop' ? 'make' : it.bucket }, `Planned ${label}`);
+    after();
+  };
+  const tile = (id, ic, name, fn, on) => h('button', { class: 'tile-btn q-tile' + (on ? ' on' : ''), type: 'button', id: 'q-' + id, onclick: fn }, ic ? icon(ic, 1.8) : null, h('span', { class: 'nm', text: name }));
+  const dateIn = h('input', { type: 'date', class: 'cap-date-in', id: 'q-date-in', 'aria-label': 'Pick a day' });
+  dateIn.value = it.today || '';
+  dateIn.addEventListener('click', () => { try { dateIn.showPicker(); } catch (e) {} });
+  dateIn.addEventListener('change', () => { if (dateIn.value) plan(dateIn.value, dateIn.value === TODAY ? 'today' : futureLabel(dateIn.value)); });
+  const nextMon = addDays(mondayOf(TODAY), 7);
+  const tom = addDays(TODAY, 1);
+  const grid = h('div', { class: 'more-grid q-grid' },
+    !(it.today === TODAY && !it.done) ? tile('today', 'check', 'Today', () => plan(TODAY, 'today')) : null,
+    it.today !== tom ? tile('tomorrow', 'cal', 'Tomorrow', () => plan(tom, 'tomorrow')) : null,
+    tile('nextweek', 'cal', 'Next week', () => plan(nextMon, futureLabel(nextMon))),
+    h('label', { class: 'tile-btn q-tile q-pick', id: 'q-pick' }, icon('cal', 1.8), h('span', { class: 'nm', text: it.today ? 'Move to…' : 'Pick a day' }), dateIn),
+    it.today ? tile('unplan', 'close', 'Unplan', async () => { await patchWithUndo(it.id, { today: null, repeat: null }, 'Unplanned'); after(); }) : null,
+    tile('done', 'check', it.done ? 'Not done' : 'Done', async () => { await toggleDone(it.id); after(); }, it.done),
+    !it.done ? tile('focus', 'timer', 'Focus', () => { closeSheet(); startFocus(it.id); }) : null,
+    tile('lab', 'tube', isLab(it) ? 'Lab ✓' : 'Mark Lab', async () => { await patch(it.id, { lab: !isLab(it) }); toast(isLab(byId(it.id)) ? 'Marked Lab' : 'Not Lab'); drawQuick(); }, isLab(it)),
+    tile('open', 'pen', 'Open', () => openItem(it.id)),
+    tile('delete', 'close', 'Delete', async () => { closeSheet(); await removeWithUndo([it.id]); }));
+  const seg = segControl(it.bucket, async b => { await patchWithUndo(it.id, { bucket: b }, `Moved to ${LABEL[b]}`); after(); }, true);
+  const body = h('div', { class: 'sheet-body' },
+    h('p', { class: 'q-title', text: rowText(it) }),
+    h('div', { class: 'row' }, h('span', { class: 'lbl', text: 'List' }), seg,
+      it.today ? h('span', { class: 'tg', text: it.done ? 'done' : 'planned ' + whenLabel(it.today) }) : null),
+    grid);
+  showSheet(h('div', { class: 'sheet quick', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Quick actions' }, head('QUICK', 'long-press menu', 'swipes'), body));
+}
+
+/* ---------- v20: ultra and legendary critters (pure luck: ultra about 1 in 40, legendary about 1 in 150) ---------- */
+const NEW_PETS = [
+  { id: 'prismo', name: 'Prismo', rarity: 'ultra', blurb: 'Splits every idea into seven brighter ones.', art: ['....XXXX....', '...X.XX.X...', '..X..XX..X..', '.XXXXXXXXXX.', '.X........X.', '.X.XX..XX.X.', '..X......X..', '..X..XX..X..', '...X....X...', '....X..X....', '.....XX.....', '............'] },
+  { id: 'orbie', name: 'Orbie', rarity: 'ultra', blurb: 'Keeps your tasks in a tidy orbit.', art: ['....XXXX....', '..XX....XX..', '.X..X..X..X.', '.X........X.', 'XXXXXXXXXXXX', 'X..........X', 'XXXXXXXXXXXX', '.X........X.', '.X...XX...X.', '..XX....XX..', '....XXXX....', '............'] },
+  { id: 'lumo', name: 'Lumo', rarity: 'ultra', blurb: 'Glows softly in the dark hours before a deadline.', art: ['....XXXX....', '..XXXXXXXX..', '.XXXXXXXXXX.', '.XX.XXXX.XX.', '.XXXXXXXXXX.', '.XXXX..XXXX.', '..XXXXXXXX..', '..X.X..X.X..', '..X.X..X.X..', '.X..X..X..X.', '.X...X.X..X.', '..X..X...X..'] },
+  { id: 'emberkit', name: 'Emberkit', rarity: 'ultra', blurb: 'Small, warm and never burns out.', art: ['.....X......', '....XX...X..', '...XXX..XX..', '..XXXX.XXX..', '..XXXXXXXX..', '.XX.XXXX.XX.', '.XX.XXXX.XX.', '.XXXXXXXXXX.', '.XXXX..XXXX.', '..XXXXXXXX..', '...XXXXXX...', '....X..X....'] },
+  { id: 'stellix', name: 'Stellix', rarity: 'ultra', blurb: 'Streaks past once in a while. Make a wish.', art: ['............', '.......XXXX.', 'X.....XXXXXX', '.X...XX.XX.X', '..XXXXX.XX.X', '.X...XXXXXXX', 'X.....XX..XX', '.......XXXX.', '..X.......X.', '.X.........X', '............', '............'] },
+  { id: 'noctua', name: 'Noctua', rarity: 'legendary', blurb: 'Keeper of late-night lab notes. Sees everything, says little.', art: ['X..X....X..X', '.XXX....XXX.', '.XXXXXXXXXX.', 'X..........X', 'X.XXX..XXX.X', 'X.X.X..X.X.X', 'X.XXX..XXX.X', 'X....XX....X', '.X........X.', '.X.X.XX.X.X.', '..X......X..', '...XX..XX...'] },
+  { id: 'solmane', name: 'Solmane', rarity: 'legendary', blurb: 'Rises with the first finished task of the day.', art: ['X....XX....X', '.X..XXXX..X.', '..XXXXXXXX..', '.XX......XX.', 'XX.X....X.XX', 'XX........XX', 'XX...XX...XX', '.XX.X..X.XX.', '..XX....XX..', '.X.XXXXXX.X.', 'X....XX....X', '............'] },
+  { id: 'abyssa', name: 'Abyssa', rarity: 'legendary', blurb: 'Sings from the deep end of the backlog.', art: ['...X.X......', '....X.......', '...XXX......', '.XXXXXXX...X', 'XXXXXXXXX.XX', 'XX.XXXXXXXXX', 'XXXXXXXXXXX.', 'X......XXX..', '.X.....XX...', '..XXXXXX....', '............', '............'] },
+];
+PET_W.ultra = 0;
+PET_W.legendary = 0;
+PETS.push(...NEW_PETS);
+const ULTRAS = NEW_PETS.filter(p => p.rarity === 'ultra'), LEGENDS = NEW_PETS.filter(p => p.rarity === 'legendary');
+function petFor(id) {
+  const r = hashStr('rare2:' + id) % 3600;
+  if (r < 24) return LEGENDS[hashStr('leg:' + id) % LEGENDS.length];
+  if (r < 114) return ULTRAS[hashStr('ult:' + id) % ULTRAS.length];
+  return petForV1(id);
+}
+const RARITY_ORDER = ['common', 'uncommon', 'rare', 'ultra', 'legendary'];
+
+// the Critter Log tally only changes when the done log does
+let critMemo = null, critKey = '';
+function critterStats() {
+  const lg = state.doneLog || {};
+  let key = (state.petEpoch || '') + '|';
+  for (const d in lg) key += d + ':' + lg[d].join(',') + ';';
+  if (key !== critKey || !critMemo) { critKey = key; critMemo = critterStatsRaw(); }
+  return critMemo;
+}
+
 // v14 wiring
 $('#friends').addEventListener('click', () => openCritters());
 $('#btn-more').addEventListener('click', () => openMore());
@@ -8259,8 +8704,19 @@ async function doImport(data) {
 
 async function boot() {
   drawDates();
+  state.booting = true;
+  let kvRestore = null;
   try {
     store = await localStore();
+    const pre = store.kvAll ? await store.kvAll().catch(() => null) : null;
+    if (pre) {
+      // serve the start-up reads from one transaction; any write drops that key from the cache
+      const get0 = store.kvGet, set0 = store.kvSet, del0 = store.kvDel;
+      store.kvGet = k => { if (pre.has(k)) { const v = pre.get(k); pre.delete(k); return Promise.resolve(v); } return get0.call(store, k); };
+      store.kvSet = (k, v) => { pre.delete(k); return set0.call(store, k, v); };
+      store.kvDel = k => { pre.delete(k); return del0.call(store, k); };
+      kvRestore = () => { store.kvGet = get0; store.kvSet = set0; store.kvDel = del0; };
+    }
   } catch (e) {
     store = memoryStore();
     bannerMsg = "This browser won't let Kura save notes, so anything written now disappears when you close it.";
@@ -8294,7 +8750,7 @@ async function boot() {
   try { state.timers = JSON.parse(localStorage.getItem('kura.timers') || '[]') || []; } catch (e) { state.timers = []; }
   runTimers();
   syncCapUI();
-  try { state.dayView = localStorage.getItem('kura.dayview') === 'week' ? 'week' : 'today'; } catch (e) { state.dayView = 'today'; }
+  try { const dv = localStorage.getItem('kura.dayview'); state.dayView = ['week', 'month'].includes(dv) ? dv : 'today'; } catch (e) { state.dayView = 'today'; }
   if (store.kvGet) {
     Object.assign(fx, (await store.kvGet('fx').catch(() => null)) || {});
     state.theme = (await store.kvGet('theme').catch(() => null)) || 'invaders';
@@ -8339,11 +8795,16 @@ async function boot() {
     }
   }
   await loadApi();
+  state.petEpoch = store.kvGet ? ((await store.kvGet('petEpoch').catch(() => '')) || '') : '';
+  if (!state.petEpoch) { state.petEpoch = TODAY; if (store.kvSet) store.kvSet('petEpoch', TODAY).catch(() => {}); }
+  if (kvRestore) kvRestore();
+  state.booting = false;
+  render();
   scheduleGtSync(1500);
   drawStreak();
   checkTrophies();
   handleLaunch();
-  try { els.input.focus({ preventScroll: true }); } catch (e) {}
+  requestAnimationFrame(() => setTimeout(() => { try { if (!state.sheet) els.input.focus({ preventScroll: true }); } catch (e) {} }, 0));
   if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
   if ('serviceWorker' in navigator && location.protocol !== 'file:') {
     const hadController = !!navigator.serviceWorker.controller;
@@ -8360,9 +8821,23 @@ async function boot() {
 // day rollover + relative times
 setInterval(() => {
   const d = dayStr();
+  if (d !== TODAY) { TODAY = d; drawDates(); render(); return; }
+  if (document.visibilityState === 'visible') render();
+}, 60000);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible') return;
+  const d = dayStr();
   if (d !== TODAY) { TODAY = d; drawDates(); }
   render();
-}, 60000);
+});
+let wideWas = innerWidth >= 720;
+window.addEventListener('resize', () => {
+  const w = innerWidth >= 720;
+  if (w === wideWas) return;
+  wideWas = w;
+  calSig = '';
+  setDayView(state.dayView);
+});
 
 boot();
 })();
