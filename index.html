@@ -615,6 +615,68 @@ body.focusing .toast { top: calc(var(--vvt, 0px) + var(--vvh, 100vh) - env(safe-
   .guide-jump { display: block; flex: 1 1 100%; }
   .g-table th { width: 40%; }
 }
+/* v17: themes (Pocket pets: original critters on an LCD screen) */
+body[data-skin="pets"] .widget, .lcd, .theme-prev[data-skin="pets"] {
+  --lcd-bg: #C4CCA8; --lcd-ink: #2E3A26; --lcd-ink2: #56654A; --lcd-edge: #9FA985; --lcd-grid: rgba(46, 58, 38, 0.06);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) body[data-skin="pets"] .widget, :root:not([data-theme="light"]) .lcd, :root:not([data-theme="light"]) .theme-prev[data-skin="pets"] {
+    --lcd-bg: #1D251B; --lcd-ink: #B3CC9F; --lcd-ink2: #7C9470; --lcd-edge: #35412F; --lcd-grid: rgba(179, 204, 159, 0.05);
+  }
+}
+:root[data-theme="dark"] body[data-skin="pets"] .widget, :root[data-theme="dark"] .lcd, :root[data-theme="dark"] .theme-prev[data-skin="pets"] {
+  --lcd-bg: #1D251B; --lcd-ink: #B3CC9F; --lcd-ink2: #7C9470; --lcd-edge: #35412F; --lcd-grid: rgba(179, 204, 159, 0.05);
+}
+body[data-skin="pets"] .widget, .lcd, .theme-prev[data-skin="pets"] {
+  background-color: var(--lcd-bg); color: var(--lcd-ink); border-color: var(--lcd-edge);
+  background-image: linear-gradient(var(--lcd-grid) 1px, transparent 1px), linear-gradient(90deg, var(--lcd-grid) 1px, transparent 1px);
+  background-size: 3px 3px;
+}
+body[data-skin="pets"] .widget { box-shadow: inset 0 0 0 3px color-mix(in srgb, var(--lcd-edge) 35%, transparent), var(--shadow); }
+body[data-skin="pets"] .widget .lbl, body[data-skin="pets"] .widget .ghost, body[data-skin="pets"] .widget .search svg { color: var(--lcd-ink2); }
+body[data-skin="pets"] .widget .search input { background: color-mix(in srgb, var(--lcd-ink) 7%, var(--lcd-bg)); border-color: var(--lcd-edge); color: var(--lcd-ink); }
+body[data-skin="pets"] .widget .wordmark { border-top-color: var(--lcd-edge); color: var(--lcd-ink); }
+body[data-skin="pets"] .widget .streak.hot, body[data-skin="pets"] .vault-btn b { color: var(--lcd-ink); font-weight: 700; }
+body[data-skin="pets"] .cannon { display: none; }
+body[data-skin="pets"] .inv-grid { gap: 10px 20px; max-height: 84px; padding-top: 8px; }
+body[data-skin="pets"] .mini-inv { width: 12px; height: 12px; color: var(--ink); }
+.pet {
+  width: 24px; height: 24px; padding: 0; border: 0; background: none; color: var(--lcd-ink, var(--ink)); position: relative;
+  animation: petHop 1.1s linear infinite, petWalk 7s ease-in-out infinite alternate; animation-delay: var(--d, 0s), var(--d, 0s);
+}
+.pet svg { width: 100%; height: 100%; display: block; }
+.pet.due { animation-duration: 0.6s, 7s; }
+.pet.due::after { content: "!"; position: absolute; top: -9px; right: -6px; font-family: var(--f-mono); font-size: 11px; font-weight: 700; color: var(--lcd-ink, var(--red)); }
+.pet.friend { animation: befriend 0.45s ease-out forwards; }
+@keyframes petHop { 0%, 49% { transform: translateY(0); } 50%, 100% { transform: translateY(-2px); } }
+@keyframes petWalk { from { translate: -6px 0; } to { translate: 6px 0; } }
+@keyframes befriend { 0% { transform: translateY(0) scale(1); } 40% { transform: translateY(-9px) scale(1.25); } 100% { transform: translateY(-16px) scale(0.5); opacity: 0; } }
+.heart { position: absolute; transform: translateX(-50%); color: var(--red); font-size: 15px; line-height: 1; pointer-events: none; animation: heartUp 0.8s ease-out forwards; }
+@keyframes heartUp { from { opacity: 1; translate: 0 0; } to { opacity: 0; translate: 0 -28px; } }
+.friends { display: none; }
+body[data-skin="pets"] .friends:not([hidden]) {
+  display: inline-flex; position: absolute; right: 0; bottom: 0; border: 0; background: none; padding: 2px 4px;
+  font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.1em; color: var(--lcd-ink2);
+}
+.focus-inv .pet-svg { width: 36px; height: 36px; animation: petHop 1.1s linear infinite; }
+.theme-pick { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; }
+.theme-card { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 10px; border: 1px solid var(--rule); border-radius: 8px; background: var(--paper); text-align: left; color: var(--ink); }
+.theme-card[aria-checked="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.theme-card b { font-size: 14px; }
+.theme-prev { display: flex; gap: 14px; align-items: center; justify-content: center; width: 100%; height: 52px; border: 1px solid var(--rule); border-radius: 6px; background-color: var(--sheet); color: var(--ink-2); }
+.theme-prev svg { width: 22px; height: 16px; }
+.theme-prev[data-skin="pets"] svg { width: 24px; height: 24px; }
+.critter-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+.critter { border: 1px dashed var(--rule); border-radius: 8px; padding: 10px; display: flex; flex-direction: column; gap: 4px; }
+.critter.met { border-style: solid; border-color: var(--ink-2); }
+.critter-art { display: flex; align-items: center; justify-content: center; height: 64px; }
+.critter-art svg { width: 40px; height: 40px; }
+.critter-art.unmet svg { opacity: 0.16; }
+.critter-art:not(.unmet) .pet-svg { animation: petHop 1.1s linear infinite; }
+.critter b { font-size: 14px; }
+.critter .muted { font-size: 12px; }
+@media (max-width: 719px) { body[data-skin="pets"] .inv-grid { max-height: 62px; gap: 8px 14px; } }
+@media (prefers-reduced-motion: reduce) { .pet, .pet-svg { animation: none !important; } }
 /* short screens: keyboard up on the Fold leaves roughly a 4:3 area */
 .short .field, .short .wordmark, .short .tags-lbl { display: none; }
 .short .widget { padding-block: 4px; }
@@ -722,6 +784,7 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
     <div class="field" id="field">
       <div class="inv-grid" id="inv-grid"></div>
       <span class="cannon" id="cannon" aria-hidden="true"></span>
+      <button class="friends" id="friends" type="button" hidden aria-label="Critter Log"></button>
     </div>
     <button class="wordmark" id="wordmark" type="button" aria-label="Open notebook">
       <span>K</span><span>U</span><span>R</span><span>A</span><span class="arr">→</span>
@@ -813,7 +876,7 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
 (() => {
 'use strict';
 
-const APP_VERSION = 'v16';
+const APP_VERSION = 'v17';
 /* ---------- helpers ---------- */
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -852,6 +915,8 @@ const ICONS = {
   gear: '<circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/>',
   nlm: '<path d="M4 4.5h8.5A3.5 3.5 0 0 1 16 8v12.5a2.5 2.5 0 0 0-2.5-2.5H4z"/><path d="M19.5 3l.7 1.6 1.6.7-1.6.7-.7 1.6-.7-1.6-1.6-.7 1.6-.7z"/><path d="M7.5 9h5M7.5 12.5h5"/>',
   help: '<circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.9.8c0 1.8-2.5 2.1-2.5 3.9"/><path d="M12 17.2h.01"/>',
+  palette: '<path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.6-.8 1.6-1.6 0-.5-.2-.8-.5-1.2-.3-.3-.5-.7-.5-1.2 0-.9.7-1.6 1.6-1.6H16a5 5 0 0 0 5-5c0-4-4-7.4-9-7.4z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7.5" r="1"/><circle cx="14.5" cy="7.5" r="1"/>',
+  heart: '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
   dots: '<circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/>',
   mic: '<path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3z"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/>',
 };
@@ -1464,13 +1529,24 @@ function drawField() {
     .sort((a, b) => (isNow(b) - isNow(a)) || (a.today && b.today ? (a.today < b.today ? -1 : 1) : 0) || (b.createdAt || 0) - (a.createdAt || 0));
   const cap = innerWidth < 720 ? 16 : 30;
   const shown = open.slice(0, cap);
+  const pets = state.theme === 'pets';
   const nodes = shown.map(it => {
-    const b = h('button', { class: 'inv' + (isNow(it) ? ' red' : ''), type: 'button', 'data-id': it.id, title: it.text, 'aria-label': (isNow(it) ? 'Today: ' : 'Task: ') + it.text, onclick: () => openItem(it.id) });
-    b.innerHTML = INV_SVG;
+    const b = h('button', { class: (pets ? 'pet' : 'inv') + (isNow(it) ? (pets ? ' due' : ' red') : ''), type: 'button', 'data-id': it.id, title: it.text, 'aria-label': (isNow(it) ? 'Today: ' : 'Task: ') + it.text, onclick: () => openItem(it.id) });
+    if (pets) {
+      const pt = petFor(it.id);
+      b.innerHTML = petSvg(pt);
+      b.dataset.pet = pt.id;
+      b.style.setProperty('--d', (-(hashStr(it.id) % 7000) / 1000).toFixed(2) + 's');
+    } else b.innerHTML = INV_SVG;
     return b;
   });
   if (open.length > cap) nodes.push(h('span', { class: 'more', text: '+' + (open.length - cap) }));
-  if (!open.length) nodes.push(h('span', { class: 'lbl all-clear', text: 'ALL CLEAR · NO OPEN TASKS' }));
+  if (!open.length) nodes.push(h('span', { class: 'lbl all-clear', text: pets ? 'ALL QUIET · NO OPEN TASKS' : 'ALL CLEAR · NO OPEN TASKS' }));
+  const fr = document.getElementById('friends');
+  if (fr) {
+    fr.hidden = !pets;
+    if (pets) { const st = critterStats(); fr.textContent = `♥ ${Object.values(st).reduce((a, x) => a + x.n, 0)} · ${PETS.filter(q => st[q.id]).length}/${PETS.length}`; }
+  }
   els.grid.replaceChildren(...nodes);
 }
 
@@ -2019,6 +2095,7 @@ function sendToday(id) { patch(id, { today: TODAY, done: false, doneAt: null, pe
 
 const busy = new Set();
 async function shoot(id) {
+  if (state.theme === 'pets') return befriend(id);
   if (reduceMotion() || document.body.classList.contains('short')) return;
   const inv = els.grid.querySelector(`.inv[data-id="${CSS.escape(id)}"]`);
   if (!inv || !inv.offsetParent) return;
@@ -2049,12 +2126,13 @@ async function toggleDone(id) {
     return;
   }
   busy.add(id);
-  play('done');
+  play(state.theme === 'pets' ? 'friend' : 'done');
   buzz([14, 50, 26]);
   try { await shoot(id); } catch (e) {}
   busy.delete(id);
+  const msg = doneMsg(it);
   await patch(id, { done: true, doneAt: Date.now() });
-  if (!it.repeat) toast('Done · +10', { label: 'Undo', fn: () => toggleDone(id) });
+  if (!it.repeat) toast(msg, { label: 'Undo', fn: () => toggleDone(id) });
 }
 async function letGoAll(ids) {
   state.confirmDrop = false;
@@ -4334,6 +4412,7 @@ const SFX = {
   chime: a => { tone(a, 660, 660, 0.22, 'triangle', 0.22); tone(a, 990, 990, 0.35, 'triangle', 0.2, 0.2); },
   trophy: a => [523, 659, 784, 1047].forEach((f, i) => tone(a, f, f, 0.11, 'square', 0.07, i * 0.09)),
   swipe: a => tone(a, 320, 620, 0.07, 'sine', 0.1),
+  friend: a => { tone(a, 880, 880, 0.08, 'square', 0.07); tone(a, 1175, 1175, 0.08, 'square', 0.07, 0.09); tone(a, 1568, 1568, 0.16, 'square', 0.06, 0.18); },
   undo: a => tone(a, 620, 300, 0.09, 'sine', 0.1),
   tick: a => tone(a, 1200, 1200, 0.03, 'square', 0.04),
 };
@@ -4519,6 +4598,8 @@ function drawMore() {
     tile('sound', fx.sound ? 'sound' : 'mute', fx.sound ? 'Sound on' : 'Sound off', 'tap to switch', async () => { fx.sound = !fx.sound; await saveFx(); play('trophy'); drawMore(); }),
     tile('nlm', 'nlm', 'NotebookLM', 'send · save', () => openNlm()),
     tile('guide', 'help', 'User guide', 'how it all works', () => openGuide()),
+    tile('theme', 'palette', 'Theme', (THEMES.find(t => t.id === (state.theme || 'invaders')) || THEMES[0]).name + ' · tap to switch', async () => { await setTheme(state.theme === 'pets' ? 'invaders' : 'pets'); drawMore(); }),
+    state.theme === 'pets' ? tile('critters', 'heart', 'Critter Log', `${PETS.filter(p => critterStats()[p.id]).length}/${PETS.length} met`, () => openCritters()) : null,
     tile('settings', 'gear', 'Settings', null, () => openSettings()));
   showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'More' },
     head('MORE', 'KURA ' + APP_VERSION, 'home'), h('div', { class: 'sheet-body' }, grid)));
@@ -4641,7 +4722,7 @@ function drawFocusView() {
   const phaseName = f.phase === 'focus' ? `FOCUS · ROUND ${f.round}` : f.phase === 'break' ? 'BREAK' : 'BREAK OVER';
   const body = h('div', { class: 'sheet-body focus-body' },
     h('span', { class: 'lbl', text: phaseName }),
-    htmlEl('div', 'focus-inv', INV_SVG),
+    htmlEl('div', 'focus-inv', themeGlyph(f.itemId)),
     h('div', { class: 'focus-time', id: 'focus-time', text: fmtClock(focusLeft()) }),
     h('span', { class: 'pj-bar big' }, h('i', { id: 'focus-bar', style: 'width:0%' })),
     h('p', { class: 'focus-task', text: f.title }),
@@ -5633,6 +5714,7 @@ function drawNlm() {
 // Block types: p (paragraph), h (small heading), steps (numbered), list (bullets), table ([left, right] rows), note (aside), try ([label, action] buttons)
 const GUIDE = [
   { id: 'new', icon: 'trophy', title: "What's new", blocks: [
+    { h: 'v17' }, { list: ['**Themes**: switch the top widget to **Pocket pets**, an LCD screen of original critters, and collect them in the **Critter Log**.'] },
     { h: 'v16' }, { list: ['This **user guide**. Open it from Settings, ⋯ More, or the **?** button on most screens.'] },
     { h: 'v15' }, { list: ['**NotebookLM**: send your notebook notes as a PDF source pack, and save NotebookLM answers back into Kura.'] },
     { h: 'v14' }, { list: ['Focus timer, swipe gestures, 8-bit sounds and vibration, streaks and trophies, Stats, Lab tools, Plan my day, sharing in and out, Undo, and checklists inside notes.', 'Review and Done log moved into **⋯ More** on the unfolded screen.'] },
@@ -5928,6 +6010,21 @@ const GUIDE = [
   { id: 'effects', icon: 'sound', title: 'Sounds, vibration and look', blocks: [
     { list: ['**8-bit sounds** (Settings → Effects, or ⋯ More → Sound): a laser when you finish a task, a chime when focus ends, a jingle for trophies. They play through media volume even on silent, so they start off.', '**Vibration** is on by default.', 'Kura follows your phone\'s light or dark mode, and the status bar matches it.', 'Work, Personal and Fun use blue, aqua and orange, and are always labelled with text too.'] },
   ] },
+  { id: 'themes', icon: 'palette', title: 'Themes and the Critter Log', blocks: [
+    { p: 'Settings → **Theme**, or ⋯ More → **Theme**, switches the look of the top widget.' },
+    { table: [
+      ['Invaders', 'Open tasks are pixel invaders. Finishing one fires the cannon.'],
+      ['Pocket pets', 'The widget becomes a small LCD screen. Each open task has a critter wandering about; finishing the task befriends it with a heart and a chirp.'],
+    ] },
+    { h: 'Critters' },
+    { list: [
+      'There are 16 original critters: 8 common, 5 uncommon and 3 rare (about 1 in 16 tasks). Which critter guards a task is decided by the task itself, so it never changes.',
+      'A critter with **!** is guarding a task that is due today. Tap any critter to open its task.',
+      'Tap **♥** in the corner of the screen, or ⋯ More → **Critter Log**, to see who you have met, how many times, and when you first met. Critters you haven\'t met are shadows marked ???.',
+      'Your whole task history counts, so switching themes never loses friends.',
+    ] },
+    { try: [['Critter Log', 'critters']] },
+  ] },
   { id: 'backup', icon: 'list', title: 'Backup, updates and installing', blocks: [
     { h: 'Your data' },
     { p: 'Notes, the notebook, the glossary, projects, stats and settings are stored in Chrome\'s storage for Kura on this phone. Nothing goes to a Kura server; there isn\'t one.' },
@@ -5970,6 +6067,7 @@ const GUIDE_ACTIONS = {
   trophies: () => openTrophies(),
   tools: () => openTools(),
   nlm: () => openNlm(),
+  critters: () => openCritters(),
 };
 const guideStrip = t => String(t || '').replace(/\*\*/g, '').replace(/`/g, '');
 function guideText(sec) {
@@ -6094,7 +6192,138 @@ function guidePdf() {
   return pdfBytes(doc);
 }
 
+const PETS = [
+  { id: 'blotty', name: 'Blotty', rarity: 'common', blurb: 'Leaves a trail of little drips. Loves fountain pens.', art: ['............', '....XXXX....', '..XXXXXXXX..', '.XXXXXXXXXX.', '.XX.XXXX.XX.', 'XXX.XXXX.XXX', 'XXXXXXXXXXXX', 'XXXXX..XXXXX', '.XXXXXXXXXX.', '..XX.XX.XX..', '..X..X..X...', '.....X......'] },
+  { id: 'beakie', name: 'Beakie', rarity: 'common', blurb: 'Always a bit bubbly. Handle with care.', art: ['....XXXX....', '.....XX.....', '.....XX.....', '....X..X....', '....X..X....', '...X....X...', '..X.X..X.X..', '..X......X..', '.XXXXXXXXXX.', '.XXXX..XXXX.', '.XXXXXXXXXX.', '..X......X..'] },
+  { id: 'rubb', name: 'Rubb', rarity: 'common', blurb: 'Fixes mistakes, then naps in the pencil case.', art: ['............', '............', '..XXXXXXXX..', '.X........X.', '.X.X....X.X.', '.X...XX...X.', '.XXXXXXXXXX.', '.XXXXXXXXXX.', '.XXXXXXXXXX.', '..XXXXXXXX..', '..X......X..', '..X......X..'] },
+  { id: 'mochi', name: 'Mochi', rarity: 'common', blurb: 'Soft, round and impossible to rush.', art: ['............', '............', '............', '...XXXXXX...', '.XX......XX.', 'X..X....X..X', 'X....XX....X', 'X..........X', 'X..........X', '.XX......XX.', '...XXXXXX...', '............'] },
+  { id: 'sockit', name: 'Sockit', rarity: 'common', blurb: 'The one that goes missing from every laundry load.', art: ['..XXXXXX....', '..XXXXXX....', '..X....X....', '..X.X.XX....', '..X....X....', '..X.XX.X....', '..X....XXX..', '..X.......X.', '..X........X', '..X........X', '...XXXXXXXX.', '............'] },
+  { id: 'dicey', name: 'Dicey', rarity: 'common', blurb: 'Rolls with whatever the day brings.', art: ['............', '.XXXXXXXXXX.', '.X........X.', '.X.XX..XX.X.', '.X.XX..XX.X.', '.X........X.', '.X...XX...X.', '.X........X.', '.XXXXXXXXXX.', '..X......X..', '..XX....XX..', '............'] },
+  { id: 'puff', name: 'Puff', rarity: 'common', blurb: 'Drifts in whenever your head is in the clouds.', art: ['............', '....XXX.....', '..XX...X.XX.', '.X......X..X', 'X..........X', 'X..X....X..X', 'X....XX....X', 'X..........X', '.X........X.', '..XXXXXXXX..', '............', '............'] },
+  { id: 'sprig', name: 'Sprig', rarity: 'common', blurb: 'Grows a little each time you water it.', art: ['.XX......XX.', 'XXXX....XXXX', '.XXXX..XXXX.', '...XX..XX...', '.....XX.....', '.....XX.....', '.XXXXXXXXXX.', '..X......X..', '..X.X..X.X..', '..X......X..', '...X.XX.X...', '....XXXX....'] },
+  { id: 'mugsy', name: 'Mugsy', rarity: 'uncommon', blurb: 'Runs on coffee and never lets it go cold.', art: ['...X..X.....', '..X..X......', '...X..X.....', '............', '.XXXXXXXX...', '.X......X...', '.X.X..X.XXX.', '.X......X..X', '.X..XX..X..X', '.X......XXX.', '.X......X...', '..XXXXXX....'] },
+  { id: 'loop', name: 'Loop', rarity: 'uncommon', blurb: 'Holds your posters and your plans together.', art: ['............', '...XXXXXX...', '..X......X..', '.X..XXXX..X.', '.X.X.X.XX.X.', '.X.X....X.X.', '.X.X.XX.X.X.', '.X..XXXX..X.', '..X......X..', '...XXXXXXXXX', '..........XX', '............'] },
+  { id: 'flit', name: 'Flit', rarity: 'uncommon', blurb: 'Drawn to desk lamps after midnight.', art: ['..X......X..', '...X....X...', '.XX.X..X.XX.', 'X..X.XX.X..X', 'X...XXXX...X', 'X..X.XX.X..X', '.XX.XXXX.XX.', '..X.X..X.X..', '.X..XXXX..X.', '.X...XX...X.', '..XXX..XXX..', '............'] },
+  { id: 'wormy', name: 'Wormy', rarity: 'uncommon', blurb: 'Has read every page twice.', art: ['......XXX...', '.....X...X..', '.....X.X.X..', '.....X...X..', '......X.X...', '.......X....', 'XXXXXXXXXXXX', 'X....XX....X', 'X.XX.XX.XX.X', 'X....XX....X', 'X.XX.XX.XX.X', 'XXXXXXXXXXXX'] },
+  { id: 'glim', name: 'Glim', rarity: 'uncommon', blurb: 'Lights up when you have a good idea.', art: ['....XXXX....', '..XX....XX..', '.X........X.', '.X..X..X..X.', '.X........X.', '.X...XX...X.', '..X......X..', '...X....X...', '....XXXX....', '....XXXX....', '....X..X....', '.....XX.....'] },
+  { id: 'tock', name: 'Tock', rarity: 'rare', blurb: 'Rings exactly when you are almost asleep.', art: ['.XX......XX.', 'XXX.XXXX.XXX', '...X....X...', '..X......X..', '..X.X..X.X..', '..X......X..', '..X..XXX.X..', '..X......X..', '...X....X...', '....XXXX....', '...X....X...', '..XX....XX..'] },
+  { id: 'fold', name: 'Fold', rarity: 'rare', blurb: 'Sailed out of a spare page of your notebook.', art: ['............', '......X.....', '......XX....', '......XXX...', '......XXXX..', '......XXXXX.', '......X.....', 'XXXXXXXXXXXX', '.X........X.', '..X.X..X.X..', '...X....X...', '....XXXX....'] },
+  { id: 'quill', name: 'Quill', rarity: 'rare', blurb: 'Writes everything in an old-fashioned hand.', art: ['.........XX.', '........XXX.', '.......XXX..', '......XXX...', '.....XX.....', '....XX......', '...XXXXX....', '..X.....X...', '..X.X.X.X...', '..X.....X...', '..XXXXXXX...', '............'] },
+];
+/* ---------- themes: Invaders or Pocket pets (original critters on an LCD screen) ---------- */
+const PET_W = { common: 8, uncommon: 6, rare: 2 };
+const THEMES = [
+  { id: 'invaders', name: 'Invaders', desc: 'Open tasks are pixel invaders. Finishing one fires the cannon.' },
+  { id: 'pets', name: 'Pocket pets', desc: 'An LCD screen of little critters. Finishing a task befriends one for your Critter Log.' },
+];
+function hashStr(s) {
+  let x = 2166136261;
+  for (const c of String(s)) { x ^= c.codePointAt(0); x = Math.imul(x, 16777619); }
+  return x >>> 0;
+}
+function petFor(id) {
+  const r = hashStr('pet:' + id) % 100;
+  let acc = 0;
+  for (const p of PETS) { acc += PET_W[p.rarity]; if (r < acc) return p; }
+  return PETS[0];
+}
+const petPathCache = {};
+const petPath = p => petPathCache[p.id] || (petPathCache[p.id] = bm(p.art));
+const petSvg = (p, cls) => `<svg class="pet-svg${cls ? ' ' + cls : ''}" viewBox="0 0 12 12" shape-rendering="crispEdges" aria-hidden="true"><path fill="currentColor" d="${petPath(p)}"/></svg>`;
+const themeGlyph = id => (state.theme === 'pets' ? petSvg(id ? petFor(id) : PETS[3]) : INV_SVG);
+function applyTheme() {
+  document.body.dataset.skin = state.theme || 'invaders';
+  const ti = document.getElementById('today-inv');
+  if (ti) {
+    if (state.theme === 'pets') { ti.setAttribute('viewBox', '0 0 12 12'); ti.innerHTML = `<path fill="currentColor" d="${petPath(PETS[3])}"/>`; }
+    else { ti.setAttribute('viewBox', '0 0 11 8'); ti.innerHTML = `<path fill="currentColor" d="${PATH_A}"/>`; }
+  }
+}
+async function setTheme(t) {
+  if (!THEMES.some(x => x.id === t) || state.theme === t) return;
+  state.theme = t;
+  if (store.kvSet) await store.kvSet('theme', t).catch(() => {});
+  applyTheme();
+  render();
+  play(t === 'pets' ? 'friend' : 'done');
+  toast(t === 'pets' ? 'Pocket pets on. Finish a task to befriend a critter.' : 'Invaders are back');
+}
+function critterStats() {
+  const stats = {};
+  for (const [d, ids] of Object.entries(state.doneLog || {})) {
+    for (const id of ids) {
+      const p = petFor(id);
+      const st = stats[p.id] || (stats[p.id] = { n: 0, first: d });
+      st.n++;
+      if (d < st.first) st.first = d;
+    }
+  }
+  return stats;
+}
+function doneMsg(it) {
+  if (state.theme !== 'pets') return 'Done · +10';
+  const p = petFor(it.id);
+  const first = !critterStats()[p.id];
+  return `${first ? 'New critter! ' : ''}${p.name} befriended${p.rarity === 'rare' ? ' (rare)' : ''} · +10`;
+}
+async function befriend(id) {
+  if (reduceMotion() || document.body.classList.contains('short')) return;
+  const el = els.grid.querySelector(`.pet[data-id="${CSS.escape(id)}"]`);
+  if (!el || !el.offsetParent) return;
+  const f = els.field.getBoundingClientRect(), r = el.getBoundingClientRect();
+  const heart = h('span', { class: 'heart', 'aria-hidden': 'true', text: '♥' });
+  heart.style.left = (r.left + r.width / 2 - f.left) + 'px';
+  heart.style.top = (r.top - f.top) + 'px';
+  el.classList.add('friend');
+  els.field.append(heart);
+  await wait(430);
+  setTimeout(() => heart.remove(), 600);
+}
+function themePreview(t) {
+  const box = h('span', { class: 'theme-prev', 'data-skin': t.id, 'aria-hidden': 'true' });
+  box.innerHTML = t.id === 'pets'
+    ? [PETS[3], PETS[12], PETS[8]].map(p => petSvg(p)).join('')
+    : [0, 1, 2].map(() => `<svg viewBox="0 0 11 8" shape-rendering="crispEdges"><path fill="currentColor" d="${PATH_A}"/></svg>`).join('');
+  return box;
+}
+function themeSection() {
+  return [
+    h('span', { class: 'lbl', text: 'Theme' }),
+    h('div', { class: 'theme-pick', role: 'radiogroup', 'aria-label': 'Theme' }, THEMES.map(t => h('button', {
+      class: 'theme-card', type: 'button', role: 'radio', id: 'theme-' + t.id, 'aria-checked': String((state.theme || 'invaders') === t.id),
+      onclick: async () => { await setTheme(t.id); drawSettings(); },
+    }, themePreview(t), h('b', { text: t.name }), h('span', { class: 'muted', text: t.desc })))),
+    state.theme === 'pets' ? h('div', { class: 'row' }, h('button', { class: 'btn', type: 'button', onclick: () => openCritters() }, 'Open the Critter Log')) : null,
+    h('hr', { class: 'rule' }),
+  ];
+}
+function openCritters() { state.sheet = { kind: 'critters' }; drawCritters(); }
+function drawCritters() {
+  const s = state.sheet;
+  if (!s || s.kind !== 'critters') return;
+  const st = critterStats();
+  const met = PETS.filter(p => st[p.id]).length;
+  const friends = Object.values(st).reduce((a, x) => a + x.n, 0);
+  const rarest = PETS.filter(p => st[p.id] && p.rarity === 'rare').length;
+  const tile = (v, l) => h('div', {}, h('b', { text: v }), h('span', { class: 'lbl', text: l }));
+  const body = h('div', { class: 'sheet-body' },
+    h('p', { class: 'muted', text: 'Every open task has a critter keeping an eye on it. Finish the task and the critter becomes your friend. Rare critters turn up about once in every 16 tasks. Your whole task history counts, whichever theme you use.' }),
+    h('div', { class: 'rv-stats' }, tile(String(friends), 'friends made'), tile(`${met}/${PETS.length}`, 'critters met'), tile(String(rarest), 'rare met')),
+    h('div', { class: 'critter-grid' }, PETS.map(p => {
+      const c = st[p.id];
+      const art = h('span', { class: 'critter-art lcd' + (c ? '' : ' unmet'), 'aria-hidden': 'true' });
+      art.innerHTML = petSvg(p);
+      return h('div', { class: 'critter' + (c ? ' met' : ''), 'data-id': p.id },
+        art,
+        h('b', { text: c ? p.name : '???' }),
+        h('span', { class: 'lbl', text: p.rarity + (c ? ` · ×${c.n}` : '') }),
+        h('span', { class: 'muted', text: c ? `${p.blurb} Met ${shortDay(c.first)}.` : 'Not met yet.' }));
+    })));
+  showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Critter Log' }, head('CRITTER LOG', `${met}/${PETS.length}`, 'themes'), body));
+}
+
 // v14 wiring
+$('#friends').addEventListener('click', () => openCritters());
 $('#btn-more').addEventListener('click', () => openMore());
 $('#score').addEventListener('click', () => openTrophies());
 $('#streak').addEventListener('click', () => openStats());
@@ -6375,6 +6604,7 @@ function drawSettings() {
     h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'Model for Auto sort' }), sort),
     h('p', { class: 'muted', text: s.provider === 'gemini' ? 'Leave the model boxes as they are. Kura picks the newest Gemini Flash for reading pages and Flash-Lite for sorting when you save the key.' : 'Leave the model boxes as they are. Kura picks the newest Sonnet for reading pages and the newest Haiku for sorting when you save the key.' }),
     h('hr', { class: 'rule' }),
+    themeSection(),
     h('span', { class: 'lbl', text: 'Effects' }),
     h('div', { class: 'row' },
       h('label', { class: 'keep', for: 'fx-sound' }, (() => { const c = h('input', { type: 'checkbox', id: 'fx-sound' }); c.checked = fx.sound; c.addEventListener('change', async () => { fx.sound = c.checked; await saveFx(); play('done'); }); return c; })(), '8-bit sounds'),
@@ -6500,6 +6730,7 @@ async function boot() {
   try { state.dayView = localStorage.getItem('kura.dayview') === 'week' ? 'week' : 'today'; } catch (e) { state.dayView = 'today'; }
   if (store.kvGet) {
     Object.assign(fx, (await store.kvGet('fx').catch(() => null)) || {});
+    state.theme = (await store.kvGet('theme').catch(() => null)) || 'invaders';
     state.doneLog = (await store.kvGet('doneLog').catch(() => null)) || {};
     state.focusSessions = (await store.kvGet('focusSessions').catch(() => null)) || [];
     state.flags = (await store.kvGet('flags').catch(() => null)) || {};
@@ -6507,6 +6738,8 @@ async function boot() {
     state.trophies = tr || {};
     if (!tr) state.trophyQuietUntil = Date.now() + 4000; // first run: count your history without fanfare
   } else Object.assign(state, { doneLog: {}, focusSessions: [], flags: {}, trophies: {} });
+  if (!state.theme) state.theme = 'invaders';
+  applyTheme();
   try {
     const f = JSON.parse(localStorage.getItem('kura.focus') || 'null');
     if (f && f.endsAt) { state.focus = f; runFocusTimer(); if (f.phase === 'focus' && !f.paused) holdWake(true); }
