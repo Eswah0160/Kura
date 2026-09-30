@@ -575,6 +575,46 @@ body.focusing .toast { top: calc(var(--vvt, 0px) + var(--vvh, 100vh) - env(safe-
 @media (max-width: 719px) { .more-btn .vl { display: none; } }
 @media (max-width: 1179px) { #btn-review, #btn-log { display: none; } }
 @media (max-width: 400px) { #streak { display: none; } }
+/* v16: user guide */
+.sheet-head .help-btn { font-family: var(--f-mono); font-size: 15px; font-weight: 500; color: var(--ink-2); }
+.sheet-head .ghost + .ghost { margin-left: 0; }
+.nb-top .help-btn { font-family: var(--f-mono); font-size: 15px; font-weight: 500; }
+.sheet.guide { width: min(980px, 100%); height: 100%; }
+@media (min-width: 720px) { .sheet.guide { height: calc(100% - 24px); } }
+.guide-body { flex: 1; min-height: 0; display: grid; grid-template-columns: 230px minmax(0, 1fr); }
+.guide-nav { overflow: auto; border-right: 1px solid var(--rule); padding: 10px 8px; display: flex; flex-direction: column; gap: 1px; }
+.guide-nav button { display: flex; gap: 8px; align-items: baseline; width: 100%; text-align: left; border: 0; background: none; padding: 6px 8px; border-radius: 6px; font-size: 13.5px; line-height: 1.3; color: var(--ink-2); }
+.guide-nav button .gn { font-family: var(--f-mono); font-size: 10px; color: var(--ink-2); opacity: 0.7; flex: none; }
+.guide-nav button[aria-current="true"] { background: var(--paper); color: var(--ink); font-weight: 700; }
+.guide-main { overflow: auto; padding: 12px 16px 28px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.guide-tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; position: sticky; top: -12px; z-index: 2; background: var(--sheet); padding: 6px 0; margin-top: -6px; }
+.guide-tools .search-in { flex: 1 1 200px; margin: 0; width: auto; }
+.guide-jump { display: none; }
+.g-sec { border: 1px solid var(--rule); border-radius: 8px; background: var(--sheet); flex: none; }
+.g-sec > summary { list-style: none; cursor: pointer; padding: 12px 14px; display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 15px; }
+.g-sec > summary::-webkit-details-marker { display: none; }
+.g-sec > summary svg { width: 18px; height: 18px; flex: none; color: var(--ink-2); }
+.g-sec > summary::after { content: "+"; margin-left: auto; font-family: var(--f-mono); font-weight: 400; color: var(--ink-2); }
+.g-sec[open] > summary::after { content: "–"; }
+.g-sec[open] > summary { border-bottom: 1px solid var(--rule); }
+.g-in { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 10px; font-size: 14.5px; line-height: 1.6; overflow-wrap: anywhere; }
+.g-in p { margin: 0; }
+.g-in ol, .g-in ul { margin: 0; padding-left: 22px; }
+.g-in li { margin: 3px 0; }
+.g-in h4 { margin: 4px 0 -4px; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2); font-weight: 400; }
+.g-in code { font-family: var(--f-mono); font-size: 0.9em; background: var(--paper); padding: 0 4px; border-radius: 3px; }
+.g-table { width: 100%; border-collapse: collapse; font-size: 13.5px; line-height: 1.5; }
+.g-table th, .g-table td { text-align: left; vertical-align: top; padding: 6px 0; border-bottom: 1px solid var(--rule); }
+.g-table tr:last-child th, .g-table tr:last-child td { border-bottom: 0; }
+.g-table th { font-family: var(--f-mono); font-weight: 400; font-size: 12px; padding-right: 14px; width: 34%; }
+.g-note { border-left: 3px solid var(--rule); padding-left: 10px; color: var(--ink-2); font-size: 13.5px; }
+.g-try { display: flex; gap: 6px; flex-wrap: wrap; }
+@media (max-width: 719px) {
+  .guide-body { grid-template-columns: minmax(0, 1fr); }
+  .guide-nav { display: none; }
+  .guide-jump { display: block; flex: 1 1 100%; }
+  .g-table th { width: 40%; }
+}
 /* short screens: keyboard up on the Fold leaves roughly a 4:3 area */
 .short .field, .short .wordmark, .short .tags-lbl { display: none; }
 .short .widget { padding-block: 4px; }
@@ -773,7 +813,7 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
 (() => {
 'use strict';
 
-const APP_VERSION = 'v15';
+const APP_VERSION = 'v16';
 /* ---------- helpers ---------- */
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -811,6 +851,7 @@ const ICONS = {
   mute: '<path d="M4 9v6h4l5 4V5L8 9z"/><path d="M17 9.5l5 5M22 9.5l-5 5"/>',
   gear: '<circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/>',
   nlm: '<path d="M4 4.5h8.5A3.5 3.5 0 0 1 16 8v12.5a2.5 2.5 0 0 0-2.5-2.5H4z"/><path d="M19.5 3l.7 1.6 1.6.7-1.6.7-.7 1.6-.7-1.6-1.6-.7 1.6-.7z"/><path d="M7.5 9h5M7.5 12.5h5"/>',
+  help: '<circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.9.8c0 1.8-2.5 2.1-2.5 3.9"/><path d="M12 17.2h.01"/>',
   dots: '<circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/>',
   mic: '<path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3z"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/>',
 };
@@ -1482,6 +1523,12 @@ function drawBanner() {
       h('button', { type: 'button', onclick: () => openReview() }, 'Start review'),
       h('button', { type: 'button', onclick: () => { state.reviewDismissed = true; drawBanner(); } }, 'Later'));
   }
+  if (state.seenVersion !== undefined && state.seenVersion !== APP_VERSION) {
+    const fresh = !state.seenVersion && !state.items.some(i => !i.example);
+    nodes.push(h('span', { text: fresh ? 'New to Kura? The user guide shows how everything works.' : `Kura updated to ${APP_VERSION}. There's now a built-in user guide.` }),
+      h('button', { type: 'button', id: 'banner-guide', onclick: () => openGuide(fresh ? 'start' : 'new') }, fresh ? 'Open the guide' : "What's new"),
+      h('button', { type: 'button', onclick: () => markSeen() }, 'Got it'));
+  }
   const ex = state.items.filter(i => i.example);
   if (ex.length) {
     nodes.push(h('span', { text: `${ex.length} example notes are showing.` }),
@@ -1819,7 +1866,7 @@ function drawPaste() {
     h('p', { class: 'muted', text: 'Free and on your phone: open Google Lens (or the Camera app), point it at the page, tap Text, then Select all and Copy. Paste it here. Each line becomes a note, and a symbol at the start of a line (! ? [] ->) becomes a tag.' }),
     ta);
   showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Paste a page' },
-    head('PASTE A PAGE', 'free'), body,
+    head('PASTE A PAGE', 'free', 'camera'), body,
     h('div', { class: 'sheet-foot' },
       navigator.clipboard && navigator.clipboard.readText
         ? h('button', { class: 'btn', type: 'button', onclick: async () => {
@@ -1960,7 +2007,7 @@ function drawDiag() {
   const prev = $('.sheet-body', els.sheet);
   const scroll = prev ? prev.scrollTop : 0;
   showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Check connections' },
-    head('CHECK CONNECTIONS', 'KURA ' + APP_VERSION), body,
+    head('CHECK CONNECTIONS', 'KURA ' + APP_VERSION, 'trouble'), body,
     h('div', { class: 'sheet-foot' }, h('span', { class: 'grow' }),
       h('button', { class: 'btn', type: 'button', disabled: d.running, onclick: () => openDiag() }, 'Run again'), copy)));
   body.scrollTop = scroll;
@@ -2227,10 +2274,11 @@ function tagChips(selected, onChange, small) {
   }
   return wrap;
 }
-function head(title, stamp) {
+function head(title, stamp, help) {
   return h('div', { class: 'sheet-head' },
     h('h2', { text: title }),
     stamp ? h('span', { class: 'lbl', text: stamp }) : null,
+    help ? h('button', { class: 'ghost help-btn', type: 'button', 'aria-label': 'Help for this screen', title: 'Help', onclick: () => openGuide(help) }, '?') : null,
     h('button', { class: 'ghost', type: 'button', 'aria-label': 'Close', onclick: closeSheet }, icon('close')));
 }
 
@@ -2286,7 +2334,7 @@ function drawItem() {
   }, 'Delete');
 
   showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Note' },
-    head(it.done ? 'DONE' : isNow(it) ? 'TODAY' : it.today ? 'PLANNED · ' + futureLabel(it.today).toUpperCase() : (LABEL[it.bucket] || 'NOTE'), created),
+    head(it.done ? 'DONE' : isNow(it) ? 'TODAY' : it.today ? 'PLANNED · ' + futureLabel(it.today).toUpperCase() : (LABEL[it.bucket] || 'NOTE'), created, 'task-sheet'),
     h('div', { class: 'sheet-body' },
       field,
       h('div', { class: 'row' },
@@ -2344,7 +2392,7 @@ function drawLog() {
   const prev = $('.sheet-body', els.sheet);
   const scroll = prev ? prev.scrollTop : 0;
   showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Done log' },
-    head('DONE LOG', `${done.length} done · score ${done.length * 10}`), body));
+    head('DONE LOG', `${done.length} done · score ${done.length * 10}`, 'lists'), body));
   body.scrollTop = scroll;
 }
 
@@ -2381,7 +2429,7 @@ function drawSymbols() {
   const prev = $('.sheet-body', els.sheet);
   const scroll = prev ? prev.scrollTop : 0;
   showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Your symbols' },
-    head('YOUR SYMBOLS', `${s.draft.length} / 8`), body,
+    head('YOUR SYMBOLS', `${s.draft.length} / 8`, 'camera'), body,
     h('div', { class: 'sheet-foot' },
       h('button', { class: 'link-btn plain', type: 'button', onclick: () => { s.draft = DEFAULT_SYMBOLS.map(x => ({ ...x })); drawSymbols(); } }, 'Reset to defaults'),
       h('span', { class: 'grow' }),
@@ -2601,7 +2649,7 @@ function drawScan() {
   const prev = $('.sheet-body', els.sheet);
   const scroll = prev ? prev.scrollTop : 0;
   showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Brain Camera' },
-    head(scan.pasted ? 'PASTE A PAGE' : 'BRAIN CAMERA', scan.status === 'review' && scan.items.length ? 'review' : ''), body, foot));
+    head(scan.pasted ? 'PASTE A PAGE' : 'BRAIN CAMERA', scan.status === 'review' && scan.items.length ? 'review' : '', 'camera'), body, foot));
   body.scrollTop = scroll;
 }
 
@@ -3460,6 +3508,7 @@ function drawNotebook() {
       drawNotebook();
       const t = document.getElementById('nb-raw'); if (t) t.focus();
     } }, '+', h('span', { class: 'nl', text: ' New' })),
+    h('button', { class: 'ghost help-btn', id: 'nb-help', type: 'button', 'aria-label': 'Help for this screen', title: 'Help', onclick: () => openGuide({ bank: nb.mode === 'edit' ? 'writing-notes' : 'notebook', proj: 'projects', gloss: 'glossary', ask: 'ask' }[nb.tab] || 'notebook') }, '?'),
     h('button', { class: 'ghost', type: 'button', 'aria-label': 'Close notebook', onclick: () => closeNotebook() }, icon('close')));
 
   // keep scroll positions when redrawing the same view
@@ -4122,7 +4171,7 @@ function drawReview() {
   const prev = $('.sheet-body', els.sheet);
   const keep = prev ? prev.scrollTop : 0;
   showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Weekly review' },
-    head('WEEKLY REVIEW', `${d.week} · ${shortDay(d.wkStart)}–${shortDay(d.wkEnd)}`), body, foot));
+    head('WEEKLY REVIEW', `${d.week} · ${shortDay(d.wkStart)}–${shortDay(d.wkEnd)}`, 'review'), body, foot));
   body.scrollTop = keep;
 }
 async function summariseWeek() {
@@ -4469,9 +4518,10 @@ function drawMore() {
     tile('log', 'list', 'Done log', null, () => openLog()),
     tile('sound', fx.sound ? 'sound' : 'mute', fx.sound ? 'Sound on' : 'Sound off', 'tap to switch', async () => { fx.sound = !fx.sound; await saveFx(); play('trophy'); drawMore(); }),
     tile('nlm', 'nlm', 'NotebookLM', 'send · save', () => openNlm()),
+    tile('guide', 'help', 'User guide', 'how it all works', () => openGuide()),
     tile('settings', 'gear', 'Settings', null, () => openSettings()));
   showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'More' },
-    head('MORE', 'KURA ' + APP_VERSION), h('div', { class: 'sheet-body' }, grid)));
+    head('MORE', 'KURA ' + APP_VERSION, 'home'), h('div', { class: 'sheet-body' }, grid)));
 }
 
 /* ---------- share out ---------- */
@@ -4619,7 +4669,7 @@ function drawFocusView() {
         ? h('button', { class: 'btn primary', type: 'button', onclick: () => { f.endsAt = Date.now(); f.paused = false; focusTick(); } }, 'Skip break')
         : it && !it.done ? h('button', { class: 'btn primary', id: 'focus-done', type: 'button', onclick: async () => { await stopFocus(true); closeSheet(); await toggleDone(it.id); } }, 'Task done') : null);
   }
-  showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Focus' }, head('FOCUS', f.phase === 'focus' ? `${Math.round(f.dur / 60000)} min` : ''), body, foot));
+  showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Focus' }, head('FOCUS', f.phase === 'focus' ? `${Math.round(f.dur / 60000)} min` : '', 'focus'), body, foot));
   if (!f.dur0 && f.phase === 'focus') { f.dur0 = f.dur; saveFocus(); }
 }
 function openFocusPicker() {
@@ -4641,7 +4691,7 @@ function drawFocusPicker() {
       h('span', { class: 'x', text: rowText(it) }), h('span', { class: 'meta' }, whenMeta(it), projOf(it) ? h('span', { class: 'tg', text: '#' + projOf(it).name }) : null, it.focusMin ? h('span', { text: fmtMin(it.focusMin) }) : null)))
       : h('p', { class: 'muted', text: 'No open tasks. You can still focus without one.' }),
     h('button', { class: 'btn', id: 'focus-free', type: 'button', onclick: () => startFocus(null, m, b) }, `Just focus for ${m} min`));
-  showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Start focus' }, head('FOCUS', `${m} min + ${b} min break`), body));
+  showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Start focus' }, head('FOCUS', `${m} min + ${b} min break`, 'focus'), body));
 }
 
 /* ---------- streaks + trophies ---------- */
@@ -4749,7 +4799,7 @@ function drawTrophies() {
         h('span', { class: 'muted', text: t.desc }),
         h('span', { class: 'lbl', text: at ? 'Unlocked ' + new Date(at).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' }) : t.goal > 1 ? `${t.id === 'flow_state' ? Math.floor(v / 60) + ' / 10 h' : v + ' / ' + t.goal}` : 'Locked' }));
     })));
-  showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Trophies' }, head('TROPHIES', `${won}/${TROPHIES.length}`), body));
+  showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Trophies' }, head('TROPHIES', `${won}/${TROPHIES.length}`, 'stats'), body));
 }
 
 /* ---------- stats ---------- */
@@ -4840,7 +4890,7 @@ function drawStats() {
     h('details', {}, h('summary', { class: 'lbl', text: 'Last 14 days as a table' }),
       h('table', { class: 'stat-table' }, h('thead', {}, h('tr', {}, h('th', { text: 'Day' }), h('th', { text: 'Done' }), h('th', { text: 'Focus' }))),
         h('tbody', {}, last14.map(d => h('tr', {}, h('td', { text: parseDay(d).toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' }) }), h('td', { text: String(doneOn(d)) }), h('td', { text: focusOn(d) ? fmtMin(focusOn(d)) : '–' })))))));
-  showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Stats' }, head('STATS', ''), body));
+  showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Stats' }, head('STATS', '', 'stats'), body));
 }
 
 /* ---------- lab tools ---------- */
@@ -5011,7 +5061,7 @@ function drawTools() {
       drawWhen();
       toast('Added to the pad. Press Enter to save it.');
     } }, 'Add to pad'));
-  showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Lab tools' }, head('LAB TOOLS', tool.name), body, foot));
+  showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Lab tools' }, head('LAB TOOLS', tool.name, 'tools'), body, foot));
   drawToolOut(tool);
 }
 
@@ -5082,7 +5132,7 @@ function drawPlan() {
       play('swipe');
       toast(`${chosen.length} added to TODAY`, { label: 'Undo', fn: async () => { for (const [id, t] of before) await patch(id, { today: t }); } });
     } }, n ? `Add ${n} to TODAY` : 'Pick some'));
-  showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Plan my day' }, head('PLAN MY DAY', parseDay(TODAY).toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'short' })), body, foot));
+  showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Plan my day' }, head('PLAN MY DAY', parseDay(TODAY).toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'short' }), 'plan'), body, foot));
 }
 async function planWithAi() {
   const s = state.sheet;
@@ -5144,7 +5194,7 @@ function drawShared() {
       h('button', { class: 'tile-btn', id: 'share-task', type: 'button', onclick: () => saveShared('make') }, icon('check', 1.8), h('span', { class: 'nm', text: 'Task' }), h('span', { class: 'lbl', text: 'MAKE' })),
       h('button', { class: 'tile-btn', id: 'share-paper', type: 'button', onclick: () => sharedToNotebook('paper') }, icon('page', 1.8), h('span', { class: 'nm', text: 'Paper note' }), h('span', { class: 'lbl', text: 'notebook' })),
       h('button', { class: 'tile-btn', id: 'share-nb', type: 'button', onclick: () => sharedToNotebook('blank') }, icon('plan', 1.8), h('span', { class: 'nm', text: 'Notebook note' }), h('span', { class: 'lbl', text: 'blank' }))));
-  showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Shared to Kura' }, head('SHARED TO KURA', first.slice(0, 40)), body));
+  showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Shared to Kura' }, head('SHARED TO KURA', first.slice(0, 40), 'sharing'), body));
 }
 async function saveShared(bucket) {
   const s = state.sheet;
@@ -5191,6 +5241,7 @@ function handleLaunch() {
       h('div', { class: 'sheet-foot' }, h('span', { class: 'grow' }), h('button', { class: 'btn primary', type: 'button', onclick: () => { closeSheet(); els.fileCam.click(); } }, 'Open camera'))));
   } else if (act === 'focus') { state.focus ? openFocusView() : openFocusPicker(); }
   else if (act === 'plan') openPlan();
+  else if (act === 'guide') openGuide(q.get('topic') || 'start');
   else if (act === 'review') openReview();
 }
 
@@ -5206,7 +5257,7 @@ const PDF_TRANSLIT = {
   '≈': '~', '≃': '~', '≤': '<=', '≥': '>=', '≠': '!=', '√': 'sqrt', '∞': 'infinity', '∑': 'sum', '∫': 'integral', '∂': 'd', '−': '-', '∼': '~', '⋅': '·', '∙': '·', '∝': 'proportional to', '∈': 'in',
   '⁰': '^0', '⁴': '^4', '⁵': '^5', '⁶': '^6', '⁷': '^7', '⁸': '^8', '⁹': '^9', '⁻': '^-', '⁺': '^+', 'ⁿ': '^n',
   '₀': '0', '₁': '1', '₂': '2', '₃': '3', '₄': '4', '₅': '5', '₆': '6', '₇': '7', '₈': '8', '₉': '9', '꜀': 'c',
-  '☐': '[ ]', '☑': '[x]', '☒': '[x]', '✓': 'v', '✔': 'v', '✗': 'x', '★': '*', '☆': '*', '▶': '>', '●': '•', '◆': '•', '▲': '^', '′': "'", '″': '"', '℃': '°C', '№': 'No.', ' ': ' ', ' ': ' ', ' ': ' ', '​': '',
+  '⋯': '...', '⋮': '(menu)', '✎': '(edit)', '☐': '[ ]', '☑': '[x]', '☒': '[x]', '✓': 'v', '✔': 'v', '✗': 'x', '★': '*', '☆': '*', '▶': '>', '●': '•', '◆': '•', '▲': '^', '′': "'", '″': '"', '℃': '°C', '№': 'No.', ' ': ' ', ' ': ' ', ' ': ' ', '​': '',
 };
 function pdfText(str) {
   let out = '';
@@ -5574,8 +5625,473 @@ function drawNlm() {
   }
   const prev = $('.sheet-body', els.sheet);
   const keep = prev && els.sheet.querySelector('[aria-label="NotebookLM"]') ? prev.scrollTop : 0;
-  showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'NotebookLM' }, head('NOTEBOOKLM', s.tab === 'send' ? 'send a source pack' : 'save an answer'), body, foot));
+  showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'NotebookLM' }, head('NOTEBOOKLM', s.tab === 'send' ? 'send a source pack' : 'save an answer', 'notebooklm'), body, foot));
   body.scrollTop = keep;
+}
+
+/* ---------- user guide content ---------- */
+// Block types: p (paragraph), h (small heading), steps (numbered), list (bullets), table ([left, right] rows), note (aside), try ([label, action] buttons)
+const GUIDE = [
+  { id: 'new', icon: 'trophy', title: "What's new", blocks: [
+    { h: 'v16' }, { list: ['This **user guide**. Open it from Settings, ⋯ More, or the **?** button on most screens.'] },
+    { h: 'v15' }, { list: ['**NotebookLM**: send your notebook notes as a PDF source pack, and save NotebookLM answers back into Kura.'] },
+    { h: 'v14' }, { list: ['Focus timer, swipe gestures, 8-bit sounds and vibration, streaks and trophies, Stats, Lab tools, Plan my day, sharing in and out, Undo, and checklists inside notes.', 'Review and Done log moved into **⋯ More** on the unfolded screen.'] },
+    { h: 'v13' }, { list: ['Smart dates and repeating tasks, the Week view, Projects, notebook templates, voice capture, and the weekly review.'] },
+    { h: 'v12 and earlier' }, { list: ['The Bank, the Glossary, Work / Personal / Fun categories, the Notebook, Google Tasks, Obsidian and Brain Camera.'] },
+  ] },
+  { id: 'start', icon: 'plan', title: 'Getting started', blocks: [
+    { p: 'Kura is a home screen for your notebook. Write the moment a thought arrives, bring in pages from your paper notebook, sort everything into **DROP**, **STOCK** and **MAKE**, plan **TODAY**, and keep longer, cleaned-up notes in the **Notebook**. Everything is saved on this phone.' },
+    { h: 'Set up in about five minutes' },
+    { steps: [
+      'Tap the **gear** (Settings).',
+      '**Obsidian vault** (optional): type your vault name exactly as Obsidian shows it, then tap **Save**. Obsidian must be installed on this phone.',
+      '**AI** (optional but recommended): choose **GEMINI · FREE**, get a free key at aistudio.google.com (**Get API key → Create API key**), paste it and tap **Save and test**.',
+      '**Your field**: type something like "biomedical engineering: catheter electrodes, bioimpedance". The notebook uses it to understand technical notes.',
+      'Close Settings, try the example notes on the home screen, then tap **Clear examples** in the banner.',
+      '**Google Tasks** (optional): see the Google Tasks chapter.',
+    ] },
+    { note: 'Everything works without an AI key. Kura then sorts with simple rules on your phone, and you bring in paper pages by pasting text from Google Lens.' },
+    { try: [['Open Settings', 'settings']] },
+  ] },
+  { id: 'home', icon: 'list', title: 'The home screen', blocks: [
+    { table: [
+      ['Date · SCORE', 'SCORE goes up 10 for every task you finish. Tap it to see your trophies.'],
+      ['STREAK', 'How many days in a row you have finished at least one task. Tap it for Stats.'],
+      ['AI ✓ / TASKS ✓', 'Connection status for AI and Google Tasks. Tap one if it shows a problem.'],
+      ['Search', 'Filters every list as you type. On the cover screen, tap the magnifier first.'],
+      ['Notebook', 'Opens the Notebook (Bank, Projects, Glossary, Ask). The K U R A → wordmark does the same.'],
+      ['Vault + number', 'Sends notes that are not in Obsidian yet. The number is how many are waiting.'],
+      ['⋯ More', 'Focus, Plan my day, Stats, Trophies, Lab tools, Weekly review, Done log, NotebookLM, sound, this guide and Settings.'],
+    ] },
+    { h: 'The invaders' },
+    { p: 'Every open task (anything in MAKE or with a date) is a pixel invader. Red ones are due today. Tap an invader to open its task. When you finish a task, the cannon shoots it down.' },
+    { h: 'Symbol tiles' },
+    { p: 'The row of tiles shows your symbols (! Important, ? Unresolved, ☐ Task, → Follow-up) and how many notes carry each. Tap a tile to show only those notes; tap it again to clear the filter. **Edit** lets you change the symbols.' },
+    { h: 'Screens' },
+    { p: 'Unfolded, you see the pad, TODAY and the three lists together. On the cover screen, tabs (TODAY · DROP · STOCK · MAKE) show one list at a time. When the keyboard is open, Kura squeezes itself above it so the pad stays visible.' },
+  ] },
+  { id: 'write', icon: 'pen', title: 'Writing quick notes', blocks: [
+    { steps: ['Type in the pad (WRITE / NO.).', 'Press **Enter** to save. **Shift + Enter** starts a new line in the same note.', 'Pick where it goes with the chips under the pad.'] },
+    { table: [
+      ['AUTO', 'AI decides DROP, STOCK or MAKE (and a category). Without a key, rules on your phone decide.'],
+      ['DROP', 'Fleeting: only useful for a moment (a room number, "running late").'],
+      ['STOCK', 'Worth keeping: facts, ideas, references, open questions.'],
+      ['MAKE', 'Something to act on.'],
+      ['TODAY', 'A task for today.'],
+    ] },
+    { h: 'Shortcuts while typing' },
+    { table: [
+      ['! at the start', 'Important'],
+      ['? at the start', 'Unresolved question'],
+      ['[] or [ ] at the start', 'Task'],
+      ['-> at the start', 'Follow-up'],
+      ['fri · tomorrow · 3 Oct', 'Plans it for that day (see Dates and repeats)'],
+      ['every mon · daily', 'A repeating task'],
+      ['#aurora', 'Files it in an existing project'],
+      ['Prep [] wash [] dry', 'A task with a checklist of steps'],
+    ] },
+    { p: 'While you type, a small red tag above the pad shows what Kura understood, like "→ Fri ↻ every Mon · #Aurora". Tap it to save this note **without** the date.' },
+    { h: 'Voice' },
+    { p: 'Tap the **mic** in the pad and speak. On Android it stops after each sentence, so tap again to keep going. Chrome sends the audio to Google to turn it into text, and it needs an internet connection.' },
+    { try: [['Write a note', 'pad']] },
+  ] },
+  { id: 'lists', icon: 'check', title: 'DROP, STOCK, MAKE and TODAY', blocks: [
+    { table: [
+      ['DROP', 'Let things go when they have done their job: tap **Clear** on the list, or swipe left.'],
+      ['STOCK', 'Your kept knowledge. Open questions carry ?.'],
+      ['MAKE', 'Tasks. Tap **+ TODAY** to plan one for today. Planned tasks show "due Fri" here until their day comes.'],
+      ['TODAY', "Today's tasks. Tick the box when done. Tasks you didn't finish stay, marked \"since Mon\"."],
+    ] },
+    { h: 'Week view' },
+    { p: 'Tap **WEEK →** on the TODAY card to see the next 7 days, grouped by day, plus a peek at later tasks. **← TODAY** goes back.' },
+    { h: 'Finishing tasks' },
+    { list: ['Tick a task in TODAY (or swipe it right). You get +10 score, and **Undo** appears for a few seconds.', 'Finished tasks are listed in the **Done log** (⋯ More → Done log), grouped by day. From there you can put one back in TODAY.'] },
+    { try: [['Done log', 'log']] },
+  ] },
+  { id: 'task-sheet', icon: 'pen', title: 'Editing a note or task', blocks: [
+    { p: 'Tap any note to open its sheet. Changes to the text are saved when you close it.' },
+    { table: [
+      ['DROP · STOCK · MAKE', 'Move it to another list.'],
+      ['+ TODAY', 'Plan it for today (or take it out of TODAY).'],
+      ['▶ Focus', 'Start a focus session on this task.'],
+      ['Share', "Send it to another app with the phone's share sheet."],
+      ['Steps', 'Tick steps, or add one to turn the note into a checklist.'],
+      ['Category · project', 'Work / Personal / Fun, and a project (or make a new one).'],
+      ['Date · Repeat', 'Pick a day, and daily, weekdays, weekly, fortnightly or monthly.'],
+      ['Symbols', 'Tag it Important, Unresolved, Task or Follow-up.'],
+      ['Send to Obsidian', 'Sends just this note, even if it was sent before.'],
+      ['Delete', 'Tap twice. **Undo** appears for 5 seconds.'],
+    ] },
+  ] },
+  { id: 'dates', icon: 'cal', title: 'Dates and repeating tasks', blocks: [
+    { p: 'Write the day as part of a task and Kura plans it, then removes those words from the text. It works in the pad, in project task boxes, on scanned pages and in tasks the notebook finds.' },
+    { table: [
+      ['tomorrow · tmrw', 'Tomorrow'],
+      ['fri · friday · on friday', 'The coming Friday (never today)'],
+      ['this fri', 'Friday this week'],
+      ['next fri', 'Friday next week'],
+      ['next week', 'Next Monday'],
+      ['in 3 days · in 2 weeks · in a month', 'That far from today'],
+      ['3 Oct · Oct 3 · 3/10 · 2026-10-03', 'That date (3/10 is day/month)'],
+      ['this weekend', 'Saturday'],
+      ['end of week · end of month', 'Friday · the last day of the month'],
+    ] },
+    { h: 'Repeats' },
+    { table: [
+      ['daily · every day · every 2 days', 'Every day, or every n days'],
+      ['weekdays', 'Monday to Friday'],
+      ['every mon · every mon and thu', 'Those weekdays'],
+      ['every other wed · fortnightly', 'Every two weeks'],
+      ['weekly', "Every week, on today's weekday"],
+      ['monthly · every month', "Every month, on today's date"],
+    ] },
+    { list: ['When you tick a repeating task, Kura creates the next one straight away. Untick it to undo.', 'Short day names in the middle of a sentence ("sat with Sam") are ignored. Put the day at the end, or after on / by / due.', 'Notes going to DROP, and messages like "moved to Thursday", are never given a date.', 'Google Tasks gets each repeat as its own task. In Obsidian, repeats show as 🔁 for the Tasks plugin.'] },
+  ] },
+  { id: 'steps', icon: 'list', title: 'Checklists inside notes', blocks: [
+    { steps: ['Type the task, then its steps: **Prep samples [] wash [] dry [] weigh**. Or put each step on its own line starting with [ ].', 'Rows show progress like ☐ 1/3.', 'Open the task to tick steps. Use **Add a step** for more.', 'When every step is ticked, **All steps done · finish the task** appears.'] },
+    { note: 'Steps go to Obsidian as nested checkboxes, and they are included when you share a task.' },
+  ] },
+  { id: 'swipes', icon: 'check', title: 'Swipes and undo', blocks: [
+    { table: [
+      ['TODAY', 'Right: done · Left: tomorrow'],
+      ['WEEK view', 'Right: + TODAY · Left: push a day'],
+      ['MAKE', 'Right: + TODAY · Left: tomorrow'],
+      ['STOCK', 'Right: to MAKE · Left: to DROP'],
+      ['DROP', 'Right: keep (to STOCK) · Left: let go'],
+    ] },
+    { p: 'Drag a row sideways. When the label turns red, let go. A short drag springs back. After most actions, **Undo** appears at the bottom of the screen for about 5 seconds.' },
+  ] },
+  { id: 'camera', icon: 'page', title: 'Brain Camera and pasting a page', blocks: [
+    { h: 'With an AI key' },
+    { steps: [
+      'Tap the **camera** in the pad, or the **picture** button to use a photo you already took.',
+      'Photograph one page (or a two-page spread) in good light, filling the frame.',
+      'Kura reads your handwriting and your symbols and splits the page into notes. This takes 10 to 40 seconds.',
+      'Check each note: fix the text, change DROP / STOCK / MAKE, tap Today, untick lines you don\'t want. Set the category and project for the page.',
+      'Tick **Keep the photo** to keep it on the phone with the notes. **Send to Obsidian** sends the page too. Then tap **Add**.',
+    ] },
+    { h: 'Without a key (free)' },
+    { steps: ['Tap the camera button: it opens **Paste a page**.', 'Open **Google Lens** (or the camera app), point it at the page, tap **Text → Select all → Copy**.', 'Paste into Kura and tap **Split into notes**. Each line becomes a note, and a symbol at the start of a line becomes a tag.'] },
+    { h: 'Your symbols' },
+    { p: 'Tap the **Edit** tile to change symbol marks and names, and describe how you draw each one (for example "a small box before the line"). Brain Camera uses that description to spot them. You can have up to 8.' },
+    { note: 'Samsung photos that won\'t open: turn off **High efficiency pictures** in the camera settings.' },
+    { try: [['Edit symbols', 'symbols']] },
+  ] },
+  { id: 'notebook', icon: 'page', title: 'The Notebook and the Bank', blocks: [
+    { p: 'The Notebook is where longer notes live. It has four tabs: **Bank**, **Projects**, **Glossary** and **Ask**.' },
+    { list: [
+      'The **Bank** holds every notebook note and quick note, newest first.',
+      'Filter with the **All / Work / Personal / Fun** chips, and with **All · Notebook · Quick notes**. Search covers titles, text and tags.',
+      'Tap a notebook note to read it. Tap a quick note to open its sheet.',
+      'On the cover screen, **←** takes you back from a note to the list.',
+      'The bottom of the list has **NotebookLM** (send a pack) and **Save an answer**.',
+    ] },
+    { try: [['Open the Notebook', 'notebook']] },
+  ] },
+  { id: 'writing-notes', icon: 'pen', title: 'Writing notebook notes', blocks: [
+    { steps: [
+      'Tap **+ New**. Pick a template if you like: Experiment, Paper, Meeting, Daily log or Blank. It fills in the headings.',
+      'Write freely. Shorthand, half-sentences and symbols are fine. **Transcribe a page** turns a photo of handwriting into text (AI), and **Dictate** types what you say.',
+      'Tap **Comprehend** (AI) to get a clean note. Without a key it says **Tidy (no AI)**, which keeps your words and finds tasks and questions from your symbols. **Save as written** skips both.',
+      'Check what Kura understood: title, category and project (suggested, tap to change), summary, key points, the cleaned note, **Technical context**, tasks and open questions.',
+      'Untick any task or question you don\'t want. Tap **Today** on a task to plan it. Then tap **Save note**.',
+    ] },
+    { table: [
+      ['Tasks', 'Go to MAKE, or TODAY if you tapped Today. Dates in them ("by fri") are planned.'],
+      ['Open questions', 'Go to STOCK with ? Unresolved.'],
+      ['Technical context', 'AI explanations of the technical terms, from textbook knowledge. They are added to the Glossary.'],
+    ] },
+    { h: 'Afterwards' },
+    { p: 'In a saved note: change its category or project at the top, **Edit** it, **Re-comprehend** it, **Share** it, send a **NotebookLM** pack, **Send to Obsidian**, or **Delete** it (with Undo). Tasks the note created follow its category and project.' },
+    { note: 'The AI is told never to invent results, numbers or citations. The Paper template keeps your citation exactly as you wrote it.' },
+  ] },
+  { id: 'glossary', icon: 'page', title: 'The Glossary', blocks: [
+    { list: [
+      'Every term in a note\'s Technical context is saved automatically, sorted A to Z and linked to the notes that use it.',
+      'Different spellings of one term are merged, like "EIS" and "Electrochemical impedance spectroscopy (EIS)".',
+      'Tap a term in a note to jump to it.',
+      '**Edit** a definition to make it yours. AI never overwrites it after that.',
+      '**Delete** a term and Kura won\'t add it again.',
+      '**Send to Obsidian** (bottom of the list) writes one Glossary note. It shows whether Obsidian is up to date.',
+    ] },
+  ] },
+  { id: 'projects', icon: 'plan', title: 'Projects', blocks: [
+    { steps: ['Notebook → **Projects** → type a name at the bottom → **Add**.', 'From then on, **#name** in any quick note files it there, e.g. #aurora.', 'You can also pick a project in a task\'s sheet, when reviewing a notebook note, on a Brain Camera page, or for something shared into Kura.'] },
+    { h: 'A project page shows' },
+    { list: ['Progress (tasks done out of all tasks).', 'The **Next action**, with + Today, ▶ Focus and Done buttons.', 'A box to add tasks (dates work there).', 'Open tasks, open questions, notebook notes (**+ New note here**), kept notes and done tasks.'] },
+    { p: '**Archive** hides a finished project. **Rename**, **Share** a summary, send a **NotebookLM** pack, or **Delete** it. Deleting keeps its notes and tasks.' },
+  ] },
+  { id: 'ask', icon: 'plan', title: 'Ask your notes', blocks: [
+    { list: [
+      'Notebook → **Ask**. Type a question like "what did I find about foam impedance?".',
+      'Answers come from your notebook notes, quick notes and glossary. Each fact is cited, and you can tap the chips to open the source.',
+      'If your notes don\'t cover it, Kura says so. Anything it adds from general knowledge starts with "General knowledge:".',
+      'The category chips limit the question to Work, Personal or Fun.',
+      'Without an AI key, Ask lists the notes that best match your question.',
+    ] },
+  ] },
+  { id: 'plan', icon: 'plan', title: 'Plan my day', blocks: [
+    { p: '⋯ More → **Plan my day** suggests 3 to 5 tasks to add to TODAY, each with a reason.' },
+    { list: ['Suggestions are based on due dates, Important marks, project next actions, how long a task has waited, and steps already started.', '**Ask AI** re-plans with AI, taking into account what is already in TODAY.', 'Tick the ones you want and tap **Add to TODAY**. Undo is available.', 'Long-press the Kura icon → **Plan my day** to jump straight here.'] },
+    { try: [['Plan my day', 'plan']] },
+  ] },
+  { id: 'focus', icon: 'timer', title: 'Focus timer', blocks: [
+    { steps: ['⋯ More → **Focus**, or **▶ Focus** on a task or a project\'s next action.', 'Pick a length: 25/5, 50/10 or 15/3 minutes (focus / break), and a task (or **Just focus**).', 'While it runs, the screen stays on and a countdown floats at the bottom right. Tap it to open the timer.'] },
+    { table: [['Pause / Resume', 'Stop the clock for a moment'], ['+5 min', 'Add five minutes'], ['Stop', 'End early; the minutes so far are logged if at least one'], ['Task done', 'Log the time and tick the task'], ['Next round', 'Start another focus session after the break']] },
+    { note: "The timer only runs while Kura is open. If you leave, it catches up when you come back, but it can't alert you in the background. Minutes are logged on the task and its project and appear in Stats." },
+    { try: [['Start focus', 'focus']] },
+  ] },
+  { id: 'review', icon: 'cal', title: 'Weekly review', blocks: [
+    { p: '⋯ More → **Weekly review**. From Friday to Sunday a reminder also appears on the home screen until you finish one.' },
+    { steps: ['See the week: tasks done, notebook notes, notes captured and open loops.', '**Overdue**: Today, Next Mon, No date, Done or Drop.', '**Open questions**: Answered, Make a task, or Keep open.', '**Untouched for a month**: Keep, Make a task or Drop. Old DROP notes can all be let go.', '**Next 7 days**: what is coming.', 'Optional: **Summarise my week** (AI) writes wins, open loops and a focus for next week, from your data only.', '**Send to Obsidian** saves it as Kura/Reviews/2026-W40. Tap **Finish review**.'] },
+    { try: [['Weekly review', 'review']] },
+  ] },
+  { id: 'stats', icon: 'stats', title: 'Score, streaks, stats and trophies', blocks: [
+    { table: [['Score', '10 points per finished task'], ['Streak', 'Days in a row with at least one finished task. Today counts once you finish something; until then yesterday keeps it alive.'], ['Best streak', 'Your longest run']] },
+    { h: 'Stats (tap STREAK)' },
+    { list: ['A heatmap of tasks done per day over 16 weeks. Darker blue means more. Tap a day for its details.', 'Tasks done and focus time this week, a breakdown by category, and your busiest projects over the last 30 days.', '**Last 14 days as a table** shows the numbers.'] },
+    { h: 'Trophies (tap SCORE)' },
+    { p: '16 trophies, including First shot, Sharpshooter (25 tasks), Invader hunter (100), On a roll / Week warrior / Unstoppable (3, 7 and 30-day streaks), Clean sweep, Brain Camera, Scholar, Lexicon, Deep work, Flow state (10 h focus), Reflective, Shipped, Night owl and Early bird. Locked ones show your progress.' },
+    { try: [['Stats', 'stats'], ['Trophies', 'trophies']] },
+  ] },
+  { id: 'tools', icon: 'flask', title: 'Lab tools', blocks: [
+    { p: '⋯ More → **Lab tools**. Results update as you type. **Copy** puts a result on the clipboard; **Add to pad** turns it into a note (press Enter to save).' },
+    { table: [
+      ['Dilution', 'C1·V1 = C2·V2. Fill three boxes, leave one blank. E.g. 10 mM stock → 1 mM in 10 mL: take 1 mL + 9 mL diluent.'],
+      ['Molarity', 'mass = concentration × volume × molar mass. E.g. 100 mM NaCl (58.44 g/mol) in 10 mL = 58.44 mg.'],
+      ['Serial', 'Start concentration, factor and number of tubes. Add a tube volume to get transfer and diluent amounts.'],
+      ['Units', 'Converts across SI prefixes for resistance, capacitance, frequency, voltage, current, time, length, volume, mass and concentration.'],
+      ['% change', 'From A to B: percentage, ratio and difference. E.g. 1.2 → 0.84 = −30%.'],
+      ['RC / Z', 'Time constant, cutoff frequency, and at a frequency: |Zc|, series and parallel |Z| and phase.'],
+    ] },
+    { note: 'Pick units from the menus next to each box. Commas work as decimal points.' },
+    { try: [['Open Lab tools', 'tools']] },
+  ] },
+  { id: 'obsidian', icon: 'page', title: 'Obsidian', blocks: [
+    { h: 'Set up' },
+    { steps: ['Install Obsidian on this phone and open your vault once.', 'Settings → **Obsidian vault**: type the vault name exactly, then Save.', 'Choose where quick notes go: **DAILY NOTE** (needs the Daily notes core plugin) or **ONE NOTE** (e.g. Kura/Inbox).'] },
+    { h: 'Where things go' },
+    { table: [
+      ['Quick notes', "Today's daily note or your one note, as Markdown lines with tags (#kura/make, #kura/work, #project/aurora, #important)"],
+      ['Notebook notes', 'One file each in Kura/Notes/Work, /Personal or /Fun'],
+      ['Glossary', 'One note, Kura/Glossary, rewritten on each send'],
+      ['Weekly reviews', 'Kura/Reviews/2026-W40'],
+    ] },
+    { list: ['Each send opens Obsidian for a moment. Come back to Kura afterwards.', 'The **Vault** button sends everything not sent yet. DROP notes are skipped unless you turn them on.', '**Tasks plugin dates** adds 📅 due, ✅ done and 🔁 repeat marks.', 'If you move a notebook note to another category, **Send again** files it in the new folder. Delete the old copy in Obsidian yourself.'] },
+    { try: [['Obsidian settings', 'obsidian']] },
+  ] },
+  { id: 'gtasks', icon: 'check', title: 'Google Tasks', blocks: [
+    { p: 'Kura syncs both ways with a Google Tasks list (normally called "Kura") through a small script in your own Google account. It is free.' },
+    { table: [['From Kura', 'Tasks in TODAY or with a date (and MAKE tasks, if you turn that on): new, edited, done and deleted'], ['From Google Tasks', 'New tasks, ticks, date changes and deletions come back into Kura'], ['When', 'When you open Kura, after changes, and every 5 minutes while it is open']] },
+    { h: 'Set up' },
+    { steps: [
+      'Settings → Google Tasks → **Copy bridge script**.',
+      'On a computer, go to script.google.com while signed in to your **personal** Google account → **New project**. Paste the script over everything.',
+      'Under **Services**, add **Tasks** (Google Tasks API).',
+      '**Deploy → New deployment → Web app**. Set Execute as: **Me**, Who has access: **Anyone**. Authorise it.',
+      'Copy the **Web app URL** that ends in **/exec**, paste it into Kura and tap **Save and test**.',
+    ] },
+    { note: 'If testing fails with 404, the deployment isn\'t open to "Anyone", or it was made with a school or work account that doesn\'t allow that. Edit the deployment (✎ → New version), or make it with your personal Gmail. **Check connections** (in Settings) explains what\'s wrong.' },
+    { try: [['Check connections', 'diag']] },
+  ] },
+  { id: 'notebooklm', icon: 'nlm', title: 'NotebookLM', blocks: [
+    { h: 'Send notes to NotebookLM' },
+    { steps: [
+      'Tap **NotebookLM** in the Bank, on a project page, on a note, or in ⋯ More.',
+      'Choose the notes (all, a category, a project or one note) and the dates. Tick what to include: Technical context, tasks and questions, your original words.',
+      'Tap **Share PDF**, choose NotebookLM, then pick a notebook. It becomes a source you can ask questions of.',
+    ] },
+    { list: ['NotebookLM keeps each PDF as a separate source. After the first pack, pick **New or changed since last pack**, or delete the old source in NotebookLM.', '**Download** saves the PDF to Downloads. **Copy as text** is for NotebookLM\'s "Copied text" source, and keeps every symbol exactly.', 'The PDF uses standard fonts: Ω becomes "Ohm", → becomes "->" and Greek letters are spelled out. µ and ° stay.'] },
+    { h: 'Save NotebookLM answers in Kura' },
+    { steps: ['In NotebookLM, copy an answer (or share it to Kura).', 'In Kura: Bank → **Save an answer** (or pick **NotebookLM answer** in the share sheet).', 'Add the question and the notebook name if you like, then **Save as note**. It is tagged #notebooklm and keeps its [1] [2] citations. **Re-comprehend** pulls out tasks and glossary terms.'] },
+    { try: [['Open NotebookLM', 'nlm']] },
+  ] },
+  { id: 'sharing', icon: 'share', title: 'Sharing and shortcuts', blocks: [
+    { h: 'Share into Kura' },
+    { p: 'In Chrome, NotebookLM or any app, tap **Share → Kura**. Save it as a quick note, a task, a **Paper note** (the citation is filled in) or a notebook note, and add it to a project.' },
+    { h: 'Long-press the Kura icon' },
+    { p: 'Shortcuts for **New note**, **Scan a page**, **Focus timer** and **Plan my day**.' },
+    { note: 'Kura appears in the share sheet, and the shortcuts appear on the icon, after Chrome refreshes the installed app. That usually happens on its own within a day.' },
+    { h: 'Share out' },
+    { p: 'Tasks, notebook notes and projects have a **Share** button. It uses the phone\'s share sheet, or copies the text when sharing isn\'t available.' },
+  ] },
+  { id: 'ai', icon: 'gear', title: 'AI keys, costs and privacy', blocks: [
+    { table: [['Gemini · free', 'Key from aistudio.google.com. No card. Daily limits apply, and Google may use free-tier content to improve its products.'], ['Claude · paid', 'Your Anthropic API key, billed per use. Separate from a Claude subscription.']] },
+    { list: [
+      'Kura picks models automatically when you save the key: a stronger one for reading pages, a faster one for sorting.',
+      'AI is only used when you use an AI feature (AUTO sort, Brain Camera, Comprehend, Transcribe, Ask, weekly summary, Plan with AI). Only the text or photo involved is sent.',
+      'If the AI is unavailable or out of quota, Kura falls back to rules on the phone and tells you why.',
+      'The key stays on this phone. **Remove key** deletes it.',
+    ] },
+    { try: [['AI settings', 'settings']] },
+  ] },
+  { id: 'effects', icon: 'sound', title: 'Sounds, vibration and look', blocks: [
+    { list: ['**8-bit sounds** (Settings → Effects, or ⋯ More → Sound): a laser when you finish a task, a chime when focus ends, a jingle for trophies. They play through media volume even on silent, so they start off.', '**Vibration** is on by default.', 'Kura follows your phone\'s light or dark mode, and the status bar matches it.', 'Work, Personal and Fun use blue, aqua and orange, and are always labelled with text too.'] },
+  ] },
+  { id: 'backup', icon: 'list', title: 'Backup, updates and installing', blocks: [
+    { h: 'Your data' },
+    { p: 'Notes, the notebook, the glossary, projects, stats and settings are stored in Chrome\'s storage for Kura on this phone. Nothing goes to a Kura server; there isn\'t one.' },
+    { list: ['Settings → Backup → **Export backup** saves a .json file. **Import backup** adds it back on any phone. Photos are not included.', 'Clearing Chrome\'s data for the Kura site, or uninstalling the app, can erase your notes. Export first.'] },
+    { h: 'Updating' },
+    { steps: ['Upload the new index.html and sw.js (and manifest.webmanifest when included) to your GitHub Pages repository.', 'Open Kura, close it, and open it again. Settings shows the new version number.'] },
+    { h: 'Installing' },
+    { list: ['Android: open your Kura address in **Chrome** → ⋮ → **Add to Home screen / Install app**.', 'iPhone: open it in **Safari** → Share → **Add to Home Screen**.'] },
+  ] },
+  { id: 'trouble', icon: 'gear', title: 'Troubleshooting', blocks: [
+    { table: [
+      ['AI ✓ shows a problem', 'Tap it. Usually the free quota ran out (try later) or the key was pasted incorrectly (save it again).'],
+      ["Obsidian didn't open", 'Check the vault name matches exactly, and that Obsidian is installed with that vault opened once.'],
+      ['Google Tasks 404 / not connected', 'See the Google Tasks chapter: the deployment must be a Web app with access set to Anyone, using its /exec URL.'],
+      ['Voice does nothing', 'Allow the microphone for the Kura site in Chrome and check you are online.'],
+      ['Kura is missing from the share sheet', 'Chrome refreshes the installed app within about a day. Reinstalling makes it immediate, but export a backup first.'],
+      ['The camera photo won\'t open', 'Turn off High efficiency pictures in the Samsung camera settings.'],
+      ['The top bar is white', 'Reinstall Kura from Chrome (export a backup first).'],
+      ['Notes vanished after reinstalling', 'Import your latest backup: Settings → Backup → Import backup.'],
+      ['Focus timer finished while away', 'It catches up when you open Kura: the minutes are logged and the break starts then.'],
+    ] },
+    { p: 'Settings → **Check connections** tests AI, Google Tasks and Obsidian and says what to fix. **Copy report** gives you something to paste when asking for help.' },
+    { try: [['Check connections', 'diag']] },
+  ] },
+];
+
+/* ---------- user guide viewer ---------- */
+const GUIDE_ACTIONS = {
+  settings: () => openSettings(),
+  obsidian: () => openSettings('obsidian'),
+  diag: () => openDiag(),
+  pad: () => { closeSheet(); if (state.nb) closeNotebook(); setTimeout(() => els.input.focus(), 80); },
+  log: () => openLog(),
+  symbols: () => openSymbols(),
+  notebook: () => { closeSheet(); setTimeout(() => openNotebook(), 30); },
+  plan: () => openPlan(),
+  focus: () => (state.focus ? openFocusView() : openFocusPicker()),
+  review: () => openReview(),
+  stats: () => openStats(),
+  trophies: () => openTrophies(),
+  tools: () => openTools(),
+  nlm: () => openNlm(),
+};
+const guideStrip = t => String(t || '').replace(/\*\*/g, '').replace(/`/g, '');
+function guideText(sec) {
+  const parts = [sec.title];
+  for (const b of sec.blocks) {
+    if (b.p) parts.push(b.p);
+    if (b.h) parts.push(b.h);
+    if (b.note) parts.push(b.note);
+    if (b.steps) parts.push(...b.steps);
+    if (b.list) parts.push(...b.list);
+    if (b.table) parts.push(...b.table.flat());
+    if (b.try) parts.push(...b.try.map(t => t[0]));
+  }
+  return guideStrip(parts.join(' ')).toLowerCase();
+}
+function guideBlocks(sec) {
+  return sec.blocks.map(b => {
+    if (b.p) return h('p', {}, mdInline(b.p));
+    if (b.h) return h('h4', { text: b.h });
+    if (b.note) return h('p', { class: 'g-note' }, mdInline(b.note));
+    if (b.steps) return h('ol', {}, b.steps.map(x => h('li', {}, mdInline(x))));
+    if (b.list) return h('ul', {}, b.list.map(x => h('li', {}, mdInline(x))));
+    if (b.table) return h('table', { class: 'g-table' }, h('tbody', {}, b.table.map(([a, c]) => h('tr', {}, h('th', { scope: 'row' }, mdInline(a)), h('td', {}, mdInline(c))))));
+    if (b.try) return h('div', { class: 'g-try' }, b.try.map(([label, act]) => h('button', { class: 'btn', type: 'button', 'data-act': act, onclick: () => { markSeen(); const f = GUIDE_ACTIONS[act]; if (f) f(); } }, label + ' →')));
+    return null;
+  });
+}
+async function markSeen() {
+  if (state.seenVersion === APP_VERSION) return;
+  state.seenVersion = APP_VERSION;
+  if (store.kvSet) await store.kvSet('seenVersion', APP_VERSION).catch(() => {});
+  drawBanner();
+}
+function openGuide(id, q) {
+  const known = GUIDE.some(g => g.id === id);
+  state.sheet = { kind: 'guide', open: new Set([known ? id : 'start']), q: q || '', focus: known ? id : null };
+  markSeen();
+  drawGuide();
+  if (known) setTimeout(() => guideScrollTo(id), 40);
+}
+function guideScrollTo(id) {
+  const el = document.getElementById('g-' + id);
+  const main = document.querySelector('.guide-main');
+  if (el && main) main.scrollTop = Math.max(0, el.offsetTop - main.offsetTop - 8);
+}
+function guideJump(id) {
+  const s = state.sheet;
+  if (!s || s.kind !== 'guide') return;
+  s.open.add(id);
+  s.focus = id;
+  if (s.q) s.q = '';
+  drawGuide();
+  setTimeout(() => guideScrollTo(id), 20);
+}
+function drawGuide() {
+  const s = state.sheet;
+  if (!s || s.kind !== 'guide') return;
+  const q = s.q.trim().toLowerCase();
+  const hits = q ? GUIDE.filter(sec => guideText(sec).includes(q)) : GUIDE;
+  const nav = h('nav', { class: 'guide-nav', 'aria-label': 'Chapters' }, GUIDE.map((sec, i) => h('button', {
+    type: 'button', 'data-id': sec.id, 'aria-current': String(s.focus === sec.id), onclick: () => guideJump(sec.id),
+  }, h('span', { class: 'gn', text: pad2(i) }), sec.title)));
+  const jump = h('select', { class: 'field-in guide-jump', id: 'guide-jump', 'aria-label': 'Jump to a chapter' },
+    h('option', { value: '', text: 'Jump to a chapter…' }), GUIDE.map((sec, i) => h('option', { value: sec.id, text: `${pad2(i)} · ${sec.title}` })));
+  jump.addEventListener('change', () => { if (jump.value) guideJump(jump.value); });
+  const search = h('input', { class: 'field-in search-in', id: 'guide-q', type: 'search', placeholder: 'Search the guide', 'aria-label': 'Search the guide' });
+  search.value = s.q;
+  search.addEventListener('input', () => {
+    s.q = search.value;
+    drawGuide();
+    const s2 = document.getElementById('guide-q');
+    if (s2) { s2.focus(); s2.setSelectionRange(s2.value.length, s2.value.length); }
+  });
+  const allOpen = hits.every(sec => s.open.has(sec.id));
+  const main = h('div', { class: 'guide-main' },
+    h('div', { class: 'guide-tools' }, search, jump,
+      q ? null : h('button', { class: 'link-btn plain', type: 'button', id: 'guide-all', onclick: () => {
+        if (allOpen) s.open.clear(); else GUIDE.forEach(g => s.open.add(g.id));
+        drawGuide();
+      } }, allOpen ? 'Collapse all' : 'Expand all')),
+    q ? h('p', { class: 'muted', id: 'guide-hits', text: hits.length ? `${hits.length} chapter${hits.length === 1 ? '' : 's'} mention "${s.q.trim()}"` : `Nothing in the guide mentions "${s.q.trim()}". Try another word.` }) : null,
+    hits.map(sec => {
+      const det = h('details', { class: 'g-sec', id: 'g-' + sec.id, open: !!(q || s.open.has(sec.id)) },
+        h('summary', {}, icon(sec.icon || 'page', 1.8), h('span', { text: sec.title })),
+        h('div', { class: 'g-in' }, guideBlocks(sec)));
+      det.addEventListener('toggle', () => { if (det.open) { s.open.add(sec.id); s.focus = sec.id; } else s.open.delete(sec.id); });
+      return det;
+    }));
+  const foot = h('div', { class: 'sheet-foot' },
+    h('span', { class: 'lbl', text: `${GUIDE.length} chapters · works offline` }),
+    h('span', { class: 'grow' }),
+    h('button', { class: 'btn', id: 'guide-pdf', type: 'button', onclick: () => {
+      const blob = new Blob([guidePdf()], { type: 'application/pdf' });
+      downloadBlob(blob, `Kura user guide ${APP_VERSION}.pdf`);
+      toast('Guide saved to Downloads as a PDF');
+    } }, 'Save as PDF'));
+  const prev = document.querySelector('.guide-main');
+  const keep = prev ? prev.scrollTop : 0;
+  showSheet(h('div', { class: 'sheet guide', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'User guide' },
+    head('USER GUIDE', 'KURA ' + APP_VERSION), h('div', { class: 'guide-body' }, nav, main), foot));
+  const m2 = document.querySelector('.guide-main');
+  if (m2 && keep && !q) m2.scrollTop = keep;
+}
+function guidePdf() {
+  const doc = pdfDoc(`Kura user guide · ${APP_VERSION}`);
+  doc.text('Kura user guide', { font: 'B', size: 22, lead: 28 });
+  doc.text(`Version ${APP_VERSION} · ${parseDay(TODAY).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })}`, { size: 10, gray: 0.4, after: 8 });
+  doc.text('Contents', { font: 'B', size: 12, after: 2 });
+  GUIDE.forEach((sec, i) => doc.text(`${i}. ${sec.title}`, { size: 10, indent: 4 }));
+  GUIDE.forEach((sec, i) => {
+    doc.rule(10);
+    doc.text(`${i}. ${sec.title}`, { font: 'B', size: 15, lead: 19, keep: 60, after: 2 });
+    for (const b of sec.blocks) {
+      if (b.p) doc.text(guideStrip(b.p), { after: 4 });
+      else if (b.h) doc.text(b.h, { font: 'B', size: 11, before: 4, keep: 30 });
+      else if (b.note) doc.text(guideStrip(b.note), { font: 'I', gray: 0.3, before: 2, after: 4 });
+      else if (b.steps) { b.steps.forEach((x, k) => doc.text(guideStrip(x), { bullet: `${k + 1}.`, hang: 16, indent: 4 })); doc.space(4); }
+      else if (b.list) { b.list.forEach(x => doc.text(guideStrip(x), { bullet: '•', hang: 12, indent: 4 })); doc.space(4); }
+      else if (b.table) { b.table.forEach(([a, c]) => { doc.text(guideStrip(a), { font: 'B', size: 10, before: 3, keep: 24 }); doc.text(guideStrip(c), { size: 10, indent: 12 }); }); doc.space(4); }
+    }
+  });
+  return pdfBytes(doc);
 }
 
 // v14 wiring
@@ -5820,7 +6336,9 @@ function drawSettings() {
   ];
 
   const body = h('div', { class: 'sheet-body' },
-    h('div', { class: 'row' }, h('button', { class: 'btn primary', id: 'btn-diag', type: 'button', onclick: () => openDiag() }, 'Check connections'),
+    h('div', { class: 'row' }, h('button', { class: 'btn primary', id: 'btn-guide', type: 'button', onclick: () => openGuide() }, icon('help', 1.8), 'User guide'),
+      h('span', { class: 'muted', text: 'How everything in Kura works, step by step, with a search box.' })),
+    h('div', { class: 'row' }, h('button', { class: 'btn', id: 'btn-diag', type: 'button', onclick: () => openDiag() }, 'Check connections'),
       h('span', { class: 'muted', text: 'Tests Claude, Google Tasks and Obsidian and tells you what to fix.' })),
     h('hr', { class: 'rule' }),
     obsSection,
@@ -5877,7 +6395,7 @@ function drawSettings() {
   const prev = $('.sheet-body', els.sheet);
   const scroll = prev ? prev.scrollTop : 0;
   showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Settings' },
-    head('SETTINGS', 'KURA ' + APP_VERSION + ' · bar ' + ((document.getElementById('theme-color') || {}).content || '?')), body,
+    head('SETTINGS', 'KURA ' + APP_VERSION + ' · bar ' + ((document.getElementById('theme-color') || {}).content || '?'), 'start'), body,
     h('div', { class: 'sheet-foot' }, h('span', { class: 'grow' }),
       h('button', { class: 'btn', type: 'button', onclick: async () => {
         const o = state.obs || DEFAULT_OBS;
@@ -5975,6 +6493,7 @@ async function boot() {
     }
   }
   state.projects = store.kvGet ? ((await store.kvGet('projects').catch(() => null)) || []) : [];
+  state.seenVersion = store.kvGet ? ((await store.kvGet('seenVersion').catch(() => '')) || '') : APP_VERSION;
   state.nlmPacks = store.kvGet ? ((await store.kvGet('nlmPacks').catch(() => null)) || {}) : {};
   state.nlmNotebook = store.kvGet ? ((await store.kvGet('nlmNotebook').catch(() => '')) || '') : '';
   state.lastReview = store.kvGet ? ((await store.kvGet('lastReview').catch(() => '')) || '') : '';
