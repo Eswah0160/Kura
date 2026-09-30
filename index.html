@@ -950,7 +950,7 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
 (() => {
 'use strict';
 
-const APP_VERSION = 'v18';
+const APP_VERSION = 'v18.1';
 /* ---------- helpers ---------- */
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -1193,6 +1193,60 @@ async function localStore() {
   };
 }
 
+/* AI calls: retry a busy model once, fall back to other current models, and replace a saved model Google or Anthropic has retired */
+const modelGone = e => !!e && (e.status === 404 || (e.code === 'invalid_request' && /model|not found|not supported/i.test(e.message || '')) || (e.code === 'quota' && /limit:\s*0\b/.test(e.message || '')));
+const modelBusy = e => !!e && (e.status >= 500 || e.code === 'upstream_error' || e.code === 'empty_completion');
+const modelSkip = e => modelGone(e) || modelBusy(e) || (!!e && (e.code === 'quota' || e.code === 'rate_limited' || e.status === 429));
+const modelCool = new Map();   // models that were busy in the last few minutes go to the back of the queue
+const cooling = m => Date.now() - (modelCool.get(m) || 0) < 180000;
+async function callHealing(cfg, opts, run, candidatesFor) {
+  const quick = opts.modelTier === 'quick';
+  const which = quick ? 'sort' : 'scan';
+  const primary = quick ? (cfg.sort || cfg.scan) : (cfg.scan || cfg.sort);
+  const saved = [primary, cfg.scan, cfg.sort].filter((m, i, a) => m && a.indexOf(m) === i);
+  const queue = [...saved.filter(m => !cooling(m)), ...saved.filter(cooling)];
+  const tried = new Set();
+  let last = null, primaryGone = false, listed = false, attempts = 0;
+  const aborted = () => !!(opts.signal && opts.signal.aborted);
+  while (attempts < 7) {
+    if (!queue.length) {
+      if (listed || !last) break;
+      listed = true;
+      try { const more = (await candidatesFor(quick)).filter(m => !tried.has(m)); queue.push(...[...more.filter(m => !cooling(m)), ...more.filter(cooling)].slice(0, 4)); } catch (e) { break; }
+      if (!queue.length) break;
+    }
+    const model = queue.shift();
+    if (tried.has(model)) continue;
+    tried.add(model);
+    for (let retry = 0; retry < 2; retry++) {
+      attempts++;
+      try {
+        const res = await run(model);
+        if (primaryGone && model !== primary) healModel(cfg, which, primary, model);
+        return res;
+      } catch (e) {
+        last = e;
+        if (aborted() || !modelSkip(e)) throw e;
+        if (model === primary && modelGone(e)) primaryGone = true;
+        if (modelBusy(e)) modelCool.set(model, Date.now());
+        if (!(retry === 0 && modelBusy(e) && queue.length + (listed ? 0 : 1) > 0)) break;
+        await wait(900);   // busy or overloaded: one more try on the same model
+        if (aborted()) throw { code: 'cancelled' };
+      }
+    }
+  }
+  if (last && typeof last === 'object') last.tried = [...tried];
+  throw last;
+}
+function healModel(cfg, which, old, model) {
+  cfg[which] = model;
+  if (state.api && cfg === state.api) {
+    if (store.kvSet) store.kvSet('api', { provider: cfg.provider, key: cfg.key, scan: cfg.scan, sort: cfg.sort }).catch(() => {});
+    modelCool.delete(model);
+    toast(`AI model ${old} isn't available any more. Kura switched to ${model}.`);
+  }
+}
+
 /* Anthropic API (your own key) */
 const API = 'https://api.anthropic.com/v1';
 const apiHeaders = key => ({
@@ -1266,18 +1320,13 @@ function makeSample(cfg) {
       content.push({ type: 'image', source: { type: 'base64', media_type: b.type || 'image/jpeg', data: await blobToB64(b) } });
     }
     content.push({ type: 'text', text: prompt });
-    const primary = opts.modelTier === 'quick' ? (cfg.sort || cfg.scan) : (cfg.scan || cfg.sort);
-    const models = [primary, cfg.scan, cfg.sort].filter((m, i, a) => m && a.indexOf(m) === i);
-    let last;
-    for (const model of models) {
-      try { return await callModel(model, content, opts); }
-      catch (e) {
-        last = e;
-        const modelProblem = e && (e.status === 404 || (e.code === 'invalid_request' && /model/i.test(e.message || '')));
-        if (!modelProblem) throw e;
-      }
-    }
-    throw last;
+    return callHealing(cfg, opts, model => callModel(model, content, opts), candidatesFor);
+  }
+  let listing = null;
+  async function candidatesFor(quick) {
+    const ids = await (listing || (listing = listModels(cfg.key).catch(e => { listing = null; throw e; })));
+    const f = w => ids.filter(id => id.includes(w));
+    return quick ? [...f('haiku'), ...f('sonnet')] : [...f('sonnet'), ...f('opus'), ...f('haiku')];
   }
   const sample = (p, o) => call(p, o);
   sample.json = async (p, o) => {
@@ -1318,14 +1367,23 @@ async function listGeminiModels(key) {
   }
   return out;
 }
-function pickGeminiModels(ids) {
+function rankGemini(ids) {
   const usable = ids.filter(id => /^gemini-/.test(id) && !/(live|tts|audio|image|transcribe|embedding|robotics|computer|native|learnlm)/i.test(id));
   const ver = id => { const m = /^gemini-(\d+(?:\.\d+)?)/.exec(id); return m ? parseFloat(m[1]) : 0; };
-  const rank = list => list.sort((a, b) => (ver(b) - ver(a)) || (/preview|exp/.test(a) - /preview|exp/.test(b)) || a.length - b.length);
-  const flash = rank(usable.filter(id => /-flash(?!-lite)/.test(id)));
-  const lite = rank(usable.filter(id => /-flash-lite/.test(id)));
-  const scan = flash[0] || lite[0] || usable[0] || '';
-  return { scan, sort: lite[0] || scan };
+  const shaky = id => /preview|exp/.test(id);
+  const alias = id => /latest/.test(id);
+  // stable versions first (newest first), then the -latest aliases, then previews
+  const rank = list => list.sort((a, b) => (shaky(a) - shaky(b)) || (alias(a) - alias(b)) || (ver(b) - ver(a)) || a.length - b.length);
+  return {
+    flash: rank(usable.filter(id => /-flash(?!-lite)/.test(id))),
+    lite: rank(usable.filter(id => /-flash-lite/.test(id))),
+    other: rank(usable.filter(id => !/-flash/.test(id))),
+  };
+}
+function pickGeminiModels(ids) {
+  const r = rankGemini(ids);
+  const scan = r.flash[0] || r.lite[0] || r.other[0] || '';
+  return { scan, sort: r.lite[0] || scan };
 }
 function makeGemini(cfg) {
   async function callModel(model, parts, opts) {
@@ -1344,7 +1402,7 @@ function makeGemini(cfg) {
     }
     if (!r.ok) { const err = await geminiError(r); err.model = model; throw err; }
     let j;
-    try { j = await r.json(); } catch (e) { if (opts.signal && opts.signal.aborted) throw { code: 'cancelled' }; throw { code: 'upstream_error' }; }
+    try { j = await r.json(); } catch (e) { if (opts.signal && opts.signal.aborted) throw { code: 'cancelled' }; throw { code: 'upstream_error', message: 'the reply was cut off or not JSON', model }; }
     if (j.promptFeedback && j.promptFeedback.blockReason) throw { code: 'refused' };
     const cand = (j.candidates || [])[0] || {};
     if (/SAFETY|PROHIBITED|BLOCKLIST/.test(cand.finishReason || '')) throw { code: 'refused' };
@@ -1356,17 +1414,13 @@ function makeGemini(cfg) {
     const parts = [];
     for (const b of opts.images || []) parts.push({ inline_data: { mime_type: b.type || 'image/jpeg', data: await blobToB64(b) } });
     parts.push({ text: prompt });
-    const primary = opts.modelTier === 'quick' ? (cfg.sort || cfg.scan) : (cfg.scan || cfg.sort);
-    const models = [primary, cfg.scan, cfg.sort].filter((m, i, a) => m && a.indexOf(m) === i);
-    let last;
-    for (const model of models) {
-      try { return await callModel(model, parts, opts); }
-      catch (e) {
-        last = e;
-        if (!(e && (e.status === 404 || e.code === 'quota'))) throw e;   // try the other model if this one is missing or out of free quota
-      }
-    }
-    throw last;
+    return callHealing(cfg, opts, model => callModel(model, parts, opts), candidatesFor);
+  }
+  let listing = null;
+  async function candidatesFor(quick) {
+    const ids = await (listing || (listing = listGeminiModels(cfg.key).catch(e => { listing = null; throw e; })));
+    const r = rankGemini(ids);
+    return quick ? [...r.lite, ...r.flash] : [...r.flash, ...r.lite];
   }
   const sample = (p, o) => call(p, o);
   sample.json = async (p, o = {}) => {
@@ -1493,6 +1547,10 @@ function sampleMsg(e) {
     case 'invalid_json': case 'empty_completion': return "The page came back in a form Kura couldn't read. Try again.";
     case 'invalid_request': return 'The AI service said: ' + ((e && e.message) || 'the request was invalid.') + ' Check the model names and credit balance in Settings.';
     case 'no_key': return 'Add a free Gemini key in Settings to read photos, or paste the text instead.';
+    case 'cancelled': return 'The AI request was stopped before it finished. Try again.';
+    case 'upstream_error': return (e.status === 503 || /overload|unavailable|high demand/i.test(e.message || ''))
+      ? `The AI service is overloaded right now${(e.tried || []).length > 1 ? ` (Kura tried ${e.tried.length} models)` : ''}. Try again in a minute.`
+      : `The AI service had a problem${e.status ? ' (HTTP ' + e.status + ')' : ''}: ${e.message || 'no details'}.${(e.tried || []).length > 1 ? ` Kura tried ${e.tried.length} models.` : ''} Try again in a minute.`;
     default: return 'The AI service had a problem (' + ((e && e.message) || 'unknown error') + '). Try again.';
   }
 }
@@ -2004,7 +2062,7 @@ function setAiStatus(err) {
   el.hidden = !(state.sample && state.aiErr);
   el.textContent = state.aiErr ? 'AI !' : 'AI ✓';
   el.classList.toggle('bad', !!state.aiErr);
-  el.setAttribute('aria-label', state.aiErr ? 'Claude problem: ' + state.aiErr : 'Claude connected');
+  el.setAttribute('aria-label', state.aiErr ? 'AI problem: ' + state.aiErr : 'AI connected');
 }
 const redactUrl = u => String(u || '').replace(/(\/s\/)([A-Za-z0-9_-]{6})[A-Za-z0-9_-]*([A-Za-z0-9_-]{4})(\/)/, '$1$2…$3$4');
 const errDetail = e => {
@@ -2044,15 +2102,21 @@ async function runDiag() {
     }
     if (ids) {
       const gone = [state.api.scan, state.api.sort].filter(m => m && !ids.includes(m));
-      if (gone.length) add('Claude models', false, 'Saved model no longer available: ' + gone.join(', '), 'Settings → Anthropic API key → Save and test to pick current models.');
-      try {
-        const r = await makeSampleFor(state.api)('Reply with the single word OK.', { modelTier: 'quick' });
-        add('Auto sort', true, `${r.model} answered "${r.text.trim().slice(0, 20)}".`);
-        setAiStatus(null);
-      } catch (e) {
-        setAiStatus(sampleMsg(e));
-        add('Auto sort', false, sampleMsg(e) + errDetail(e),
-          /credit|balance|billing/i.test((e && e.message) || '') ? 'Switch to Gemini (free) in Settings, or add credit in the Anthropic Console.' : e && e.code === 'quota' ? 'Wait for the free limit to reset. Until then Kura sorts on the phone.' : 'Settings → AI → Save and test.');
+      if (gone.length) add(providerName(state.api.provider) + ' models', false, 'Saved model no longer offered: ' + gone.join(', '), 'Kura switches to a current model on its own. Settings → AI → Save and test does it straight away.');
+      const smp = state.sample || makeSampleFor(state.api);
+      for (const [tier, area] of [['quick', 'Capture + sorting'], ['', 'Brain Camera + notebook']]) {
+        try {
+          const r = await smp('Reply with the single word OK.', { modelTier: tier });
+          add(area, true, `${r.model} answered "${r.text.trim().slice(0, 20)}".`);
+          if (tier) setAiStatus(null);
+        } catch (e) {
+          if (tier) setAiStatus(sampleMsg(e));
+          add(area, false, sampleMsg(e) + errDetail(e) + ((e && e.tried) ? ' Tried: ' + e.tried.join(', ') + '.' : ''),
+            /credit|balance|billing/i.test((e && e.message) || '') ? 'Switch to Gemini (free) in Settings, or add credit in the Anthropic Console.'
+              : e && e.code === 'quota' ? 'Wait for the free limit to reset (daily limits reset overnight, US Pacific time). Until then Kura works with on-phone rules.'
+              : modelBusy(e) ? "Google's or Anthropic's servers are busy. Wait a minute and run the check again."
+              : 'Settings → AI → Save and test.');
+        }
       }
     }
   }
@@ -5755,6 +5819,10 @@ function drawNlm() {
 // Block types: p (paragraph), h (small heading), steps (numbered), list (bullets), table ([left, right] rows), note (aside), try ([label, action] buttons)
 const GUIDE = [
   { id: 'new', icon: 'trophy', title: "What's new", blocks: [
+    { h: 'v18.1' }, { list: [
+      '**Sturdier AI**: when Google\'s (or Anthropic\'s) servers are busy, Kura tries again, then uses another current model. If a saved model has been retired, Kura switches to a current one by itself and tells you.',
+      '**Save and test** now picks today\'s best models and actually tests them. **Check connections** tests both the quick model and the page-reading model.',
+    ] },
     { h: 'v18' }, { list: [
       '**Smart capture**: with **AUTO** (now the default) jot a few words and press Enter. A preview shows what Kura will save: tidied wording, separate items, date, category, project and steps. Press Enter again to save. With an AI key it words tasks clearly and splits run-on jottings.',
       '**A tidier home**: the symbol filters sit at the top of the pad, the banner shows one message at a time, and AI and Google Tasks status only appear when something needs attention.',
@@ -6119,6 +6187,7 @@ const GUIDE = [
       ['The camera photo won\'t open', 'Turn off High efficiency pictures in the Samsung camera settings.'],
       ['The top bar is white', 'Reinstall Kura from Chrome (export a backup first).'],
       ['Notes vanished after reinstalling', 'Import your latest backup: Settings → Backup → Import backup.'],
+      ['"The AI service had a problem" or "overloaded"', 'Google\'s servers were busy. Kura already retried and tried other models, so wait a minute and try again. If it keeps happening, Settings → AI → **Save and test** picks and tests current models.'],
       ['Focus timer finished while away', 'It catches up when you open Kura: the minutes are logged and the break starts then.'],
     ] },
     { p: 'Settings → Basics → **Check connections** tests AI, Google Tasks and Obsidian and says what to fix. **Copy report** gives you something to paste when asking for help.' },
@@ -6577,6 +6646,19 @@ function capFromAi(r, raw, off, whenOff) {
   return { kind: items.length > 1 ? 'list' : 'single', items };
 }
 
+function shortAiMsg(e) {
+  switch (e && e.code) {
+    case 'bad_key': return 'AI key rejected';
+    case 'quota': return 'free AI limit used up';
+    case 'rate_limited': return 'AI busy, too many requests';
+    case 'network': return 'no connection to the AI';
+    case 'upstream_error': return 'AI service busy or down';
+    case 'invalid_request': return /model/i.test(e.message || '') ? 'AI model not available' : 'AI refused the request';
+    case 'refused': return 'AI declined';
+    case 'invalid_json': case 'empty_completion': return "AI reply wasn't usable";
+    default: return 'AI unavailable';
+  }
+}
 let capSeq = 0;
 function openCapture(raw) {
   const prev = state.cap;
@@ -6592,7 +6674,7 @@ function openCapture(raw) {
 }
 async function aiCapture(c, off) {
   let r = null, err = null, timedOut = false;
-  const timer = setTimeout(() => { timedOut = true; c.ctl.abort(); }, 15000);
+  const timer = setTimeout(() => { timedOut = true; c.ctl.abort(); }, 25000);
   try { r = await state.sample.json(capPrompt(c.raw), { modelTier: 'quick', signal: c.ctl.signal }); setAiStatus(null); }
   catch (e) { err = e; }
   clearTimeout(timer);
@@ -6600,7 +6682,7 @@ async function aiCapture(c, off) {
   c.busy = false;
   const next = r ? capFromAi(r, c.raw, off, c.whenOff) : null;
   if (!next) {
-    c.err = timedOut ? 'AI took too long' : err ? 'AI unavailable' : "AI reply wasn't usable";
+    c.err = timedOut ? 'AI took too long' : err ? shortAiMsg(err) : "AI reply wasn't usable";
     if (err && !timedOut && err.code !== 'cancelled') setAiStatus(sampleMsg(err));
     drawCapture();
     return;
@@ -6775,6 +6857,7 @@ function drawCapture() {
   const head = h('div', { class: 'cap-head' },
     h('span', { class: 'lbl cap-kind', text: c.kind === 'list' ? `✦ ${c.items.length} items` : c.kind === 'notebook' ? '✦ Notebook note' : '✦ Kura suggests' }),
     h('span', { class: 'lbl cap-st' + (c.busy ? ' busy' : '') + (c.by === 'ai' && !c.stale ? ' ai' : ''), text: status }),
+    c.err && !c.busy && !c.stale && c.by !== 'ai' ? h('button', { class: 'link-btn', type: 'button', id: 'cap-why', onclick: () => openDiag() }, 'Why?') : null,
     c.alt && !c.stale ? h('button', { class: 'link-btn', type: 'button', id: 'cap-alt', onclick: () => { Object.assign(c, c.alt, { alt: null, by: 'ai', edited: false }); drawCapture(); } }, 'Use AI version') : null,
     h('button', { class: 'ghost cap-x', type: 'button', 'aria-label': 'Close the preview', title: 'Close (Esc)', onclick: () => closeCapture() }, icon('close')));
   const rows = c.kind === 'notebook'
@@ -6835,7 +6918,7 @@ function bannerMsgs() {
   if (reviewDue() && !state.reviewDismissed) out.push({ id: 'review', text: 'Weekly review time: tidy loose ends and plan next week.', act: ['Start review', () => openReview()], later: () => { state.reviewDismissed = true; } });
   if (state.seenVersion !== undefined && state.seenVersion !== APP_VERSION) {
     const fresh = !state.seenVersion && !state.items.some(i => !i.example);
-    out.push({ id: 'ver', text: fresh ? 'New to Kura? The user guide shows how everything works.' : `Updated to ${APP_VERSION}: smarter capture, a tidier home and a new icon.`,
+    out.push({ id: 'ver', text: fresh ? 'New to Kura? The user guide shows how everything works.' : /^v18/.test(state.seenVersion || '') ? `Updated to ${APP_VERSION}: AI calls now retry and switch models when Google's servers are busy.` : `Updated to ${APP_VERSION}: smarter capture, a tidier home and a new icon.`,
       act: [fresh ? 'Open the guide' : "What's new", () => openGuide(fresh ? 'start' : 'new'), 'banner-guide'], later: () => markSeen(), laterLabel: 'Got it' });
   }
   const missing = [!state.sample && 'a free AI key', !state.obs && 'your Obsidian vault'].filter(Boolean);
@@ -6957,14 +7040,32 @@ function drawSettings() {
     try {
       const ids = await listModelsFor(s.provider, s.key);
       const pick = pickModelsFor(s.provider, ids);
-      if (!s.scan || !ids.includes(s.scan)) s.scan = pick.scan;
-      if (!s.sort || !ids.includes(s.sort)) s.sort = pick.sort;
+      const same = state.api && state.api.provider === s.provider;
+      // untouched model boxes get today's best picks; a model you typed yourself is kept if it still exists
+      if (!s.scan || !ids.includes(s.scan) || (same && s.scan === state.api.scan)) s.scan = pick.scan;
+      if (!s.sort || !ids.includes(s.sort) || (same && s.sort === state.api.sort)) s.sort = pick.sort;
       if (!s.scan) throw { code: 'invalid_request', message: 'No models are available to this key.' };
       const cfg = { provider: s.provider, key: s.key, scan: s.scan, sort: s.sort };
-      await store.kvSet('api', cfg);
+      s.status = 'Key accepted. Testing the models…'; drawSettings();
+      const t = makeSampleFor(cfg);
+      const notes = [];
+      let okCount = 0;
+      for (const [tier, label] of [['quick', 'Capture and sorting'], ['', 'Brain Camera and notebook']]) {
+        try {
+          const r = await t('Reply with the single word OK.', { modelTier: tier });
+          notes.push(`${label}: ${r.model} ✓`);
+          okCount++;
+        } catch (e) {
+          if (e && e.code === 'bad_key') throw e;
+          notes.push(`${label}: not working yet (${sampleMsg(e)})`);
+        }
+      }
+      await store.kvSet('api', { provider: cfg.provider, key: cfg.key, scan: cfg.scan, sort: cfg.sort });
+      s.scan = cfg.scan; s.sort = cfg.sort;
       state.aiErr = null;
-      s.status = `Key works. Brain Camera uses ${s.scan}; Auto sort uses ${s.sort}.`;
+      s.status = (okCount ? 'Key works. ' : 'Key saved, but the test failed. ') + notes.join(' · ');
       await loadApi();
+      if (!okCount) setAiStatus('Model test failed');
     } catch (e) {
       s.status = e && e.code === 'bad_key' ? `That key was rejected. Copy it again from ${s.provider === 'gemini' ? 'Google AI Studio' : 'the Anthropic Console'}.`
         : e && e.code === 'network' ? "Couldn't reach the AI service. Check your connection." : sampleMsg(e);
