@@ -11,9 +11,9 @@
   "theme_color": "#111110",
   "categories": ["productivity"],
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    { "src": "icon-192.png?v=18", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png?v=18", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable-512.png?v=18", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "share_target": {
     "action": "./",
@@ -21,9 +21,9 @@
     "params": { "title": "share_title", "text": "share_text", "url": "share_url" }
   },
   "shortcuts": [
-    { "name": "New note", "short_name": "Note", "url": "./?do=note", "icons": [{ "src": "icon-192.png", "sizes": "192x192", "type": "image/png" }] },
-    { "name": "Scan a page", "short_name": "Scan", "url": "./?do=scan", "icons": [{ "src": "icon-192.png", "sizes": "192x192", "type": "image/png" }] },
-    { "name": "Focus timer", "short_name": "Focus", "url": "./?do=focus", "icons": [{ "src": "icon-192.png", "sizes": "192x192", "type": "image/png" }] },
-    { "name": "Plan my day", "short_name": "Plan", "url": "./?do=plan", "icons": [{ "src": "icon-192.png", "sizes": "192x192", "type": "image/png" }] }
+    { "name": "New note", "short_name": "Note", "url": "./?do=note", "icons": [{ "src": "icon-192.png?v=18", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "Scan a page", "short_name": "Scan", "url": "./?do=scan", "icons": [{ "src": "icon-192.png?v=18", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "Focus timer", "short_name": "Focus", "url": "./?do=focus", "icons": [{ "src": "icon-192.png?v=18", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "Plan my day", "short_name": "Plan", "url": "./?do=plan", "icons": [{ "src": "icon-192.png?v=18", "sizes": "192x192", "type": "image/png" }] }
   ]
 }

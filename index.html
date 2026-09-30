@@ -22,8 +22,8 @@
 })();
 </script>
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icon-192.png" type="image/png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png?v=18" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=18">
 <meta name="apple-mobile-web-app-title" content="Kura">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -677,6 +677,83 @@ body[data-skin="pets"] .friends:not([hidden]) {
 .critter .muted { font-size: 12px; }
 @media (max-width: 719px) { body[data-skin="pets"] .inv-grid { max-height: 62px; gap: 8px 14px; } }
 @media (prefers-reduced-motion: reduce) { .pet, .pet-svg { animation: none !important; } }
+/* v18: tidier home, smart capture, settings tabs */
+.pad-lbl { flex: none; }
+.symbar { display: flex; gap: 2px; align-items: center; min-width: 0; overflow-x: auto; scrollbar-width: none; flex: 0 1 auto; margin-left: 2px; }
+.symbar::-webkit-scrollbar { display: none; }
+.sym { flex: none; border: 0; background: none; height: 24px; min-width: 26px; padding: 0 6px; border-radius: 5px; display: inline-flex; align-items: center; justify-content: center; gap: 3px; font-family: var(--f-mono); font-size: 12.5px; line-height: 1; color: var(--ink-2); }
+.sym b { font-weight: 500; font-size: 9.5px; color: var(--ink); font-variant-numeric: tabular-nums; }
+.sym.imp { color: var(--red); }
+.sym.edit { font-size: 12px; opacity: 0.75; }
+.sym[aria-pressed="true"] { background: var(--ink); color: var(--sheet); }
+.sym[aria-pressed="true"] b { color: var(--sheet); }
+.banner .b-msg { flex: 1 1 220px; min-width: 0; }
+.banner .b-later { color: var(--ink-2); }
+.banner .b-next { color: var(--ink-2); margin-left: auto; }
+.app.capturing .pad textarea { flex: none; height: 66px; }
+@media (min-width: 720px) { .app.capturing .work { grid-template-rows: fit-content(68%) minmax(0, 1fr); } .capture { flex: 0 1 auto; } }
+.capture { flex: 1 1 auto; min-height: 0; overflow: auto; border-top: 1px solid var(--rule); background: var(--paper); padding: 8px 10px; display: flex; flex-direction: column; gap: 8px; }
+.cap-head { display: flex; align-items: center; gap: 8px; min-width: 0; flex: none; }
+.cap-kind { color: var(--ink); flex: none; }
+.cap-st { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; letter-spacing: 0.06em; }
+.cap-st.ai { color: var(--red); }
+.cap-st.busy { animation: recpulse 1.2s ease-in-out infinite; }
+.cap-x { margin-left: auto; height: 26px; min-width: 26px; }
+.cap-item { display: flex; flex-direction: column; gap: 7px; padding: 8px 10px; border: 1px solid var(--rule); border-radius: 8px; background: var(--sheet); flex: none; }
+.cap-item.off { opacity: 0.55; }
+.cap-title { display: flex; align-items: center; gap: 8px; }
+.cap-t { flex: 1; min-width: 0; border: 0; border-bottom: 1px dashed var(--rule); border-radius: 0; background: transparent; padding: 2px 0 3px; font-size: 16px; font-weight: 600; line-height: 1.35; outline: none; }
+.cap-t:focus { border-bottom-color: var(--ink-2); }
+.cap-keep, .cap-step input { accent-color: var(--ink); width: 16px; height: 16px; flex: none; margin: 0; }
+.cap-body { margin: 0; font-size: 13px; line-height: 1.45; color: var(--ink-2); white-space: pre-wrap; max-height: 5.8em; overflow: hidden; }
+.cap-steps { display: flex; flex-direction: column; gap: 4px; }
+.cap-step { display: flex; align-items: center; gap: 8px; font-size: 14px; line-height: 1.35; }
+.cap-step.off span { color: var(--ink-2); text-decoration: line-through; }
+.cap-ctl { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.cap-seg button { padding: 5px 7px; }
+.cap-chip { position: relative; display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 9px; border: 1px solid var(--rule); border-radius: 999px; background: transparent; color: var(--ink-2); font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; cursor: pointer; }
+.cap-chip.date { border-style: dashed; }
+.cap-chip.date.on { color: var(--red); border-color: color-mix(in srgb, var(--red) 55%, transparent); }
+.cap-date-in { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; border: 0; padding: 0; margin: 0; cursor: pointer; }
+.cap-chip .cc { width: 7px; height: 7px; border-radius: 50%; background: var(--cc); display: inline-block; }
+.capture .proj-pick select.field-in { padding: 2px 6px; font-size: 12px; height: 26px; }
+.capture .proj-pick input.field-in { padding: 3px 6px; font-size: 14px; width: 9em; }
+.capture .proj-pick .btn { padding: 4px 8px; }
+.cap-syms { display: inline-flex; gap: 3px; }
+.cap-sym { width: 26px; height: 26px; border: 1px solid var(--rule); border-radius: 6px; background: transparent; font-family: var(--f-mono); font-size: 12px; color: var(--ink-2); padding: 0; }
+.cap-sym.imp { color: var(--red); }
+.cap-sym[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--sheet); }
+.cap-nb { margin: 0; font-size: 14px; line-height: 1.5; }
+.cap-foot { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; flex: none; padding: 6px 0 2px; position: sticky; bottom: -8px; background: var(--paper); margin-bottom: -2px; }
+.cap-save { padding: 9px 14px; text-transform: uppercase; }
+.capture.stale .cap-item, .capture.stale .cap-nb { opacity: 0.45; }
+.capture.stale .cap-st { color: var(--red); }
+.sheet.settings { height: min(760px, 100%); }
+.sheet.settings .sheet-body { flex: 1; }
+.set-tabs { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; padding: 0 10px; border-bottom: 1px solid var(--rule); flex: none; }
+.set-tabs::-webkit-scrollbar { display: none; }
+.set-tabs button { flex: none; border: 0; border-bottom: 2px solid transparent; background: none; padding: 11px 8px 9px; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-2); white-space: nowrap; display: inline-flex; gap: 5px; align-items: center; }
+.set-tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--red); font-weight: 500; }
+.set-tabs .warn { font-style: normal; color: var(--red); font-weight: 700; }
+.set-conns { display: flex; flex-direction: column; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
+.set-conn { display: grid; grid-template-columns: 10px auto minmax(0, 1fr) auto; align-items: center; gap: 10px; width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--rule); background: var(--sheet); padding: 11px 12px; font-size: 14px; }
+.set-conn:last-child { border-bottom: 0; }
+.set-conn .dot { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid var(--ink-2); }
+.set-conn .dot.on { background: var(--ink); border-color: var(--ink); }
+.set-conn .dot.bad { background: var(--red); border-color: var(--red); }
+.set-conn .muted { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.set-conn .arr { color: var(--ink-2); font-family: var(--f-mono); }
+.set-ver { font-size: 11.5px; margin-top: 6px; }
+/* keyboard up: the preview needs the room more than the banner and widget do */
+.short .banner { display: none; }
+.short .app.capturing .widget { display: none; }
+@media (max-width: 719px) {
+  #pad-date { display: none; }
+  .pad .box-head:has(.when-hint:not([hidden])) .symbar { display: none; }
+  .capture { flex: none; max-height: min(46vh, 380px); }
+  .short .capture { max-height: calc(var(--vvh, 100vh) * 0.42); }
+  .app.capturing .pad textarea { height: 48px; }
+}
 /* short screens: keyboard up on the Fold leaves roughly a 4:3 area */
 .short .field, .short .wordmark, .short .tags-lbl { display: none; }
 .short .widget { padding-block: 4px; }
@@ -772,7 +849,7 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/></svg>
           <span class="vl">More</span>
         </button>
-        <button class="ghost" id="btn-settings" type="button" aria-label="Settings">
+        <button class="ghost" id="btn-settings" type="button" aria-label="Settings" hidden>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg>
         </button>
         <button class="ghost" id="btn-log" type="button" aria-label="Done log">
@@ -793,20 +870,17 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
 
   <div class="banner" id="banner" hidden></div>
 
-  <section class="tagsrow" aria-label="Symbols">
-    <div class="tags-lbl"><span class="lbl" id="tags-count">SYMBOLS / 04</span><button class="lbl" id="clear-tag" type="button" hidden></button></div>
-    <div class="tiles" id="tiles"></div>
-  </section>
-
   <main class="work">
     <form class="pad card-box" id="pad" autocomplete="off">
       <div class="box-head">
-        <span class="lbl">WRITE / NO.<span id="pad-no">001</span></span>
+        <span class="lbl pad-lbl">WRITE<span id="pad-no" hidden>001</span></span>
+        <div class="symbar" id="symbar" role="group" aria-label="Filter by symbol"></div>
         <span class="grow"></span>
         <button class="when-hint" id="when" type="button" hidden></button>
         <span class="lbl" id="pad-date"></span>
       </div>
       <textarea id="pad-input" enterkeyhint="done" placeholder="Write anything. Enter saves. Start with ! ? [] -> to tag it." aria-label="New note"></textarea>
+      <div class="capture" id="capture" hidden role="region" aria-label="Preview of what will be saved"></div>
       <div class="pad-bar">
         <button class="icon-btn" id="btn-scan" type="button" hidden aria-label="Scan a notebook page with the camera" title="Brain Camera: scan a page">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
@@ -821,9 +895,9 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
         <input type="file" id="file-pick" accept="image/*" hidden>
         <input type="file" id="file-import" accept="application/json,.json" hidden>
         <div class="route" id="route" role="radiogroup" aria-label="Where this note goes">
-          <button class="chip" type="button" role="radio" data-r="auto" aria-checked="false" hidden>Auto</button>
+          <button class="chip" type="button" role="radio" data-r="auto" aria-checked="true">Auto</button>
           <button class="chip" type="button" role="radio" data-r="drop" aria-checked="false" style="--c: var(--drop)">Drop</button>
-          <button class="chip" type="button" role="radio" data-r="stock" aria-checked="true" style="--c: var(--stock)">Stock</button>
+          <button class="chip" type="button" role="radio" data-r="stock" aria-checked="false" style="--c: var(--stock)">Stock</button>
           <button class="chip" type="button" role="radio" data-r="make" aria-checked="false" style="--c: var(--make)">Make</button>
           <button class="chip" type="button" role="radio" data-r="today" aria-checked="false" style="--c: var(--red)">Today</button>
         </div>
@@ -876,7 +950,7 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
 (() => {
 'use strict';
 
-const APP_VERSION = 'v17';
+const APP_VERSION = 'v18';
 /* ---------- helpers ---------- */
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -917,6 +991,7 @@ const ICONS = {
   help: '<circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.9.8c0 1.8-2.5 2.1-2.5 3.9"/><path d="M12 17.2h.01"/>',
   palette: '<path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.6-.8 1.6-1.6 0-.5-.2-.8-.5-1.2-.3-.3-.5-.7-.5-1.2 0-.9.7-1.6 1.6-1.6H16a5 5 0 0 0 5-5c0-4-4-7.4-9-7.4z"/><circle cx="7.5" cy="11" r="1"/><circle cx="10" cy="7.5" r="1"/><circle cx="14.5" cy="7.5" r="1"/>',
   heart: '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/>',
+  vault: '<path d="M3 5h18v3H3z"/><path d="M4.5 8v11h15V8"/><path d="M12 10.5v5.5M9.5 13.5L12 16l2.5-2.5"/>',
   dots: '<circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/>',
   mic: '<path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3z"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/>',
 };
@@ -1015,7 +1090,7 @@ function parseMarks(text) {
 const state = {
   items: [],
   symbols: DEFAULT_SYMBOLS.map(s => ({ ...s })),
-  route: 'stock',
+  route: 'auto',
   tab: 'today',
   q: '',
   tag: null,
@@ -1361,8 +1436,7 @@ const els = {
   todayList: $('#today-list'), todayCount: $('#today-count'), todayEmpty: $('#today-empty'),
   banner: $('#banner'), q: $('#q'), sheet: $('#sheet'), toast: $('#toast'),
   no: $('#pad-no'), padDate: $('#pad-date'), stamp: $('#stamp'), score: $('#score'),
-  grid: $('#inv-grid'), field: $('#field'), cannon: $('#cannon'), tiles: $('#tiles'),
-  tagsCount: $('#tags-count'), clearTag: $('#clear-tag'),
+  grid: $('#inv-grid'), field: $('#field'), cannon: $('#cannon'),
 };
 
 /* ---------- keyboard-aware fit ---------- */
@@ -1454,7 +1528,6 @@ function laneRow(it) {
       h('span', { class: 'main' },
         h('span', { class: 'txt', text: rowText(it) }),
         h('span', { class: 'meta' },
-          icon(it.source === 'scan' ? 'page' : it.source === 'gtasks' ? 'check' : 'pen', 1.8),
           h('span', { text: rel(it.createdAt) }),
           tagMeta(it),
           stepMeta(it),
@@ -1551,26 +1624,17 @@ function drawField() {
 }
 
 function drawTiles() {
-  els.tagsCount.textContent = `SYMBOLS / ${pad2(state.symbols.length)}`;
+  const bar = document.getElementById('symbar');
+  if (!bar) return;
   const counts = {};
   for (const it of state.items) if (!it.done) for (const t of knownTags(it)) counts[t] = (counts[t] || 0) + 1;
-  const tiles = state.symbols.map((s, i) => h('button', {
-    class: 'tile', type: 'button', 'aria-pressed': String(state.tag === s.id),
-    'aria-label': `${s.name}: ${counts[s.id] || 0} open. Tap to filter.`,
-    onclick: () => { state.tag = state.tag === s.id ? null : s.id; render(); },
-  },
-    h('span', { class: 't-idx', text: pad2(i + 1) }),
-    h('span', { class: 't-n', text: counts[s.id] ? pad2(counts[s.id]) : '' }),
-    h('span', { class: 't-mark' + (s.id === 'imp' ? ' imp' : ''), text: s.mark }),
-    h('span', { class: 't-name', text: s.name })));
-  tiles.push(h('button', { class: 'tile edit', type: 'button', 'aria-label': 'Edit your symbols', onclick: openSymbols },
-    h('span', { class: 't-mark', text: '✎' }), h('span', { class: 't-name', text: 'Edit' })));
-  els.tiles.replaceChildren(...tiles);
-  const s = state.tag && symById(state.tag);
-  els.clearTag.hidden = !s;
-  if (s) els.clearTag.textContent = `SHOWING ${s.mark} ${s.name} · CLEAR`;
+  bar.replaceChildren(...state.symbols.map(sy => h('button', {
+    class: 'sym' + (sy.id === 'imp' ? ' imp' : ''), type: 'button', 'data-sym': sy.id, 'aria-pressed': String(state.tag === sy.id),
+    title: `${sy.name}: ${counts[sy.id] || 0} open`, 'aria-label': `Show only ${sy.name} (${counts[sy.id] || 0} open)`,
+    onclick: () => { state.tag = state.tag === sy.id ? null : sy.id; render(); },
+  }, sy.mark, counts[sy.id] ? h('b', { text: String(counts[sy.id]) }) : null)),
+  h('button', { class: 'sym edit', type: 'button', 'aria-label': 'Edit your symbols', title: 'Edit symbols', onclick: openSymbols }, '✎'));
 }
-els.clearTag.addEventListener('click', () => { state.tag = null; render(); });
 
 function drawDropActions(list) {
   const act = $('.lane[data-b="drop"] .box-act');
@@ -1585,35 +1649,6 @@ function drawDropActions(list) {
 }
 
 let bannerMsg = null;
-function drawBanner() {
-  const nodes = [];
-  if (bannerMsg) nodes.push(h('span', { text: bannerMsg }));
-  const missing = [!state.obs && 'your Obsidian vault', !state.sample && 'a free Gemini key (optional)'].filter(Boolean);
-  if (missing.length && !state.keyDismissed) {
-    nodes.push(h('span', { text: `Finish setup: add ${missing.join(' and ')} in Settings.` }),
-      h('button', { type: 'button', onclick: () => openSettings() }, 'Open settings'),
-      h('button', { type: 'button', onclick: () => { state.keyDismissed = true; drawBanner(); } }, 'Later'));
-  }
-  if (reviewDue() && !state.reviewDismissed) {
-    nodes.push(h('span', { text: 'Weekly review time: tidy loose ends and plan next week.' }),
-      h('button', { type: 'button', onclick: () => openReview() }, 'Start review'),
-      h('button', { type: 'button', onclick: () => { state.reviewDismissed = true; drawBanner(); } }, 'Later'));
-  }
-  if (state.seenVersion !== undefined && state.seenVersion !== APP_VERSION) {
-    const fresh = !state.seenVersion && !state.items.some(i => !i.example);
-    nodes.push(h('span', { text: fresh ? 'New to Kura? The user guide shows how everything works.' : `Kura updated to ${APP_VERSION}. There's now a built-in user guide.` }),
-      h('button', { type: 'button', id: 'banner-guide', onclick: () => openGuide(fresh ? 'start' : 'new') }, fresh ? 'Open the guide' : "What's new"),
-      h('button', { type: 'button', onclick: () => markSeen() }, 'Got it'));
-  }
-  const ex = state.items.filter(i => i.example);
-  if (ex.length) {
-    nodes.push(h('span', { text: `${ex.length} example notes are showing.` }),
-      h('button', { type: 'button', onclick: () => clearExamples(ex.map(i => i.id)) }, 'Clear examples'));
-  }
-  els.banner.replaceChildren(...nodes);
-  els.banner.hidden = nodes.length === 0;
-}
-
 /* ---------- Obsidian ---------- */
 const DEFAULT_OBS = { vault: '', target: 'daily', note: 'Kura/Inbox', tasksDates: true, includeDrop: false, notesFolder: 'Kura/Notes', glossaryNote: 'Kura/Glossary', reviewsFolder: 'Kura/Reviews' };
 const tagSlug = t => String(t).toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\p{L}\p{N}_\-/]/gu, '');
@@ -1700,6 +1735,7 @@ function drawVault() {
   const n = state.obs ? unsent().length : 0;
   $('#vault-n').textContent = n ? pad2(n) : '';
   $('#btn-vault').setAttribute('aria-label', state.obs ? `Send ${n} new notes to Obsidian` : 'Connect Obsidian');
+  $('#btn-vault').hidden = !(state.obs && n);
 }
 $('#btn-vault').addEventListener('click', () => sendToObsidian(unsent()));
 async function loadObs() {
@@ -1784,9 +1820,9 @@ async function saveGtMeta(p) {
 function drawGtStat() {
   const el = document.getElementById('gt-stat');
   if (!el) return;
-  el.hidden = !state.gt;
+  const err = state.gt && state.gtMeta && state.gtMeta.lastError;
+  el.hidden = !err;
   if (!state.gt) return;
-  const err = state.gtMeta && state.gtMeta.lastError;
   el.textContent = gtSyncing ? 'TASKS ↻' : err ? 'TASKS !' : 'TASKS ✓';
   el.classList.toggle('bad', !!err && !gtSyncing);
   el.setAttribute('aria-label', gtSyncing ? 'Syncing with Google Tasks' : err ? 'Google Tasks sync problem: ' + err : 'Google Tasks in sync');
@@ -1965,7 +2001,7 @@ function setAiStatus(err) {
   state.aiErr = err || null;
   const el = document.getElementById('ai-stat');
   if (!el) return;
-  el.hidden = !state.sample;
+  el.hidden = !(state.sample && state.aiErr);
   el.textContent = state.aiErr ? 'AI !' : 'AI ✓';
   el.classList.toggle('bad', !!state.aiErr);
   el.setAttribute('aria-label', state.aiErr ? 'Claude problem: ' + state.aiErr : 'Claude connected');
@@ -2193,7 +2229,7 @@ els.pad.addEventListener('submit', e => {
   if (padHadFocus) els.input.focus({ preventScroll: true });
 });
 
-async function submitPad() {
+async function saveDirect() {
   const raw = els.input.value.trim();
   if (!raw) return;
   els.input.value = '';
@@ -2321,7 +2357,11 @@ function closeSheet(fromPop) {
   els.sheet.replaceChildren();
 }
 els.sheet.addEventListener('click', e => { if (e.target === els.sheet && !(state.scan && state.scan.status === 'saving')) closeSheet(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && state.sheet) closeSheet(); });
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if (state.sheet) closeSheet();
+  else if (state.cap && !(state.nb && state.nb.open)) closeCapture();
+});
 
 function segControl(value, onChange, small) {
   const seg = h('div', { class: 'seg' + (small ? ' small' : ''), role: 'group', 'aria-label': 'Bucket' });
@@ -3780,7 +3820,7 @@ function drawWhen() {
   const bits = [];
   if (r && r.when) bits.push('→ ' + whenLabel(r.when.date) + (r.when.repeat ? ' ↻ ' + repeatLabel(r.when.repeat) : ''));
   if (r && r.proj && projById(r.proj)) bits.push('#' + projById(r.proj).name);
-  el.hidden = !bits.length;
+  el.hidden = !bits.length || !!(state.cap && !state.cap.stale);
   el.textContent = bits.join(' · ');
   el.classList.toggle('off', !!state.whenOff);
   el.title = state.whenOff ? 'Dates ignored for this note. Tap to use them.' : 'Tap to save without the date';
@@ -4595,6 +4635,7 @@ function drawMore() {
     tile('tools', 'flask', 'Lab tools', 'dilution, units…', () => openTools()),
     tile('review', 'cal', 'Weekly review', state.lastReview ? 'last ' + dayName(state.lastReview) : 'not done yet', () => openReview()),
     tile('log', 'list', 'Done log', null, () => openLog()),
+    state.obs ? tile('vault', 'vault', 'Send to Obsidian', unsent().length ? `${unsent().length} waiting` : 'all sent', () => { closeSheet(); sendToObsidian(unsent()); }) : null,
     tile('sound', fx.sound ? 'sound' : 'mute', fx.sound ? 'Sound on' : 'Sound off', 'tap to switch', async () => { fx.sound = !fx.sound; await saveFx(); play('trophy'); drawMore(); }),
     tile('nlm', 'nlm', 'NotebookLM', 'send · save', () => openNlm()),
     tile('guide', 'help', 'User guide', 'how it all works', () => openGuide()),
@@ -5338,7 +5379,7 @@ const PDF_TRANSLIT = {
   '≈': '~', '≃': '~', '≤': '<=', '≥': '>=', '≠': '!=', '√': 'sqrt', '∞': 'infinity', '∑': 'sum', '∫': 'integral', '∂': 'd', '−': '-', '∼': '~', '⋅': '·', '∙': '·', '∝': 'proportional to', '∈': 'in',
   '⁰': '^0', '⁴': '^4', '⁵': '^5', '⁶': '^6', '⁷': '^7', '⁸': '^8', '⁹': '^9', '⁻': '^-', '⁺': '^+', 'ⁿ': '^n',
   '₀': '0', '₁': '1', '₂': '2', '₃': '3', '₄': '4', '₅': '5', '₆': '6', '₇': '7', '₈': '8', '₉': '9', '꜀': 'c',
-  '⋯': '...', '⋮': '(menu)', '✎': '(edit)', '☐': '[ ]', '☑': '[x]', '☒': '[x]', '✓': 'v', '✔': 'v', '✗': 'x', '★': '*', '☆': '*', '▶': '>', '●': '•', '◆': '•', '▲': '^', '′': "'", '″': '"', '℃': '°C', '№': 'No.', ' ': ' ', ' ': ' ', ' ': ' ', '​': '',
+  '⋯': '...', '⋮': '(menu)', '✦': '*', '⏎': '(Enter)', '✎': '(edit)', '☐': '[ ]', '☑': '[x]', '☒': '[x]', '✓': 'v', '✔': 'v', '✗': 'x', '★': '*', '☆': '*', '▶': '>', '●': '•', '◆': '•', '▲': '^', '′': "'", '″': '"', '℃': '°C', '№': 'No.', ' ': ' ', ' ': ' ', ' ': ' ', '​': '',
 };
 function pdfText(str) {
   let out = '';
@@ -5714,6 +5755,12 @@ function drawNlm() {
 // Block types: p (paragraph), h (small heading), steps (numbered), list (bullets), table ([left, right] rows), note (aside), try ([label, action] buttons)
 const GUIDE = [
   { id: 'new', icon: 'trophy', title: "What's new", blocks: [
+    { h: 'v18' }, { list: [
+      '**Smart capture**: with **AUTO** (now the default) jot a few words and press Enter. A preview shows what Kura will save: tidied wording, separate items, date, category, project and steps. Press Enter again to save. With an AI key it words tasks clearly and splits run-on jottings.',
+      '**A tidier home**: the symbol filters sit at the top of the pad, the banner shows one message at a time, and AI and Google Tasks status only appear when something needs attention.',
+      '**Settings in tabs**: Basics, AI, Obsidian, Google Tasks, Look and Backup. Settings is now in **⋯ More**.',
+      '**A new app icon**: a bold K. Chrome updates the home-screen icon on its own, usually within a day.',
+    ] },
     { h: 'v17' }, { list: ['**Themes**: switch the top widget to **Pocket pets**, an LCD screen of original critters, and collect them in the **Critter Log**.'] },
     { h: 'v16' }, { list: ['This **user guide**. Open it from Settings, ⋯ More, or the **?** button on most screens.'] },
     { h: 'v15' }, { list: ['**NotebookLM**: send your notebook notes as a PDF source pack, and save NotebookLM answers back into Kura.'] },
@@ -5725,11 +5772,11 @@ const GUIDE = [
     { p: 'Kura is a home screen for your notebook. Write the moment a thought arrives, bring in pages from your paper notebook, sort everything into **DROP**, **STOCK** and **MAKE**, plan **TODAY**, and keep longer, cleaned-up notes in the **Notebook**. Everything is saved on this phone.' },
     { h: 'Set up in about five minutes' },
     { steps: [
-      'Tap the **gear** (Settings).',
-      '**Obsidian vault** (optional): type your vault name exactly as Obsidian shows it, then tap **Save**. Obsidian must be installed on this phone.',
-      '**AI** (optional but recommended): choose **GEMINI · FREE**, get a free key at aistudio.google.com (**Get API key → Create API key**), paste it and tap **Save and test**.',
-      '**Your field**: type something like "biomedical engineering: catheter electrodes, bioimpedance". The notebook uses it to understand technical notes.',
-      'Close Settings, try the example notes on the home screen, then tap **Clear examples** in the banner.',
+      'Tap **⋯ More → Settings**. The **Basics** tab lists your connections; tap one to open its tab.',
+      '**AI** tab (optional but recommended): choose **GEMINI · FREE**, get a free key at aistudio.google.com (**Get API key → Create API key**), paste it and tap **Save and test**.',
+      '**Your field** (AI tab): type something like "biomedical engineering: catheter electrodes, bioimpedance". Smart capture and the notebook use it to understand technical notes.',
+      '**Obsidian** tab (optional): type your vault name exactly as Obsidian shows it, then tap **Save**. Obsidian must be installed on this phone.',
+      'Close Settings, try the example notes on the home screen, then tap **Clear examples** in the banner (tap **1/3 ›** if another message is showing).',
       '**Google Tasks** (optional): see the Google Tasks chapter.',
     ] },
     { note: 'Everything works without an AI key. Kura then sorts with simple rules on your phone, and you bring in paper pages by pasting text from Google Lens.' },
@@ -5739,28 +5786,55 @@ const GUIDE = [
     { table: [
       ['Date · SCORE', 'SCORE goes up 10 for every task you finish. Tap it to see your trophies.'],
       ['STREAK', 'How many days in a row you have finished at least one task. Tap it for Stats.'],
-      ['AI ✓ / TASKS ✓', 'Connection status for AI and Google Tasks. Tap one if it shows a problem.'],
+      ['AI ! · TASKS !', 'Only appear when AI or Google Tasks has a problem. Tap one to see what to fix.'],
       ['Search', 'Filters every list as you type. On the cover screen, tap the magnifier first.'],
       ['Notebook', 'Opens the Notebook (Bank, Projects, Glossary, Ask). The K U R A → wordmark does the same.'],
-      ['Vault + number', 'Sends notes that are not in Obsidian yet. The number is how many are waiting.'],
-      ['⋯ More', 'Focus, Plan my day, Stats, Trophies, Lab tools, Weekly review, Done log, NotebookLM, sound, this guide and Settings.'],
+      ['Vault + number', 'Appears when notes are waiting to go to Obsidian. Tap it to send them.'],
+      ['⋯ More', 'Focus, Plan my day, Stats, Trophies, Lab tools, Weekly review, Done log, Send to Obsidian, NotebookLM, sound, theme, this guide and **Settings**.'],
     ] },
     { h: 'The invaders' },
     { p: 'Every open task (anything in MAKE or with a date) is a pixel invader. Red ones are due today. Tap an invader to open its task. When you finish a task, the cannon shoots it down.' },
-    { h: 'Symbol tiles' },
-    { p: 'The row of tiles shows your symbols (! Important, ? Unresolved, ☐ Task, → Follow-up) and how many notes carry each. Tap a tile to show only those notes; tap it again to clear the filter. **Edit** lets you change the symbols.' },
+    { h: 'Symbol filters' },
+    { p: 'The marks at the top of the pad are your symbols (! Important, ? Unresolved, ☐ Task, → Follow-up), with how many open notes carry each. Tap one to show only those notes; tap it again to clear the filter. **✎** edits your symbols.' },
+    { h: 'The banner' },
+    { p: 'The dashed banner under the widget shows one message at a time: setup, the weekly review, updates and example notes. When there is more than one, **1/3 ›** shows the next.' },
     { h: 'Screens' },
     { p: 'Unfolded, you see the pad, TODAY and the three lists together. On the cover screen, tabs (TODAY · DROP · STOCK · MAKE) show one list at a time. When the keyboard is open, Kura squeezes itself above it so the pad stays visible.' },
   ] },
   { id: 'write', icon: 'pen', title: 'Writing quick notes', blocks: [
-    { steps: ['Type in the pad (WRITE / NO.).', 'Press **Enter** to save. **Shift + Enter** starts a new line in the same note.', 'Pick where it goes with the chips under the pad.'] },
+    { steps: [
+      'Type in the pad. Keep it short: "call mum re bday sat", "prep samples: wash, dry, weigh", "mtg w/ Pierre fri".',
+      'Press **Enter**. With **AUTO** picked (the default), a preview opens under your text showing what Kura will save.',
+      'Change anything by tapping it, then press **Enter** again or tap **Save**. **Undo** appears for a few seconds.',
+    ] },
+    { h: 'What the preview does' },
+    { list: [
+      'Tidies the wording: "mtg w/ Sam re: budget" becomes "Meeting with Sam about budget". With an AI key it words tasks clearly, starting with a verb, and keeps your names and technical terms.',
+      'Splits several things into separate items: one per line (**Shift + Enter**), separated by semicolons, or tasks joined by "and" ("email Pierre fri and order saline"). With AI it also splits looser jottings. Untick any you don\'t want, tap **As one note** to keep them together as a checklist, or **All today** to plan them all for today.',
+      'Turns "Prep samples: wash, dry, weigh" into a task with three steps.',
+      'Finds the date, repeat, project (#name), category and symbols, and picks DROP, STOCK or MAKE.',
+      'Sends long writing (several sentences) to the **Notebook** instead, where it is comprehended into a clean note.',
+    ] },
     { table: [
-      ['AUTO', 'AI decides DROP, STOCK or MAKE (and a category). Without a key, rules on your phone decide.'],
+      ['DROP · STOCK · MAKE', 'Which list it goes to.'],
+      ['+ Date · Today · ×', 'Plan it for a day, or clear the date. Dated items go to MAKE and appear in TODAY on the day.'],
+      ['↻ weekly ×', 'Tap to stop it repeating.'],
+      ['Work · Personal · Fun', 'Tap to change the category.'],
+      ['Project', 'Pick a project, or make a new one.'],
+      ['! ? ☐ →', 'Tap to add or remove a symbol.'],
+      ['Save as typed', 'Skips the tidy-up and saves your words as they are.'],
+      ['Use AI version', 'Appears when the AI finishes after you started changing the preview.'],
+    ] },
+    { note: 'Change the text in the pad while the preview is open and the preview dims: press Enter to update it. **Esc** or **×** closes the preview and keeps your text. Settings → Basics → **Smart capture** turns the preview or the AI wording off.' },
+    { h: 'The chips under the pad' },
+    { table: [
+      ['AUTO', 'Smart capture with a preview (the default). Without AI, rules on your phone do the tidying and sorting.'],
       ['DROP', 'Fleeting: only useful for a moment (a room number, "running late").'],
       ['STOCK', 'Worth keeping: facts, ideas, references, open questions.'],
       ['MAKE', 'Something to act on.'],
       ['TODAY', 'A task for today.'],
     ] },
+    { p: 'DROP, STOCK, MAKE and TODAY save the next note straight there, without a preview. After saving, the pad goes back to AUTO.' },
     { h: 'Shortcuts while typing' },
     { table: [
       ['! at the start', 'Important'],
@@ -5772,10 +5846,10 @@ const GUIDE = [
       ['#aurora', 'Files it in an existing project'],
       ['Prep [] wash [] dry', 'A task with a checklist of steps'],
     ] },
-    { p: 'While you type, a small red tag above the pad shows what Kura understood, like "→ Fri ↻ every Mon · #Aurora". Tap it to save this note **without** the date.' },
+    { p: 'While you type, a small red tag above the pad shows the date Kura found, like "→ Fri ↻ every Mon · #Aurora". Tap it to save this note **without** the date.' },
     { h: 'Voice' },
     { p: 'Tap the **mic** in the pad and speak. On Android it stops after each sentence, so tap again to keep going. Chrome sends the audio to Google to turn it into text, and it needs an internet connection.' },
-    { try: [['Write a note', 'pad']] },
+    { try: [['Write a note', 'pad'], ['Smart capture settings', 'settings']] },
   ] },
   { id: 'lists', icon: 'check', title: 'DROP, STOCK, MAKE and TODAY', blocks: [
     { table: [
@@ -5855,7 +5929,7 @@ const GUIDE = [
     { h: 'Without a key (free)' },
     { steps: ['Tap the camera button: it opens **Paste a page**.', 'Open **Google Lens** (or the camera app), point it at the page, tap **Text → Select all → Copy**.', 'Paste into Kura and tap **Split into notes**. Each line becomes a note, and a symbol at the start of a line becomes a tag.'] },
     { h: 'Your symbols' },
-    { p: 'Tap the **Edit** tile to change symbol marks and names, and describe how you draw each one (for example "a small box before the line"). Brain Camera uses that description to spot them. You can have up to 8.' },
+    { p: 'Tap **✎** at the top of the pad (or Settings → Basics → **Edit symbols**) to change symbol marks and names, and describe how you draw each one (for example "a small box before the line"). Brain Camera uses that description to spot them. You can have up to 8.' },
     { note: 'Samsung photos that won\'t open: turn off **High efficiency pictures** in the camera settings.' },
     { try: [['Edit symbols', 'symbols']] },
   ] },
@@ -5951,7 +6025,7 @@ const GUIDE = [
   ] },
   { id: 'obsidian', icon: 'page', title: 'Obsidian', blocks: [
     { h: 'Set up' },
-    { steps: ['Install Obsidian on this phone and open your vault once.', 'Settings → **Obsidian vault**: type the vault name exactly, then Save.', 'Choose where quick notes go: **DAILY NOTE** (needs the Daily notes core plugin) or **ONE NOTE** (e.g. Kura/Inbox).'] },
+    { steps: ['Install Obsidian on this phone and open your vault once.', '⋯ More → Settings → **Obsidian** tab: type the vault name exactly, then Save.', 'Choose where quick notes go: **DAILY NOTE** (needs the Daily notes core plugin) or **ONE NOTE** (e.g. Kura/Inbox).'] },
     { h: 'Where things go' },
     { table: [
       ['Quick notes', "Today's daily note or your one note, as Markdown lines with tags (#kura/make, #kura/work, #project/aurora, #important)"],
@@ -5967,13 +6041,13 @@ const GUIDE = [
     { table: [['From Kura', 'Tasks in TODAY or with a date (and MAKE tasks, if you turn that on): new, edited, done and deleted'], ['From Google Tasks', 'New tasks, ticks, date changes and deletions come back into Kura'], ['When', 'When you open Kura, after changes, and every 5 minutes while it is open']] },
     { h: 'Set up' },
     { steps: [
-      'Settings → Google Tasks → **Copy bridge script**.',
+      '⋯ More → Settings → **Google Tasks** tab → **Copy bridge script**.',
       'On a computer, go to script.google.com while signed in to your **personal** Google account → **New project**. Paste the script over everything.',
       'Under **Services**, add **Tasks** (Google Tasks API).',
       '**Deploy → New deployment → Web app**. Set Execute as: **Me**, Who has access: **Anyone**. Authorise it.',
       'Copy the **Web app URL** that ends in **/exec**, paste it into Kura and tap **Save and test**.',
     ] },
-    { note: 'If testing fails with 404, the deployment isn\'t open to "Anyone", or it was made with a school or work account that doesn\'t allow that. Edit the deployment (✎ → New version), or make it with your personal Gmail. **Check connections** (in Settings) explains what\'s wrong.' },
+    { note: 'If testing fails with 404, the deployment isn\'t open to "Anyone", or it was made with a school or work account that doesn\'t allow that. Edit the deployment (✎ → New version), or make it with your personal Gmail. **Check connections** (Settings → Basics) explains what\'s wrong.' },
     { try: [['Check connections', 'diag']] },
   ] },
   { id: 'notebooklm', icon: 'nlm', title: 'NotebookLM', blocks: [
@@ -6001,17 +6075,18 @@ const GUIDE = [
     { table: [['Gemini · free', 'Key from aistudio.google.com. No card. Daily limits apply, and Google may use free-tier content to improve its products.'], ['Claude · paid', 'Your Anthropic API key, billed per use. Separate from a Claude subscription.']] },
     { list: [
       'Kura picks models automatically when you save the key: a stronger one for reading pages, a faster one for sorting.',
-      'AI is only used when you use an AI feature (AUTO sort, Brain Camera, Comprehend, Transcribe, Ask, weekly summary, Plan with AI). Only the text or photo involved is sent.',
+      'AI is only used when you use an AI feature (smart capture, AUTO sort, Brain Camera, Comprehend, Transcribe, Ask, weekly summary, Plan with AI). Only the text or photo involved is sent.',
       'If the AI is unavailable or out of quota, Kura falls back to rules on the phone and tells you why.',
+      'Smart capture sends the jotting, your field, your project names and the titles of up to three related notebook notes, so the AI can use your own terms.',
       'The key stays on this phone. **Remove key** deletes it.',
     ] },
-    { try: [['AI settings', 'settings']] },
+    { try: [['AI settings', 'aisettings']] },
   ] },
   { id: 'effects', icon: 'sound', title: 'Sounds, vibration and look', blocks: [
-    { list: ['**8-bit sounds** (Settings → Effects, or ⋯ More → Sound): a laser when you finish a task, a chime when focus ends, a jingle for trophies. They play through media volume even on silent, so they start off.', '**Vibration** is on by default.', 'Kura follows your phone\'s light or dark mode, and the status bar matches it.', 'Work, Personal and Fun use blue, aqua and orange, and are always labelled with text too.'] },
+    { list: ['**8-bit sounds** (Settings → Look, or ⋯ More → Sound): a laser when you finish a task, a chime when focus ends, a jingle for trophies. They play through media volume even on silent, so they start off.', '**Vibration** is on by default.', 'Kura follows your phone\'s light or dark mode, and the status bar matches it.', 'Work, Personal and Fun use blue, aqua and orange, and are always labelled with text too.'] },
   ] },
   { id: 'themes', icon: 'palette', title: 'Themes and the Critter Log', blocks: [
-    { p: 'Settings → **Theme**, or ⋯ More → **Theme**, switches the look of the top widget.' },
+    { p: 'Settings → **Look**, or ⋯ More → **Theme**, switches the look of the top widget.' },
     { table: [
       ['Invaders', 'Open tasks are pixel invaders. Finishing one fires the cannon.'],
       ['Pocket pets', 'The widget becomes a small LCD screen. Each open task has a critter wandering about; finishing the task befriends it with a heart and a chirp.'],
@@ -6032,11 +6107,11 @@ const GUIDE = [
     { h: 'Updating' },
     { steps: ['Upload the new index.html and sw.js (and manifest.webmanifest when included) to your GitHub Pages repository.', 'Open Kura, close it, and open it again. Settings shows the new version number.'] },
     { h: 'Installing' },
-    { list: ['Android: open your Kura address in **Chrome** → ⋮ → **Add to Home screen / Install app**.', 'iPhone: open it in **Safari** → Share → **Add to Home Screen**.'] },
+    { list: ['Android: open your Kura address in **Chrome** → ⋮ → **Add to Home screen / Install app**.', 'iPhone: open it in **Safari** → Share → **Add to Home Screen**.', 'After an update with a new icon, Chrome refreshes the home-screen icon within about a day. Reinstalling makes it immediate (export a backup first).'] },
   ] },
   { id: 'trouble', icon: 'gear', title: 'Troubleshooting', blocks: [
     { table: [
-      ['AI ✓ shows a problem', 'Tap it. Usually the free quota ran out (try later) or the key was pasted incorrectly (save it again).'],
+      ['AI ! appears at the top', 'Tap it. Usually the free quota ran out (try later) or the key was pasted incorrectly (save it again).'],
       ["Obsidian didn't open", 'Check the vault name matches exactly, and that Obsidian is installed with that vault opened once.'],
       ['Google Tasks 404 / not connected', 'See the Google Tasks chapter: the deployment must be a Web app with access set to Anyone, using its /exec URL.'],
       ['Voice does nothing', 'Allow the microphone for the Kura site in Chrome and check you are online.'],
@@ -6046,7 +6121,7 @@ const GUIDE = [
       ['Notes vanished after reinstalling', 'Import your latest backup: Settings → Backup → Import backup.'],
       ['Focus timer finished while away', 'It catches up when you open Kura: the minutes are logged and the break starts then.'],
     ] },
-    { p: 'Settings → **Check connections** tests AI, Google Tasks and Obsidian and says what to fix. **Copy report** gives you something to paste when asking for help.' },
+    { p: 'Settings → Basics → **Check connections** tests AI, Google Tasks and Obsidian and says what to fix. **Copy report** gives you something to paste when asking for help.' },
     { try: [['Check connections', 'diag']] },
   ] },
 ];
@@ -6055,6 +6130,7 @@ const GUIDE = [
 const GUIDE_ACTIONS = {
   settings: () => openSettings(),
   obsidian: () => openSettings('obsidian'),
+  aisettings: () => openSettings('ai'),
   diag: () => openDiag(),
   pad: () => { closeSheet(); if (state.nb) closeNotebook(); setTimeout(() => els.input.focus(), 80); },
   log: () => openLog(),
@@ -6322,6 +6398,471 @@ function drawCritters() {
   showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Critter Log' }, head('CRITTER LOG', `${met}/${PETS.length}`, 'themes'), body));
 }
 
+/* ---------- v18: smart capture — expand on save, show a preview ---------- */
+const capPrefs = { preview: true, ai: true };
+async function saveCapPrefs() { if (store.kvSet) await store.kvSet('capture', { ...capPrefs }).catch(() => {}); }
+function syncCapUI() {
+  els.input.placeholder = capPrefs.preview
+    ? 'Jot it short: "call mum sat", "prep samples: wash, dry". Enter to preview, Enter again to save.'
+    : 'Write anything. Enter saves. Start with ! ? [] -> to tag it.';
+}
+const SHORTHAND = [
+  [/\bw\/o\b/gi, 'without'],
+  [/\bw\/(?=\s|$)/gi, 'with'],
+  [/\bw\/(?=[A-Za-z])/gi, 'with '],
+  [/\bb\/c\b/gi, 'because'],
+  [/\bmtgs\b/gi, 'meetings'],
+  [/\bmtg\b/gi, 'meeting'],
+  [/\bappts\b/gi, 'appointments'],
+  [/\bappt\b/gi, 'appointment'],
+  [/\b(?:pls|plz)\b/gi, 'please'],
+  [/\bthx\b/gi, 'thanks'],
+  [/\bmsg\b/gi, 'message'],
+  [/\bppl\b/gi, 'people'],
+  [/\bbday\b/gi, 'birthday'],
+  [/\babt\b/gi, 'about'],
+  [/\blit review\b/gi, 'literature review'],
+  [/(^|\s)re:\s*/gi, '$1about '],
+  [/(^|\s)re\s+(?=[A-Za-z0-9])/gi, '$1about '],
+];
+// "mtg w/ sam re: budget" → "Meeting with sam about budget" (links are left alone)
+function tidyShort(s) {
+  const t = String(s || '').split(/(\S+:\/\/\S+)/).map((seg, i) => {
+    if (i % 2) return seg;
+    for (const [rx, rep] of SHORTHAND) seg = seg.replace(rx, rep);
+    return seg;
+  }).join('').replace(/[ \t]{2,}/g, ' ').replace(/ +([,.;!?])/g, '$1').trim();
+  return t.replace(/^([a-z])(?![A-Z])/, c => c.toUpperCase());
+}
+const RX_BULLET = /^\s*(?:[*•·▪◦‣]|-(?!>)|\d{1,2}[.)])\s+/;
+const RX_LIST_HEAD = /\b(shopping|groceries|grocery|packing|pack|buy|get|order|to-?dos?|checklist|list|steps)\b/i;
+// "Prep samples: wash, dry, weigh" → a task with three steps
+function colonSteps(t) {
+  const m = /^(.{3,80}?):\s+(.+)$/.exec(t);
+  if (!m) return null;
+  const head = m[1].trim();
+  if (!(RX_ACTION.test(head) || RX_LIST_HEAD.test(head))) return null;
+  let parts = m[2].split(/\s*[,;]\s*|\s+then\s+/i).map(x => x.trim()).filter(Boolean);
+  if (parts.length >= 2) {
+    const last = parts.pop().split(/\s+(?:and|&)\s+/i).map(x => x.trim()).filter(Boolean);
+    parts = [...parts, ...last].map(x => x.replace(/^(?:and|&)\s+/i, '').replace(/[.;]+$/, ''));
+  }
+  if (parts.length < 2 || parts.length > 8 || parts.some(p => p.split(/\s+/).length > 7)) return null;
+  return { head, steps: parts };
+}
+// "email pierre fri and order saline" → two tasks (only when every part starts with an action)
+function actionSplit(t) {
+  if (colonSteps(t) || t.includes('\n')) return null;
+  const parts = t.split(/\s*[,;]\s*(?:and\s+|then\s+)?|\s+(?:and|&|then|\+)\s+/i).map(x => x.trim()).filter(Boolean);
+  if (parts.length < 2 || parts.length > 12) return null;
+  return parts.every(x => RX_ACTION.test(parseMarks(x).text) && x.split(/\s+/).length >= 2) ? parts : null;
+}
+function capItem(src) {
+  const pm = parseMarks(String(src || '').replace(RX_BULLET, '').trim());
+  const pj = takeProject(pm.text);
+  let t = pj.text;
+  const w = !state.whenOff && !RX_FLEETING.test(t) ? parseWhen(t) : null;
+  if (w) t = w.text;
+  let steps = [];
+  const inl = expandInlineSteps(t);
+  if (inl !== t) {
+    const ls = inl.split('\n');
+    t = ls[0];
+    steps = ls.slice(1).map(l => ({ text: tidyShort(l.replace(/^\[ \]\s*/, '')), on: true, done: false, typed: true }));
+  } else {
+    const cs = colonSteps(t);
+    if (cs) { t = cs.head; steps = cs.steps.map(x => ({ text: tidyShort(x), on: true, done: false, typed: true })); }
+  }
+  const text = tidyShort(t);
+  const r = ruleSort(text, pm.tags);
+  const proj = projById(pj.proj);
+  let bucket = r.bucket;
+  if (w || (steps.length && bucket !== 'drop')) bucket = 'make';
+  return {
+    text, body: '', steps, tags: r.tags, bucket, userBucket: false,
+    today: w ? w.date : null, repeat: w ? w.repeat : null,
+    cat: proj ? proj.cat : guessCat(text + ' ' + steps.map(s => s.text).join(' ')), proj: proj ? proj.id : null, keep: true,
+  };
+}
+function proposeOffline(raw) {
+  const text = String(raw || '').replace(/\r/g, '').trim();
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  if (text.length >= 240 && text.length / lines.length >= 60) return { kind: 'notebook', items: [], title: '' };
+  const isStep = l => RX_STEP.test(l) || RX_BULLET.test(l);
+  if (lines.length > 1 && !isStep(lines[0]) && lines.slice(1).every(isStep)) {
+    const it = capItem(lines[0]);
+    for (const l of lines.slice(1)) {
+      const m = RX_STEP.exec(l);
+      it.steps.push({ text: tidyShort(m ? m[2] : l.replace(RX_BULLET, '')), on: true, done: !!(m && m[1] && m[1].trim()), typed: true });
+    }
+    if (it.bucket !== 'drop') it.bucket = 'make';
+    return { kind: 'single', items: [it] };
+  }
+  if (lines.length > 1) return { kind: 'list', items: lines.slice(0, 12).map(capItem) };
+  const semi = text.split(/\s*;\s*/).filter(Boolean);
+  if (semi.length > 1 && semi.every(s => s.split(/\s+/).length >= 2)) return { kind: 'list', items: semi.slice(0, 12).map(capItem) };
+  const acts = actionSplit(text);
+  if (acts) return { kind: 'list', items: acts.map(capItem) };
+  return { kind: 'single', items: [capItem(text)] };
+}
+
+/* AI version: clearer wording, splitting and steps. Dates are still read on the phone from your own words. */
+const CAP_STOP = new Set(['this', 'that', 'with', 'from', 'have', 'need', 'needs', 'about', 'there', 'their', 'what', 'when', 'which', 'will', 'would', 'could', 'should', 'into', 'some', 'then', 'than', 'them', 'they', 'your', 'just', 'also', 'more', 'like', 'make', 'call', 'email', 'today', 'tomorrow', 'next', 'week', 'every', 'after', 'before', 'check', 'send', 'book', 'order']);
+function relatedNotes(raw, n = 3) {
+  const words = [...new Set((String(raw).toLowerCase().match(/[\p{L}\p{N}][\p{L}\p{N}-]{3,}/gu) || []).filter(w => !CAP_STOP.has(w)))].slice(0, 24);
+  if (!words.length) return [];
+  return (state.notes || []).map(nt => {
+    const hay = [nt.title, nt.summary, String(nt.note || nt.raw || '').slice(0, 1500)].join(' ').toLowerCase();
+    return { nt, s: words.reduce((a, w) => a + (hay.includes(w) ? 1 : 0), 0) };
+  }).filter(x => x.s > 0).sort((a, b) => b.s - a.s).slice(0, n).map(x => x.nt);
+}
+function capPrompt(raw) {
+  const legend = state.symbols.map(s => `"${s.id}" = ${s.name}`).join(', ');
+  const ps = (state.projects || []).filter(p => !p.archived).map(p => p.name);
+  const rel = relatedNotes(raw);
+  const day = parseDay(TODAY).toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  return `You turn quick jottings into clear notes and tasks for a personal notebook app. The writer types as little as possible. Fill in obvious wording, expand shorthand and fix typos, but keep their names, numbers and technical terms exactly. Never invent facts, people, places, dates or amounts.
+Today is ${day}.${state.field ? `\nThe writer's field: ${String(state.field).slice(0, 200)}.` : ''}
+Buckets: "drop" = fleeting, only useful today; "stock" = worth keeping (a fact, idea, reference or open question); "make" = something to do.
+Categories: "work" = research, study, lab or job; "personal" = life admin, family, friends, health, money, errands, home; "fun" = hobbies, games, entertainment, trips.
+Symbols (add only when clearly implied): ${legend}.
+Projects: ${ps.length ? ps.map(x => JSON.stringify(x)).join(', ') : 'none'}.${rel.length ? '\nRelated notes the writer already has (context for names and terms only, do not copy):\n' + rel.map(nt => `- ${nt.title}: ${String(nt.summary || nt.note || '').replace(/\s+/g, ' ').slice(0, 160)}`).join('\n') : ''}
+
+Jotting:
+"""${String(raw).slice(0, 4000)}"""
+
+Rules:
+- "kind": "single" for one thing; "list" when the jotting holds several separate things (one item each, at most 12); "notebook" when it is a long piece of writing better kept whole as a notebook note.
+- "text": for something to do, start with a verb and use at most 12 words. Otherwise one clear sentence of at most 25 words that keeps every fact. Leave date and time words out of "text".
+- "when": the exact date or repeat words from the jotting that apply to this item (like "fri", "tomorrow", "3 Oct", "every mon"), else "".
+- "steps": only when the jotting lists parts, or the task clearly has 2 to 4 separate steps someone would tick off. At most 4, each at most 6 words. Otherwise [].
+- "project": one of the listed project names, or "".
+- For "notebook", return one item whose "text" is a short title.
+
+Reply with only JSON: {"kind": "single" | "list" | "notebook", "items": [{"text": "", "when": "", "steps": [], "bucket": "drop" | "stock" | "make", "category": "work" | "personal" | "fun", "project": "", "symbols": []}]}`;
+}
+const projByName = n => (state.projects || []).find(p => !p.archived && p.name.toLowerCase() === String(n || '').trim().replace(/^#/, '').toLowerCase()) || null;
+function capFromAi(r, raw, off, whenOff) {
+  if (!r || !Array.isArray(r.items) || !r.items.length) return null;
+  const kind = ['single', 'list', 'notebook'].includes(r.kind) ? r.kind : (r.items.length > 1 ? 'list' : 'single');
+  if (kind === 'notebook') return { kind, items: [], title: String((r.items[0] || {}).text || '').trim().slice(0, 120) };
+  const typed = parseMarks(String(raw).trim());
+  const typedProj = takeProject(typed.text).proj;
+  const src = kind === 'single' ? r.items.slice(0, 1) : r.items.slice(0, 12);
+  const items = src.map((x, i) => {
+    let text = tidyShort(String((x && x.text) || '').replace(/\s+/g, ' ').trim()).slice(0, 300);
+    if (!text) return null;
+    const base = kind === 'single' ? off.items[0] : (off.kind === 'list' && off.items.length === src.length ? off.items[i] : null);
+    let w = null;
+    if (!whenOff) {
+      if (x.when) w = parseWhen(' ' + String(x.when).slice(0, 60) + ' ');
+      const w2 = parseWhen(text);
+      if (w2) { text = w2.text; if (!w) w = w2; }
+      if (!w && base && base.today) w = { date: base.today, repeat: base.repeat };
+    }
+    const aiSteps = (Array.isArray(x.steps) ? x.steps : []).map(s => tidyShort(String(s || '').trim()).slice(0, 80)).filter(Boolean).slice(0, 4);
+    const typedSteps = base ? base.steps.filter(s => s.typed) : [];
+    const steps = typedSteps.length ? typedSteps.map(s => ({ ...s })) : aiSteps.map(s => ({ text: s, on: true, done: false }));
+    const proj = projById(kind === 'single' ? typedProj : null) || (base && projById(base.proj)) || projByName(x.project);
+    const tags = [...new Set([...(kind === 'single' ? typed.tags : base ? base.tags : []), ...(Array.isArray(x.symbols) ? x.symbols.map(String).filter(t => symById(t)) : [])])];
+    let bucket = BUCKETS.includes(x.bucket) ? x.bucket : base ? base.bucket : 'stock';
+    if (w || (steps.length && bucket !== 'drop')) bucket = 'make';
+    return {
+      text, body: '', steps, tags, bucket, userBucket: false,
+      today: w ? w.date : null, repeat: w ? w.repeat || null : null,
+      cat: proj ? proj.cat : CATS.includes(x.category) ? x.category : guessCat(text), proj: proj ? proj.id : null, keep: true,
+    };
+  }).filter(Boolean);
+  if (!items.length) return null;
+  return { kind: items.length > 1 ? 'list' : 'single', items };
+}
+
+let capSeq = 0;
+function openCapture(raw) {
+  const prev = state.cap;
+  if (prev && prev.ctl) prev.ctl.abort();
+  const off = proposeOffline(raw);
+  const useAi = !!state.sample && capPrefs.ai;
+  const c = state.cap = {
+    seq: ++capSeq, raw, kind: off.kind, items: off.items, title: off.title || '', by: 'rules', busy: useAi, edited: false, alt: null,
+    stale: false, err: '', whenOff: !!state.whenOff, ctl: useAi ? new AbortController() : null, saving: false,
+  };
+  drawCapture();
+  if (useAi) aiCapture(c, off);
+}
+async function aiCapture(c, off) {
+  let r = null, err = null, timedOut = false;
+  const timer = setTimeout(() => { timedOut = true; c.ctl.abort(); }, 15000);
+  try { r = await state.sample.json(capPrompt(c.raw), { modelTier: 'quick', signal: c.ctl.signal }); setAiStatus(null); }
+  catch (e) { err = e; }
+  clearTimeout(timer);
+  if (state.cap !== c) return;
+  c.busy = false;
+  const next = r ? capFromAi(r, c.raw, off, c.whenOff) : null;
+  if (!next) {
+    c.err = timedOut ? 'AI took too long' : err ? 'AI unavailable' : "AI reply wasn't usable";
+    if (err && !timedOut && err.code !== 'cancelled') setAiStatus(sampleMsg(err));
+    drawCapture();
+    return;
+  }
+  if (c.edited || c.stale) c.alt = next;
+  else Object.assign(c, next, { by: 'ai' });
+  drawCapture();
+}
+function closeCapture() {
+  const c = state.cap;
+  if (!c) return;
+  if (c.ctl) c.ctl.abort();
+  state.cap = null;
+  drawCapture();
+}
+const capBucket = x => (x.today ? 'make' : !x.userBucket && x.bucket !== 'drop' && x.steps.some(s => s.on) ? 'make' : x.bucket);
+function capDest(x) {
+  const b = capBucket(x);
+  if (x.today) return x.today <= TODAY ? 'TODAY' : `MAKE · ${futureLabel(x.today)}`;
+  return LABEL[b];
+}
+function capData(x, now) {
+  const steps = x.steps.filter(s => s.on && String(s.text || '').trim());
+  const text = [String(x.text).trim(), ...String(x.body || '').split('\n').map(l => l.trim()).filter(Boolean), ...steps.map(s => `[${s.done ? 'x' : ' '}] ${String(s.text).trim()}`)].join('\n');
+  const proj = projById(x.proj);
+  return {
+    text, tags: (x.tags || []).filter(t => symById(t)), bucket: capBucket(x),
+    today: x.today || null, repeat: x.today ? x.repeat || null : null,
+    done: false, doneAt: null, createdAt: now, updatedAt: now,
+    source: 'typed', photo: null, page: null, pending: false,
+    cat: CATS.includes(x.cat) ? x.cat : guessCat(x.text), proj: proj ? proj.id : null,
+  };
+}
+async function acceptCapture() {
+  const c = state.cap;
+  if (!c || c.saving) return;
+  const cur = els.input.value.trim();
+  if (c.stale || (cur && cur !== c.raw)) { openCapture(cur); return; }
+  if (c.kind === 'notebook') { captureToNotebook(c); return; }
+  const keep = c.items.filter(x => x.keep && String(x.text || '').trim());
+  if (!keep.length) { toast('Tick at least one item to save.'); return; }
+  c.saving = true;
+  if (c.ctl) c.ctl.abort();
+  const now = Date.now(), ids = [];
+  for (let i = 0; i < keep.length; i++) {
+    const id = store.newId();
+    try { await store.set(id, capData(keep[i], now + i)); ids.push(id); }
+    catch (e) { onWriteError(e); break; }
+  }
+  if (!ids.length) { c.saving = false; return; }
+  const raw = c.raw;
+  if (els.input.value.trim() === raw) els.input.value = '';
+  state.whenOff = false;
+  state.cap = null;
+  drawCapture();
+  setRoute('auto');
+  const x = keep[0], p = projById(x.proj);
+  const msg = ids.length > 1 ? `Saved ${ids.length} notes` : `Saved to ${capDest(x)}${x.repeat && x.today ? ' ↻ ' + repeatLabel(x.repeat) : ''}${p ? ' · #' + p.name : ''}`;
+  toast(msg, { label: 'Undo', fn: async () => {
+    for (const id of ids) await store.remove(id).catch(() => {});
+    if (!els.input.value.trim()) { els.input.value = raw; drawWhen(); }
+    play('undo');
+    toast('Undone. Your words are back in the pad.');
+  } });
+  if (innerWidth < 720) setTab(x.today && x.today <= TODAY ? 'today' : capBucket(x));
+}
+function captureToNotebook(c) {
+  const raw = c.raw;
+  if (els.input.value.trim() === raw) els.input.value = '';
+  state.cap = null;
+  drawCapture();
+  setRoute('auto');
+  openNotebook();
+  Object.assign(state.nb, { tab: 'bank', mode: 'edit', pane: 'main', draft: { id: null, title: c.title || '', raw, result: null, cat: null, tpl: 'blank' } });
+  drawNotebook();
+  if (state.sample) nbComprehend();
+  else toast('Moved to the notebook. Tap Tidy or Save when ready.');
+}
+async function captureAsTyped() {
+  const c = state.cap;
+  if (c && c.ctl) c.ctl.abort();
+  state.cap = null;
+  drawCapture();
+  await saveDirect();
+  setRoute('auto');
+}
+function captureQuickNote() {
+  const c = state.cap;
+  if (!c) return;
+  const lines = c.raw.split('\n');
+  const was = state.whenOff;
+  state.whenOff = true;   // a long note's "today" or "friday" is part of the story, not a plan
+  const it = capItem(lines[0]);
+  state.whenOff = was;
+  it.body = lines.slice(1).join('\n');
+  Object.assign(c, { kind: 'single', items: [it], edited: true });
+  drawCapture();
+}
+function captureAsOne() {
+  const c = state.cap;
+  if (!c || c.kind !== 'list') return;
+  const [first, ...rest] = c.items;
+  const it = { ...first, steps: [...first.steps, ...rest.map(x => ({ text: x.text, on: x.keep, done: false }))], keep: true };
+  if (!it.userBucket && it.bucket !== 'drop') it.bucket = 'make';
+  Object.assign(c, { kind: 'single', items: [it], edited: true });
+  drawCapture();
+}
+
+function capRow(c, x, i) {
+  const touch = () => { c.edited = true; };
+  const redraw = () => { touch(); drawCapture(); };
+  const list = c.kind === 'list';
+  const title = h('input', { type: 'text', class: 'cap-t', 'data-k': 't' + i, 'aria-label': list ? `Item ${i + 1}` : 'Note text', enterkeyhint: 'done', autocomplete: 'off' });
+  title.value = x.text;
+  title.addEventListener('input', () => { x.text = title.value; touch(); });
+  title.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing && e.keyCode !== 229) { e.preventDefault(); acceptCapture(); } });
+  let keep = null;
+  if (list) {
+    keep = h('input', { type: 'checkbox', class: 'cap-keep', 'data-k': 'k' + i, 'aria-label': 'Save this one' });
+    keep.checked = x.keep;
+    keep.addEventListener('change', () => { x.keep = keep.checked; redraw(); });
+  }
+  const eff = capBucket(x);
+  const seg = h('div', { class: 'seg small cap-seg', role: 'group', 'aria-label': 'List' }, BUCKETS.map(b => h('button', {
+    type: 'button', 'data-b': b, 'aria-pressed': String(eff === b),
+    onclick: () => { x.bucket = b; x.userBucket = true; if (b !== 'make') { x.today = null; x.repeat = null; } redraw(); },
+  }, LABEL[b])));
+  const dateIn = h('input', { type: 'date', class: 'cap-date-in', 'data-k': 'd' + i, 'aria-label': 'Pick a date' });
+  dateIn.value = x.today || '';
+  dateIn.addEventListener('click', () => { try { dateIn.showPicker(); } catch (e) {} });
+  dateIn.addEventListener('change', () => { x.today = dateIn.value || null; if (!x.today) x.repeat = null; else { x.bucket = 'make'; x.userBucket = false; } redraw(); });
+  const dateChip = h('label', { class: 'cap-chip date' + (x.today ? ' on' : '') }, x.today ? (x.today === TODAY ? 'today' : whenLabel(x.today)) : '+ Date', dateIn);
+  const todayBtn = x.today === TODAY ? null : h('button', { type: 'button', class: 'cap-chip', onclick: () => { x.today = TODAY; x.bucket = 'make'; x.userBucket = false; redraw(); } }, 'Today');
+  const clearDate = x.today ? h('button', { type: 'button', class: 'cap-chip', 'aria-label': 'Clear the date', onclick: () => { x.today = null; x.repeat = null; redraw(); } }, '×') : null;
+  const rep = x.today && x.repeat ? h('button', { type: 'button', class: 'cap-chip date on', title: 'Tap to stop repeating', onclick: () => { x.repeat = null; redraw(); } }, '↻ ' + repeatLabel(x.repeat) + ' ×') : null;
+  const cat = h('button', { type: 'button', class: 'cap-chip cat', 'data-cat': x.cat, title: 'Tap to change the category', 'aria-label': `Category ${CAT_NAME[x.cat]}. Tap to change.`, onclick: () => { x.cat = CATS[(CATS.indexOf(x.cat) + 1) % CATS.length]; redraw(); } }, h('i', { class: 'cc' }), CAT_NAME[x.cat]);
+  const proj = (state.projects || []).some(p => !p.archived) ? projPicker(x.proj, v => { x.proj = v; const p = projById(v); if (p) x.cat = p.cat; redraw(); }, () => x.cat) : null;
+  const syms = h('span', { class: 'cap-syms' }, state.symbols.map(s => h('button', {
+    type: 'button', class: 'cap-sym' + (s.id === 'imp' ? ' imp' : ''), 'aria-pressed': String(x.tags.includes(s.id)), title: s.name, 'aria-label': s.name,
+    onclick: () => { x.tags = x.tags.includes(s.id) ? x.tags.filter(t => t !== s.id) : [...x.tags, s.id]; redraw(); },
+  }, s.mark)));
+  const steps = x.steps.length ? h('div', { class: 'cap-steps' }, x.steps.map((s, j) => {
+    const cb = h('input', { type: 'checkbox', 'data-k': `s${i}-${j}`, 'aria-label': 'Keep step: ' + s.text });
+    cb.checked = s.on;
+    cb.addEventListener('change', () => { s.on = cb.checked; redraw(); });
+    return h('label', { class: 'cap-step' + (s.on ? '' : ' off') }, cb, h('span', { text: s.text }));
+  })) : null;
+  return h('div', { class: 'cap-item' + (list && !x.keep ? ' off' : ''), 'data-i': String(i) },
+    h('div', { class: 'cap-title' }, keep, title),
+    x.body ? h('p', { class: 'cap-body', text: x.body }) : null,
+    steps,
+    h('div', { class: 'cap-ctl' }, seg, dateChip, clearDate, todayBtn, rep, cat, proj, syms));
+}
+function drawCapture() {
+  const box = document.getElementById('capture');
+  if (!box) return;
+  const c = state.cap;
+  els.app.classList.toggle('capturing', !!c);
+  if (!c) { box.hidden = true; box.replaceChildren(); drawWhen(); return; }
+  const act = document.activeElement;
+  const key = act && box.contains(act) ? act.dataset.k : null;
+  const sel = key && typeof act.selectionStart === 'number' ? [act.selectionStart, act.selectionEnd] : null;
+  const scroll = box.scrollTop;
+  box.hidden = false;
+  box.classList.toggle('stale', !!c.stale);
+  const n = c.items.filter(x => x.keep).length;
+  const status = c.stale ? 'Text changed · Enter to update'
+    : c.busy ? 'AI is wording it…'
+    : c.by === 'ai' ? 'Worded by AI'
+    : c.err ? `By rules · ${c.err}`
+    : 'By rules on your phone';
+  const head = h('div', { class: 'cap-head' },
+    h('span', { class: 'lbl cap-kind', text: c.kind === 'list' ? `✦ ${c.items.length} items` : c.kind === 'notebook' ? '✦ Notebook note' : '✦ Kura suggests' }),
+    h('span', { class: 'lbl cap-st' + (c.busy ? ' busy' : '') + (c.by === 'ai' && !c.stale ? ' ai' : ''), text: status }),
+    c.alt && !c.stale ? h('button', { class: 'link-btn', type: 'button', id: 'cap-alt', onclick: () => { Object.assign(c, c.alt, { alt: null, by: 'ai', edited: false }); drawCapture(); } }, 'Use AI version') : null,
+    h('button', { class: 'ghost cap-x', type: 'button', 'aria-label': 'Close the preview', title: 'Close (Esc)', onclick: () => closeCapture() }, icon('close')));
+  const rows = c.kind === 'notebook'
+    ? [h('p', { class: 'cap-nb' }, c.title ? h('b', { text: c.title + '. ' }) : null, 'This is long enough to be a notebook note. Kura will open it in the notebook', state.sample ? ' and comprehend it into a clean note with tasks and key terms.' : '. Tap Tidy there to find tasks and questions.')]
+    : c.items.map((x, i) => capRow(c, x, i));
+  const primary = c.kind === 'notebook' ? 'To notebook' : c.kind === 'list' ? `Save ${n}` : 'Save';
+  const foot = h('div', { class: 'cap-foot' },
+    c.kind === 'notebook'
+      ? h('button', { class: 'link-btn plain', type: 'button', onclick: captureQuickNote }, 'Quick note instead')
+      : h('button', { class: 'link-btn plain', type: 'button', id: 'cap-typed', onclick: captureAsTyped }, 'Save as typed'),
+    c.kind === 'list' ? h('button', { class: 'link-btn plain', type: 'button', id: 'cap-one', onclick: captureAsOne }, 'As one note') : null,
+    c.kind === 'list' ? h('button', { class: 'link-btn plain', type: 'button', id: 'cap-today', onclick: () => { for (const x of c.items) if (x.keep) { x.today = TODAY; x.bucket = 'make'; x.userBucket = false; } c.edited = true; drawCapture(); } }, 'All today') : null,
+    h('span', { class: 'grow' }),
+    h('button', { class: 'save cap-save', type: 'button', id: 'cap-save', onclick: acceptCapture }, primary + ' ⏎'));
+  box.replaceChildren(head, ...rows, foot);
+  box.scrollTop = scroll;
+  if (key) {
+    const el = box.querySelector(`[data-k="${CSS.escape(key)}"]`);
+    if (el) { el.focus({ preventScroll: true }); if (sel && el.setSelectionRange) try { el.setSelectionRange(sel[0], sel[1]); } catch (e) {} }
+  }
+  drawWhen();
+}
+// keep the keyboard up when tapping preview buttons while typing
+for (const t of ['pointerdown', 'mousedown']) {
+  document.getElementById('capture').addEventListener(t, e => {
+    if (document.activeElement === els.input && e.target.closest('button, .cap-chip')) e.preventDefault();
+  });
+}
+els.input.addEventListener('input', () => {
+  const c = state.cap;
+  if (!c) return;
+  const v = els.input.value.trim();
+  if (!v) { closeCapture(); return; }
+  const st = v !== c.raw;
+  if (st !== c.stale) { c.stale = st; drawCapture(); }
+});
+els.input.addEventListener('keydown', e => { if (e.key === 'Escape' && state.cap && !state.sheet) { e.stopPropagation(); closeCapture(); } });
+document.getElementById('capture').addEventListener('keydown', e => {
+  if (e.key === 'Escape' && state.cap) { e.stopPropagation(); closeCapture(); els.input.focus({ preventScroll: true }); }
+});
+async function submitPad() {
+  const raw = els.input.value.trim();
+  if (!raw) { closeCapture(); return; }
+  const c = state.cap;
+  if (c && !c.stale && c.raw === raw) { acceptCapture(); return; }
+  if (state.route === 'auto' && capPrefs.preview) { openCapture(raw); return; }
+  closeCapture();
+  const was = state.route;
+  await saveDirect();
+  if (was !== 'auto' && state.route === was) setRoute('auto');   // the other chips are one-shot: back to AUTO after saving
+}
+els.route.addEventListener('click', e => { if (e.target.closest('.chip') && state.cap) closeCapture(); });
+
+/* ---------- v18: home banner, one message at a time ---------- */
+function bannerMsgs() {
+  const out = [];
+  if (bannerMsg) out.push({ id: 'msg', text: bannerMsg });
+  if (reviewDue() && !state.reviewDismissed) out.push({ id: 'review', text: 'Weekly review time: tidy loose ends and plan next week.', act: ['Start review', () => openReview()], later: () => { state.reviewDismissed = true; } });
+  if (state.seenVersion !== undefined && state.seenVersion !== APP_VERSION) {
+    const fresh = !state.seenVersion && !state.items.some(i => !i.example);
+    out.push({ id: 'ver', text: fresh ? 'New to Kura? The user guide shows how everything works.' : `Updated to ${APP_VERSION}: smarter capture, a tidier home and a new icon.`,
+      act: [fresh ? 'Open the guide' : "What's new", () => openGuide(fresh ? 'start' : 'new'), 'banner-guide'], later: () => markSeen(), laterLabel: 'Got it' });
+  }
+  const missing = [!state.sample && 'a free AI key', !state.obs && 'your Obsidian vault'].filter(Boolean);
+  if (missing.length && !state.keyDismissed) out.push({ id: 'setup', text: `Finish setup: add ${missing.join(' and ')} (both optional).`, act: ['Set up', () => openSettings()], later: () => { state.keyDismissed = true; } });
+  const ex = state.items.filter(i => i.example);
+  if (ex.length) out.push({ id: 'ex', text: `${ex.length} example notes are showing.`, act: ['Clear examples', () => clearExamples(ex.map(i => i.id))] });
+  return out;
+}
+function drawBanner() {
+  const msgs = bannerMsgs();
+  if (!msgs.length) { els.banner.replaceChildren(); els.banner.hidden = true; return; }
+  const i = ((state.bannerIdx || 0) % msgs.length + msgs.length) % msgs.length;
+  const m = msgs[i];
+  els.banner.dataset.msg = m.id;
+  els.banner.replaceChildren(...[
+    h('span', { class: 'b-msg', text: m.text }),
+    m.act ? h('button', { type: 'button', class: 'b-act', id: m.act[2] || null, onclick: () => m.act[1]() }, m.act[0]) : null,
+    m.later ? h('button', { type: 'button', class: 'b-later', onclick: () => { m.later(); drawBanner(); } }, m.laterLabel || 'Later') : null,
+    msgs.length > 1 ? h('button', { type: 'button', class: 'b-next', id: 'banner-next', 'aria-label': `Next message (${i + 1} of ${msgs.length})`, onclick: () => { state.bannerIdx = i + 1; drawBanner(); } }, `${i + 1}/${msgs.length} ›`) : null,
+  ].filter(Boolean));
+  els.banner.hidden = false;
+}
+
+const SET_TABS = [['basics', 'Basics'], ['ai', 'AI'], ['obsidian', 'Obsidian'], ['tasks', 'Google Tasks'], ['look', 'Look'], ['backup', 'Backup']];
+const SET_TAB_OF = { ai: 'ai', obsidian: 'obsidian', tasks: 'tasks', gtasks: 'tasks', look: 'look', theme: 'look', backup: 'backup' };
+const SET_HELP = { basics: 'start', ai: 'ai', obsidian: 'obsidian', tasks: 'gtasks', look: 'themes', backup: 'backup' };
+
 // v14 wiring
 $('#friends').addEventListener('click', () => openCritters());
 $('#btn-more').addEventListener('click', () => openMore());
@@ -6379,6 +6920,7 @@ function openSettings(section) {
     field: state.field || '',
     gurl: (state.gt && state.gt.url) || '', glist: (state.gt && state.gt.list) || 'Kura', gmake: !!(state.gt && state.gt.includeMake), gstatus: '', gbusy: false, showScript: false,
   };
+  state.sheet.tab = SET_TAB_OF[section] || 'basics';
   drawSettings();
   if (section === 'obsidian') { const v = $('#obs-vault'); if (v) v.focus(); }
 }
@@ -6564,16 +7106,40 @@ function drawSettings() {
     h('hr', { class: 'rule' }),
   ];
 
-  const body = h('div', { class: 'sheet-body' },
+  const capChk = (id, key, label) => {
+    const c = h('input', { type: 'checkbox', id });
+    c.checked = !!capPrefs[key];
+    c.addEventListener('change', async () => { capPrefs[key] = c.checked; await saveCapPrefs(); syncCapUI(); });
+    return h('label', { class: 'keep', for: id }, c, label);
+  };
+  const gErr = state.gt && (state.gtMeta || {}).lastError;
+  const conn = (label, ok, bad, detail, tab) => h('button', { class: 'set-conn', type: 'button', id: 'set-conn-' + tab, onclick: () => { s.tab = tab; drawSettings(); } },
+    h('span', { class: 'dot' + (bad ? ' bad' : ok ? ' on' : ''), 'aria-hidden': 'true' }), h('b', { text: label }), h('span', { class: 'muted', text: detail }), h('span', { class: 'arr', 'aria-hidden': 'true', text: '›' }));
+  const basics = [
     h('div', { class: 'row' }, h('button', { class: 'btn primary', id: 'btn-guide', type: 'button', onclick: () => openGuide() }, icon('help', 1.8), 'User guide'),
       h('span', { class: 'muted', text: 'How everything in Kura works, step by step, with a search box.' })),
     h('div', { class: 'row' }, h('button', { class: 'btn', id: 'btn-diag', type: 'button', onclick: () => openDiag() }, 'Check connections'),
-      h('span', { class: 'muted', text: 'Tests Claude, Google Tasks and Obsidian and tells you what to fix.' })),
+      h('span', { class: 'muted', text: 'Tests AI, Google Tasks and Obsidian and tells you what to fix.' })),
     h('hr', { class: 'rule' }),
-    obsSection,
-    gtSection,
-    h('span', { class: 'lbl', text: 'AI for Auto sort and Brain Camera (optional)' }),
-    h('p', { class: 'muted', text: 'Without a key, Kura sorts notes with simple rules on your phone, and you bring in paper pages by pasting text from Google Lens. With a key, it reads photos of your handwriting and sorts more accurately.' }),
+    h('span', { class: 'lbl', text: 'Connections' }),
+    h('div', { class: 'set-conns' },
+      conn('AI', !!state.sample, !!(state.sample && state.aiErr), state.sample ? `${providerName(state.api && state.api.provider)} · ${state.aiErr ? 'has a problem' : 'ready'}` : 'Optional · free Gemini key', 'ai'),
+      conn('Obsidian', !!state.obs, false, state.obs ? `Vault "${state.obs.vault}"` : 'Optional · not connected', 'obsidian'),
+      conn('Google Tasks', !!state.gt, !!gErr, state.gt ? (gErr ? 'Sync problem' : `List "${state.gt.list || 'Kura'}"`) : 'Optional · not connected', 'tasks')),
+    h('hr', { class: 'rule' }),
+    h('span', { class: 'lbl', text: 'Smart capture' }),
+    capChk('cap-preview', 'preview', 'Preview before saving (with AUTO)'),
+    capChk('cap-ai', 'ai', 'Let AI word and split notes (needs a key)'),
+    h('p', { class: 'muted', text: 'With AUTO picked, Enter shows what Kura will save: tidied wording, separate items, date, category, project and steps. Enter again saves it. Turn the preview off to save straight away.' }),
+    h('hr', { class: 'rule' }),
+    h('span', { class: 'lbl', text: 'Symbols' }),
+    h('div', { class: 'row' }, h('button', { class: 'btn', type: 'button', id: 'set-symbols', onclick: () => openSymbols() }, 'Edit symbols'),
+      h('span', { class: 'muted', text: state.symbols.map(x => x.mark + ' ' + x.name).join(' · ') })),
+    h('p', { class: 'muted set-ver', text: `Kura ${APP_VERSION} · status bar ${((document.getElementById('theme-color') || {}).content || '?')}` }),
+  ];
+  const aiSection = [
+    h('span', { class: 'lbl', text: 'AI for smart capture, Auto sort and Brain Camera (optional)' }),
+    h('p', { class: 'muted', text: 'Without a key, Kura tidies and sorts notes with rules on your phone, and you bring in paper pages by pasting text from Google Lens. With a key, it words notes and tasks more clearly, reads photos of your handwriting and sorts more accurately.' }),
     h('div', { class: 'row' }, h('div', { class: 'seg', role: 'group', 'aria-label': 'AI service' },
       ...[['gemini', 'GEMINI · FREE'], ['anthropic', 'CLAUDE · PAID']].map(([val, label]) => h('button', {
         type: 'button', style: '--c: var(--ink)', 'aria-pressed': String(s.provider === val),
@@ -6603,7 +7169,8 @@ function drawSettings() {
     h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'Model for Brain Camera' }), scan),
     h('div', { class: 'stack' }, h('span', { class: 'lbl', text: 'Model for Auto sort' }), sort),
     h('p', { class: 'muted', text: s.provider === 'gemini' ? 'Leave the model boxes as they are. Kura picks the newest Gemini Flash for reading pages and Flash-Lite for sorting when you save the key.' : 'Leave the model boxes as they are. Kura picks the newest Sonnet for reading pages and the newest Haiku for sorting when you save the key.' }),
-    h('hr', { class: 'rule' }),
+  ];
+  const lookSection = [
     themeSection(),
     h('span', { class: 'lbl', text: 'Effects' }),
     h('div', { class: 'row' },
@@ -6611,6 +7178,8 @@ function drawSettings() {
       h('label', { class: 'keep', for: 'fx-haptics' }, (() => { const c = h('input', { type: 'checkbox', id: 'fx-haptics' }); c.checked = fx.haptics; c.addEventListener('change', async () => { fx.haptics = c.checked; await saveFx(); buzz(30); }); return c; })(), 'Vibration')),
     h('p', { class: 'muted', text: 'Sounds play through the media volume, even when the phone is on silent, so they start switched off.' }),
     h('hr', { class: 'rule' }),
+  ];
+  const backupSection = [
     h('span', { class: 'lbl', text: 'Backup' }),
     h('p', { class: 'muted', text: `Your ${state.items.length} notes are stored on this phone only. Export a backup now and then. Photos are not included.` }),
     h('div', { class: 'row' },
@@ -6620,12 +7189,22 @@ function drawSettings() {
       h('p', { class: 'muted ok', text: `Import ${s.confirmImport.items.length} notes? Notes with the same ID are replaced; others are kept.` }),
       h('div', { class: 'row' },
         h('button', { class: 'btn primary', type: 'button', onclick: () => doImport(s.confirmImport) }, 'Import'),
-        h('button', { class: 'btn', type: 'button', onclick: () => { s.confirmImport = null; drawSettings(); } }, 'Cancel'))) : null);
+        h('button', { class: 'btn', type: 'button', onclick: () => { s.confirmImport = null; drawSettings(); } }, 'Cancel'))) : null,
+    s.importMsg ? h('p', { class: 'muted ok', text: s.importMsg }) : null,
+  ];
+  const content = { basics, ai: aiSection, obsidian: obsSection, tasks: gtSection, look: lookSection, backup: backupSection }[s.tab] || basics;
+  const flat = content.flat(4).filter(Boolean);
+  while (flat.length && flat[flat.length - 1].tagName === 'HR') flat.pop();
+  const tabs = h('div', { class: 'set-tabs', role: 'tablist', 'aria-label': 'Settings sections' }, SET_TABS.map(([k, label]) => h('button', {
+    type: 'button', role: 'tab', id: 'set-tab-' + k, 'aria-selected': String(s.tab === k), 'aria-controls': 'set-panel',
+    onclick: () => { if (s.tab !== k) { s.tab = k; drawSettings(); } },
+  }, label, (k === 'ai' && state.sample && state.aiErr) || (k === 'tasks' && gErr) ? h('i', { class: 'warn', 'aria-label': 'needs attention', text: '!' }) : null)));
+  const body = h('div', { class: 'sheet-body', id: 'set-panel', role: 'tabpanel', 'aria-labelledby': 'set-tab-' + s.tab }, flat);
 
   const prev = $('.sheet-body', els.sheet);
   const scroll = prev ? prev.scrollTop : 0;
-  showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Settings' },
-    head('SETTINGS', 'KURA ' + APP_VERSION + ' · bar ' + ((document.getElementById('theme-color') || {}).content || '?'), 'start'), body,
+  showSheet(h('div', { class: 'sheet settings', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Settings' },
+    head('SETTINGS', 'KURA ' + APP_VERSION, SET_HELP[s.tab] || 'start'), tabs, body,
     h('div', { class: 'sheet-foot' }, h('span', { class: 'grow' }),
       h('button', { class: 'btn', type: 'button', onclick: async () => {
         const o = state.obs || DEFAULT_OBS;
@@ -6637,7 +7216,10 @@ function drawSettings() {
         }
         closeSheet();
       } }, 'Done'))));
-  body.scrollTop = scroll;
+  body.scrollTop = s.lastTab === s.tab ? scroll : 0;
+  s.lastTab = s.tab;
+  const at = document.getElementById('set-tab-' + s.tab);
+  if (at) at.parentNode.scrollLeft = Math.max(0, at.offsetLeft - 40);
 }
 $('#btn-settings').addEventListener('click', () => openSettings());
 $('#gt-stat').addEventListener('click', () => openDiag());
@@ -6661,7 +7243,8 @@ $('#file-import').addEventListener('change', async e => {
   try {
     const data = JSON.parse(await f.text());
     if (!data || !['kura', 'keitan'].includes(data.app) || !Array.isArray(data.items)) throw new Error('not a backup');
-    if (!state.sheet || state.sheet.kind !== 'settings') openSettings();
+    if (!state.sheet || state.sheet.kind !== 'settings') openSettings('backup');
+    state.sheet.tab = 'backup';
     state.sheet.confirmImport = data;
     drawSettings();
   } catch (err) { toast("That file isn't a Kura backup."); }
@@ -6696,7 +7279,7 @@ async function doImport(data) {
   }
   if (Array.isArray(data.glossary) && store.putTerm) { for (const g of data.glossary) if (g && typeof g.id === 'string' && g.term && Array.isArray(g.noteIds)) await store.putTerm(g).catch(() => {}); state.glossary = await store.listTerms(); await markGloss(); }
   if (!state.obs && data.obsidian && data.obsidian.vault && store.kvSet) { await store.kvSet('obsidian', { ...DEFAULT_OBS, ...data.obsidian }).catch(() => {}); await loadObs(); }
-  if (state.sheet && state.sheet.kind === 'settings') { state.sheet.confirmImport = null; state.sheet.status = `Imported ${n} notes.`; drawSettings(); }
+  if (state.sheet && state.sheet.kind === 'settings') { state.sheet.confirmImport = null; state.sheet.importMsg = `Imported ${n} notes.`; drawSettings(); }
 }
 
 async function boot() {
@@ -6727,6 +7310,8 @@ async function boot() {
   state.nlmPacks = store.kvGet ? ((await store.kvGet('nlmPacks').catch(() => null)) || {}) : {};
   state.nlmNotebook = store.kvGet ? ((await store.kvGet('nlmNotebook').catch(() => '')) || '') : '';
   state.lastReview = store.kvGet ? ((await store.kvGet('lastReview').catch(() => '')) || '') : '';
+  if (store.kvGet) Object.assign(capPrefs, (await store.kvGet('capture').catch(() => null)) || {});
+  syncCapUI();
   try { state.dayView = localStorage.getItem('kura.dayview') === 'week' ? 'week' : 'today'; } catch (e) { state.dayView = 'today'; }
   if (store.kvGet) {
     Object.assign(fx, (await store.kvGet('fx').catch(() => null)) || {});
@@ -6782,7 +7367,7 @@ async function boot() {
     const hadController = !!navigator.serviceWorker.controller;
     let reloaded = false;
     navigator.serviceWorker.addEventListener('controllerchange', () => {
-      if (!hadController || reloaded || state.sheet) return;
+      if (!hadController || reloaded || state.sheet || state.cap || els.input.value.trim()) return;
       reloaded = true;
       location.reload();
     });
