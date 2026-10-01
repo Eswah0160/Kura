@@ -41,13 +41,13 @@
   --paper: #E7E7E4;
   --sheet: #F6F6F3;
   --ink: #262625;
-  --ink-2: #7A7A76;
+  --ink-2: #63635F;
   --rule: #D3D3CF;
   --dot: #D5D5D1;
-  --red: #DE4336;
+  --red: #BD3226;
   --drop: #9A9A96;
   --stock: #3A3A38;
-  --make: #DE4336;
+  --make: #BD3226;
   --scrim: rgba(30, 30, 28, 0.38);
   --shadow: 0 1px 0 rgba(0, 0, 0, 0.03), 0 10px 24px -18px rgba(0, 0, 0, 0.35);
   --f-mono: "DM Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
@@ -85,7 +85,7 @@ button, input, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; }
 :focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
 svg { display: block; flex: none; }
-.lbl { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.lbl { font-family: var(--f-mono); font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2); font-variant-numeric: tabular-nums; }
 
 /* fitted to the visible viewport (keyboard-aware) */
 .fit {
@@ -106,7 +106,7 @@ svg { display: block; flex: none; }
 .ghost {
   height: 30px; min-width: 30px; padding: 0 6px; border: 0; border-radius: 6px; background: transparent; color: var(--ink-2);
   display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-  font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase;
+  font-family: var(--f-mono); font-size: 11.5px; letter-spacing: 0.12em; text-transform: uppercase;
 }
 .ghost svg { width: 16px; height: 16px; }
 .search { display: flex; align-items: center; position: relative; }
@@ -130,7 +130,7 @@ svg { display: block; flex: none; }
 @keyframes frameB { 0%, 49.9% { opacity: 0; } 50%, 100% { opacity: 1; } }
 .inv.hit { animation: hit 0.28s ease-out forwards; }
 @keyframes hit { 0% { transform: scale(1); } 35% { transform: scale(1.6); color: var(--red); } 100% { transform: scale(0.2); opacity: 0; } }
-.more { font-family: var(--f-mono); font-size: 10.5px; color: var(--ink-2); align-self: center; letter-spacing: 0.1em; }
+.more { font-family: var(--f-mono); font-size: 11.5px; color: var(--ink-2); align-self: center; letter-spacing: 0.1em; }
 .all-clear { text-align: center; padding: 8px 0 2px; }
 .cannon { position: absolute; bottom: 0; left: 50%; width: 20px; height: 11px; transform: translateX(-50%); color: var(--ink); transition: left 0.16s ease; }
 .laser { position: absolute; width: 2px; background: var(--red); transform: translateX(-50%) scaleY(0); transform-origin: bottom; animation: laser 0.16s ease-out forwards; }
@@ -152,12 +152,12 @@ svg { display: block; flex: none; }
   flex: 1 0 70px; max-width: 150px; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
   height: 64px; padding: 14px 6px 6px; border: 1px solid var(--rule); border-radius: 8px; background: var(--sheet); color: var(--ink);
 }
-.tile .t-idx, .tile .t-n { position: absolute; top: 5px; font-family: var(--f-mono); font-size: 9.5px; color: var(--ink-2); letter-spacing: 0.06em; font-variant-numeric: tabular-nums; }
+.tile .t-idx, .tile .t-n { position: absolute; top: 5px; font-family: var(--f-mono); font-size: 11px; color: var(--ink-2); letter-spacing: 0.06em; font-variant-numeric: tabular-nums; }
 .tile .t-idx { left: 7px; }
 .tile .t-n { right: 7px; }
 .tile .t-mark { font-family: var(--f-mono); font-size: 18px; line-height: 1; }
 .tile .t-mark.imp { color: var(--red); }
-.tile .t-name { font-family: var(--f-mono); font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.tile .t-name { font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 .tile[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--sheet); }
 .tile[aria-pressed="true"] .t-name, .tile[aria-pressed="true"] .t-idx, .tile[aria-pressed="true"] .t-n { color: var(--sheet); }
 .tile.edit { flex: 0 0 64px; border-style: dashed; background: transparent; }
@@ -174,7 +174,7 @@ svg { display: block; flex: none; }
 .box-head .name { font-family: var(--f-mono); font-weight: 500; font-size: 11px; letter-spacing: 0.16em; color: var(--c, var(--ink)); }
 .box-head .gloss { margin-left: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .box-act { margin-left: auto; display: flex; gap: 8px; align-items: center; }
-.link-btn { white-space: nowrap; border: 0; background: none; padding: 2px 0; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--red); }
+.link-btn { white-space: nowrap; border: 0; background: none; padding: 2px 0; font-family: var(--f-mono); font-size: 11.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--red); }
 .link-btn.plain { color: var(--ink-2); }
 
 /* notepad */
@@ -199,7 +199,7 @@ svg { display: block; flex: none; }
 .chip {
   display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; flex: none;
   padding: 6px 8px; border-radius: 999px; border: 1px solid var(--rule); background: transparent;
-  font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2);
+  font-family: var(--f-mono); font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2);
 }
 .chip::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--c, var(--ink-2)); }
 .chip[data-r="auto"]::before { background: conic-gradient(var(--drop) 0 33%, var(--stock) 0 66%, var(--make) 0); }
@@ -231,7 +231,7 @@ svg { display: block; flex: none; }
   font-size: 14px; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere;
   display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden;
 }
-.meta { display: flex; align-items: center; gap: 6px; font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.06em; color: var(--ink-2); min-width: 0; text-transform: uppercase; }
+.meta { display: flex; align-items: center; gap: 6px; font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.06em; color: var(--ink-2); min-width: 0; text-transform: uppercase; }
 .meta svg { width: 11px; height: 11px; }
 .meta .pg { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 .meta .tg { color: var(--ink); white-space: nowrap; }
@@ -241,7 +241,7 @@ svg { display: block; flex: none; }
 .is-pending .txt { opacity: 0.7; }
 .to-today {
   position: absolute; right: 0; bottom: 7px; border: 1px dashed color-mix(in srgb, var(--red) 60%, transparent); background: transparent; color: var(--red);
-  border-radius: 999px; padding: 3px 8px; font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.1em;
+  border-radius: 999px; padding: 3px 8px; font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.1em;
 }
 .check {
   width: 20px; height: 20px; margin-top: 1px; flex: none; border-radius: 4px; border: 1.5px solid var(--ink-2);
@@ -290,17 +290,17 @@ textarea.field-in { resize: vertical; min-height: 96px; }
 .seg { display: inline-flex; border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; }
 .seg button {
   border: 0; border-right: 1px solid var(--rule); background: transparent; color: var(--ink-2);
-  font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.12em; padding: 8px 11px; line-height: 1;
+  font-family: var(--f-mono); font-size: 11.5px; letter-spacing: 0.12em; padding: 8px 11px; line-height: 1;
 }
 .seg button:last-child { border-right: 0; }
 .seg button[data-b="drop"] { --c: var(--drop); }
 .seg button[data-b="stock"] { --c: var(--stock); }
 .seg button[data-b="make"] { --c: var(--make); }
 .seg button[aria-pressed="true"] { background: var(--c); color: var(--sheet); }
-.seg.small button { padding: 6px 8px; font-size: 10px; }
+.seg.small button { padding: 6px 8px; font-size: 11px; }
 .tog {
   border: 1px dashed var(--rule); background: transparent; border-radius: 999px; padding: 6px 11px;
-  font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2);
+  font-family: var(--f-mono); font-size: 11.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2);
 }
 .tog[aria-pressed="true"] { background: var(--red); border: 1px solid var(--red); color: var(--sheet); }
 .tagchip {
@@ -336,14 +336,14 @@ textarea.field-in { resize: vertical; min-height: 96px; }
 .sym { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 10px; border: 1px solid var(--rule); border-radius: 6px; }
 .sym .mark-in { text-align: center; font-family: var(--f-mono); font-size: 20px; padding: 6px 4px; }
 .sym .draw-in { grid-column: 1 / -1; font-size: 14px; }
-.sym .idx { font-family: var(--f-mono); font-size: 10px; color: var(--ink-2); }
+.sym .idx { font-family: var(--f-mono); font-size: 11px; color: var(--ink-2); }
 
 .log-day { margin: 8px 0 0; }
 .log-row { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--rule); }
 .log-row p { margin: 0; flex: 1; min-width: 0; font-size: 14px; line-height: 1.45; overflow-wrap: anywhere; white-space: pre-wrap; text-decoration: line-through; color: var(--ink-2); }
 
 .banner { flex: none; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 12.5px; line-height: 1.4; padding: 7px 12px; border: 1px dashed var(--ink-2); border-radius: 6px; color: var(--ink-2); }
-.banner button { border: 0; background: none; padding: 0; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--red); }
+.banner button { border: 0; background: none; padding: 0; font-family: var(--f-mono); font-size: 11.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--red); }
 
 .toast {
   position: fixed; left: 50%; transform: translateX(-50%); z-index: 30;
@@ -390,7 +390,7 @@ textarea.field-in { resize: vertical; min-height: 96px; }
 .nb-pick input { width: 18px; height: 18px; margin-top: 1px; accent-color: var(--ink); flex: none; }
 .nb-pick span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
 .nb-chips { display: flex; gap: 6px; flex-wrap: wrap; }
-.nb-chip { border: 1px solid var(--rule); border-radius: 999px; padding: 3px 9px; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.06em; color: var(--ink-2); background: transparent; }
+.nb-chip { border: 1px solid var(--rule); border-radius: 999px; padding: 3px 9px; font-family: var(--f-mono); font-size: 11.5px; letter-spacing: 0.06em; color: var(--ink-2); background: transparent; }
 button.nb-chip { cursor: pointer; color: var(--ink); }
 .nb-q { font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2); }
 .nb-a { font-size: 15px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
@@ -440,12 +440,12 @@ details summary { cursor: pointer; }
 /* v13: dates, week, projects, templates, voice, review */
 .when-hint {
   border: 1px dashed color-mix(in srgb, var(--red) 60%, transparent); background: transparent; color: var(--red); border-radius: 999px;
-  padding: 2px 8px; font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap;
+  padding: 2px 8px; font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap;
   max-width: 62%; overflow: hidden; text-overflow: ellipsis; flex: 0 1 auto; min-width: 0;
 }
 .when-hint.off { color: var(--ink-2); border-color: var(--rule); text-decoration: line-through; }
 .day-toggle { margin-left: auto; }
-.wk-day { list-style: none; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2); padding: 10px 0 4px; border-bottom: 1px solid var(--rule); }
+.wk-day { list-style: none; font-family: var(--f-mono); font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2); padding: 10px 0 4px; border-bottom: 1px solid var(--rule); }
 .date-in { width: auto; padding: 6px 8px; font-size: 14px; }
 select.field-in { width: auto; max-width: 100%; padding: 7px 8px; font-size: 14px; }
 .proj-pick { display: inline-flex; gap: 6px; align-items: center; flex-wrap: wrap; min-width: 0; }
@@ -467,7 +467,7 @@ select.field-in { width: auto; max-width: 100%; padding: 7px 8px; font-size: 14p
 .rv-acts { display: flex; gap: 6px; flex-wrap: wrap; padding-left: 0; }
 .mini {
   border: 1px solid var(--rule); background: transparent; border-radius: 999px; padding: 5px 10px; white-space: nowrap;
-  font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink);
+  font-family: var(--f-mono); font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink);
 }
 .rv-done { margin: 4px 0 0; padding-left: 18px; font-size: 14px; line-height: 1.5; }
 @media (max-width: 719px) { .rv-btn .vl { display: none; } }
@@ -494,7 +494,7 @@ select.field-in { width: auto; max-width: 100%; padding: 7px 8px; font-size: 14p
 .li.swiping { transition: none; background: var(--sheet); z-index: 1; }
 .li[data-hint]::before {
   content: attr(data-hint); position: absolute; top: 0; bottom: 0; display: flex; align-items: center; white-space: nowrap; pointer-events: none;
-  font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.12em; color: var(--ink-2);
+  font-family: var(--f-mono); font-size: 11.5px; letter-spacing: 0.12em; color: var(--ink-2);
 }
 .li[data-side="right"]::before { right: 100%; padding-right: 14px; }
 .li[data-side="left"]::before { left: 100%; padding-left: 14px; }
@@ -562,7 +562,7 @@ body.focusing .toast { top: calc(var(--vvt, 0px) + var(--vvh, 100vh) - env(safe-
 .pbar .pv { font-family: var(--f-mono); font-size: 11px; color: var(--ink-2); white-space: nowrap; }
 .stat-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 6px; }
 .stat-table th, .stat-table td { text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--rule); }
-.stat-table th { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.1em; color: var(--ink-2); font-weight: 400; }
+.stat-table th { font-family: var(--f-mono); font-size: 11.5px; letter-spacing: 0.1em; color: var(--ink-2); font-weight: 400; }
 .calc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; }
 .calc-f { display: flex; flex-direction: column; gap: 4px; }
 .calc-row { display: flex; gap: 6px; }
@@ -584,7 +584,7 @@ body.focusing .toast { top: calc(var(--vvt, 0px) + var(--vvh, 100vh) - env(safe-
 .guide-body { flex: 1; min-height: 0; display: grid; grid-template-columns: 230px minmax(0, 1fr); }
 .guide-nav { overflow: auto; border-right: 1px solid var(--rule); padding: 10px 8px; display: flex; flex-direction: column; gap: 1px; }
 .guide-nav button { display: flex; gap: 8px; align-items: baseline; width: 100%; text-align: left; border: 0; background: none; padding: 6px 8px; border-radius: 6px; font-size: 13.5px; line-height: 1.3; color: var(--ink-2); }
-.guide-nav button .gn { font-family: var(--f-mono); font-size: 10px; color: var(--ink-2); opacity: 0.7; flex: none; }
+.guide-nav button .gn { font-family: var(--f-mono); font-size: 11px; color: var(--ink-2); opacity: 0.7; flex: none; }
 .guide-nav button[aria-current="true"] { background: var(--paper); color: var(--ink); font-weight: 700; }
 .guide-main { overflow: auto; padding: 12px 16px 28px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .guide-tools { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; position: sticky; top: -12px; z-index: 2; background: var(--sheet); padding: 6px 0; margin-top: -6px; }
@@ -601,7 +601,7 @@ body.focusing .toast { top: calc(var(--vvt, 0px) + var(--vvh, 100vh) - env(safe-
 .g-in p { margin: 0; }
 .g-in ol, .g-in ul { margin: 0; padding-left: 22px; }
 .g-in li { margin: 3px 0; }
-.g-in h4 { margin: 4px 0 -4px; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2); font-weight: 400; }
+.g-in h4 { margin: 4px 0 -4px; font-family: var(--f-mono); font-size: 11.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-2); font-weight: 400; }
 .g-in code { font-family: var(--f-mono); font-size: 0.9em; background: var(--paper); padding: 0 4px; border-radius: 3px; }
 .g-table { width: 100%; border-collapse: collapse; font-size: 13.5px; line-height: 1.5; }
 .g-table th, .g-table td { text-align: left; vertical-align: top; padding: 6px 0; border-bottom: 1px solid var(--rule); }
@@ -617,7 +617,7 @@ body.focusing .toast { top: calc(var(--vvt, 0px) + var(--vvh, 100vh) - env(safe-
 }
 /* v17: themes (Pocket pets: original critters on an LCD screen) */
 body[data-skin="pets"] .widget, .lcd, .theme-prev[data-skin="pets"] {
-  --lcd-bg: #C4CCA8; --lcd-ink: #2E3A26; --lcd-ink2: #56654A; --lcd-edge: #9FA985; --lcd-grid: rgba(46, 58, 38, 0.06);
+  --lcd-bg: #C4CCA8; --lcd-ink: #2E3A26; --lcd-ink2: #4A5840; --lcd-edge: #9FA985; --lcd-grid: rgba(46, 58, 38, 0.06);
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) body[data-skin="pets"] .widget, :root:not([data-theme="light"]) .lcd, :root:not([data-theme="light"]) .theme-prev[data-skin="pets"] {
@@ -656,7 +656,7 @@ body[data-skin="pets"] .mini-inv { width: 12px; height: 12px; color: var(--ink);
 .friends { display: none; }
 body[data-skin="pets"] .friends:not([hidden]) {
   display: inline-flex; position: absolute; right: 0; bottom: 0; border: 0; background: none; padding: 2px 4px;
-  font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.1em; color: var(--lcd-ink2);
+  font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.1em; color: var(--lcd-ink2);
 }
 .focus-inv .pet-svg { width: 36px; height: 36px; animation: petHop 1.1s linear infinite; }
 .theme-pick { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; }
@@ -682,7 +682,7 @@ body[data-skin="pets"] .friends:not([hidden]) {
 .symbar { display: flex; gap: 2px; align-items: center; min-width: 0; overflow-x: auto; scrollbar-width: none; flex: 0 1 auto; margin-left: 2px; }
 .symbar::-webkit-scrollbar { display: none; }
 .sym { flex: none; border: 0; background: none; height: 24px; min-width: 26px; padding: 0 6px; border-radius: 5px; display: inline-flex; align-items: center; justify-content: center; gap: 3px; font-family: var(--f-mono); font-size: 12.5px; line-height: 1; color: var(--ink-2); }
-.sym b { font-weight: 500; font-size: 9.5px; color: var(--ink); font-variant-numeric: tabular-nums; }
+.sym b { font-weight: 500; font-size: 11px; color: var(--ink); font-variant-numeric: tabular-nums; }
 .sym.imp { color: var(--red); }
 .sym.edit { font-size: 12px; opacity: 0.75; }
 .sym[aria-pressed="true"] { background: var(--ink); color: var(--sheet); }
@@ -711,7 +711,7 @@ body[data-skin="pets"] .friends:not([hidden]) {
 .cap-step.off span { color: var(--ink-2); text-decoration: line-through; }
 .cap-ctl { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .cap-seg button { padding: 5px 7px; }
-.cap-chip { position: relative; display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 9px; border: 1px solid var(--rule); border-radius: 999px; background: transparent; color: var(--ink-2); font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; cursor: pointer; }
+.cap-chip { position: relative; display: inline-flex; align-items: center; gap: 5px; height: 26px; padding: 0 9px; border: 1px solid var(--rule); border-radius: 999px; background: transparent; color: var(--ink-2); font-family: var(--f-mono); font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap; cursor: pointer; }
 .cap-chip.date { border-style: dashed; }
 .cap-chip.date.on { color: var(--red); border-color: color-mix(in srgb, var(--red) 55%, transparent); }
 .cap-date-in { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; border: 0; padding: 0; margin: 0; cursor: pointer; }
@@ -732,7 +732,7 @@ body[data-skin="pets"] .friends:not([hidden]) {
 .sheet.settings .sheet-body { flex: 1; }
 .set-tabs { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; padding: 0 10px; border-bottom: 1px solid var(--rule); flex: none; }
 .set-tabs::-webkit-scrollbar { display: none; }
-.set-tabs button { flex: none; border: 0; border-bottom: 2px solid transparent; background: none; padding: 11px 8px 9px; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-2); white-space: nowrap; display: inline-flex; gap: 5px; align-items: center; }
+.set-tabs button { flex: none; border: 0; border-bottom: 2px solid transparent; background: none; padding: 11px 8px 9px; font-family: var(--f-mono); font-size: 11.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-2); white-space: nowrap; display: inline-flex; gap: 5px; align-items: center; }
 .set-tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--red); font-weight: 500; }
 .set-tabs .warn { font-style: normal; color: var(--red); font-weight: 700; }
 .set-conns { display: flex; flex-direction: column; border: 1px solid var(--rule); border-radius: 8px; overflow: hidden; }
@@ -762,7 +762,7 @@ body[data-skin="pets"] .friends:not([hidden]) {
 .lab-day { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .lab-day .btn { padding: 6px 13px; font-size: 16px; letter-spacing: 0; }
 .lab-date { font-size: 14.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-.lab-status { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--red); white-space: nowrap; }
+.lab-status { font-family: var(--f-mono); font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--red); white-space: nowrap; }
 .lab-status.ok { color: var(--ink-2); }
 .lab-grow { flex: 1 0 auto; display: flex; flex-direction: column; }
 .lab-grow > textarea { flex: 1 0 auto; }
@@ -785,13 +785,13 @@ textarea.lab-extra { min-height: 64px; height: 64px; font-size: 15px; }
 .obs img, .exp-photos img { display: block; margin-top: 6px; max-width: 170px; max-height: 128px; border-radius: 6px; border: 1px solid var(--rule); object-fit: cover; cursor: zoom-in; }
 .obs img.big, .exp-photos img.big { max-width: 100%; max-height: none; cursor: zoom-out; }
 .obs-del { height: 26px; min-width: 26px; font-size: 16px; }
-.obs-del.armed { color: var(--red); font-size: 10px; }
+.obs-del.armed { color: var(--red); font-size: 11px; }
 .obs-day { margin: 8px 0 0; }
 .obs-add { display: flex; flex-direction: column; gap: 8px; }
 .obs-in { min-height: 56px; font-size: 15px; }
 .exp-photos { display: flex; gap: 10px; flex-wrap: wrap; }
 .exp-photos figure { margin: 0; }
-.exp-photos figcaption { font-family: var(--f-mono); font-size: 10.5px; color: var(--ink-2); margin-top: 3px; }
+.exp-photos figcaption { font-family: var(--f-mono); font-size: 11.5px; color: var(--ink-2); margin-top: 3px; }
 .bench-top { display: flex; align-items: center; gap: 12px; }
 .bench-exp { flex: 1; min-width: 0; font-size: 15px; font-weight: 600; }
 .bench-in { font-size: 18px; min-height: 84px; line-height: 1.45; }
@@ -828,7 +828,7 @@ body.timing.focusing .toast { top: calc(var(--vvt, 0px) + var(--vvh, 100vh) - en
 .lab-pick:last-child { border-bottom: 0; }
 .lab-pick input { accent-color: var(--ink); width: 17px; height: 17px; margin: 0; }
 .lab-pick .lp-t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
-.lab-pick .lp-m { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-2); white-space: nowrap; }
+.lab-pick .lp-m { font-family: var(--f-mono); font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-2); white-space: nowrap; }
 .pick-list.off .lab-pick { background: transparent; }
 .pick-list.off .lp-t { color: var(--ink-2); }
 @media (max-width: 719px) { .lab-pick { grid-template-columns: 18px minmax(0, 1fr); } .lab-pick .lp-m { grid-column: 2; } }
@@ -836,7 +836,7 @@ body.timing.focusing .toast { top: calc(var(--vvt, 0px) + var(--vvh, 100vh) - en
 /* v20: calendar, day sheet, quick actions, faster lists, rarer critters */
 .dayseg-slot { margin-left: auto; display: flex; }
 .dayseg { display: inline-flex; border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; flex: none; }
-.dayseg button { border: 0; background: none; padding: 3px 8px; font-family: var(--f-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2); }
+.dayseg button { border: 0; background: none; padding: 3px 8px; font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink-2); }
 .dayseg button + button { border-left: 1px solid var(--rule); }
 .dayseg button[aria-pressed="true"] { background: var(--ink); color: var(--sheet); }
 .cal { grid-area: cal; overflow: hidden; }
@@ -844,7 +844,7 @@ body.timing.focusing .toast { top: calc(var(--vvt, 0px) + var(--vvh, 100vh) - en
 .cal-head .name { white-space: nowrap; }
 .cal-head .dayseg { margin-left: 4px; }
 .cal-nav { font-size: 18px; height: 26px; min-width: 28px; padding: 0 4px; color: var(--ink); letter-spacing: 0; }
-.cal-wd { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); padding: 5px 8px 0; font-family: var(--f-mono); font-size: 9.5px; color: var(--ink-2); text-align: center; letter-spacing: 0.08em; flex: none; }
+.cal-wd { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); padding: 5px 8px 0; font-family: var(--f-mono); font-size: 11px; color: var(--ink-2); text-align: center; letter-spacing: 0.08em; flex: none; }
 .cal-grid { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); grid-auto-rows: minmax(0, 1fr); gap: 2px; padding: 3px 8px 8px; }
 .cal-day { min-width: 0; min-height: 0; border: 0; border-radius: 6px; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 2px; padding: 3px 0 2px; color: var(--ink); font-family: var(--f-mono); overflow: hidden; }
 .cal-day:hover, .cal-day:focus-visible { background: var(--paper); }
@@ -872,7 +872,7 @@ body.timing.focusing .toast { top: calc(var(--vvt, 0px) + var(--vvh, 100vh) - en
   body.short .work, body .app.capturing .work { grid-template-rows: auto auto minmax(0, 1fr); grid-template-areas: "pad" "tabs" "pane"; }
   .work > .cal { grid-area: cal; display: flex; flex: none; }
   .cal-head { padding: 6px 10px 5px; }
-  .cal-head .name { font-size: 10.5px; }
+  .cal-head .name { font-size: 11.5px; }
   .cal-grid { grid-auto-rows: 40px; flex: none; padding: 2px 8px 6px; }
   .cal.week .cal-grid { grid-auto-rows: 44px; }
   .cal-n { font-size: 14px; line-height: 20px; min-width: 22px; }
@@ -896,7 +896,7 @@ body.timing.focusing .toast { top: calc(var(--vvt, 0px) + var(--vvh, 100vh) - en
 .day-ico { width: 22px; text-align: center; color: var(--ink-2); flex: none; font-family: var(--f-mono); }
 .day-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; border: 0; background: none; padding: 5px 0; text-align: left; font-size: 14.5px; color: var(--ink); }
 .day-txt > span:first-child { overflow-wrap: anywhere; }
-.day-txt .meta { display: flex; gap: 6px; flex-wrap: wrap; font-family: var(--f-mono); font-size: 10.5px; color: var(--ink-2); }
+.day-txt .meta { display: flex; gap: 6px; flex-wrap: wrap; font-family: var(--f-mono); font-size: 11.5px; color: var(--ink-2); }
 .day-lab, .day-plan { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .plan-chip { border: 1px dashed var(--ink-2); border-radius: 999px; background: transparent; padding: 7px 12px; font-size: 13.5px; color: var(--ink); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .q-title { margin: 0; font-size: 16px; font-weight: 600; line-height: 1.4; white-space: pre-wrap; max-height: 5.6em; overflow: hidden; }
@@ -954,7 +954,7 @@ textarea.jr-area { min-height: 66px; font-size: 15px; line-height: 1.5; resize: 
 .short .widget { padding-block: 4px; }
 .short .tile { height: 38px; padding: 4px 8px; flex-direction: row; gap: 6px; flex-basis: 56px; }
 .short .tile .t-idx, .short .tile .t-name { display: none; }
-.short .tile .t-n { position: static; font-size: 10px; }
+.short .tile .t-n { position: static; font-size: 11px; }
 .short .tile .t-mark { font-size: 15px; }
 .short .tile.edit { flex-basis: 44px; }
 .short .app { gap: 8px; padding-top: 6px; }
@@ -980,9 +980,9 @@ textarea.jr-area { min-height: 66px; font-size: 15px; line-height: 1.5; resize: 
   .tab {
     flex: 1; min-width: 0; display: inline-flex; align-items: center; justify-content: center; gap: 5px;
     border: 1px solid var(--rule); border-radius: 6px; background: var(--sheet); color: var(--ink-2);
-    font-family: var(--f-mono); font-size: 10.5px; letter-spacing: 0.1em; padding: 8px 4px; line-height: 1;
+    font-family: var(--f-mono); font-size: 11.5px; letter-spacing: 0.1em; padding: 8px 4px; line-height: 1;
   }
-  .tab small { font-size: 10px; letter-spacing: 0; color: var(--red); }
+  .tab small { font-size: 11px; letter-spacing: 0; color: var(--red); }
   .tab[aria-selected="true"] { background: var(--ink); border-color: var(--ink); color: var(--sheet); }
   .work > .today, .work > .lane[data-b] { grid-area: pane; display: none; contain: none; }
   .app[data-tab="today"] .today,
@@ -1008,6 +1008,75 @@ textarea.jr-area { min-height: 66px; font-size: 15px; line-height: 1.5; resize: 
 .set-row .field-in { flex: 1; min-width: 0; }
 .ok { color: var(--ink); }
 hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 100%; }
+/* ---------- v24: a compact cover screen ---------- */
+@media (max-width: 719px) {
+  .app { gap: 8px; padding-top: 8px; }
+  .widget { padding: 4px 10px 2px; gap: 0; }
+  .widget .wordmark { display: none; }
+  .field { padding: 2px 0 13px; }
+  .inv-grid { max-height: 44px; }
+  body .work { gap: 8px; }
+  /* the banner is one line; tap its text to read all of it */
+  .banner { flex-wrap: nowrap; gap: 2px; padding: 0 2px 0 10px; min-height: 40px; }
+  .banner .b-msg { flex: 1 1 auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; padding: 10px 4px 10px 0; }
+  .banner.open { flex-wrap: wrap; row-gap: 0; }
+  .banner.open .b-msg { white-space: normal; flex-basis: 100%; padding-bottom: 2px; }
+  .banner:not(.open) .b-later { font-size: 0; letter-spacing: 0; min-width: 36px; }
+  .banner:not(.open) .b-later::before { content: "✕"; font-size: 14px; }
+  .banner button { white-space: nowrap; flex: none; }
+  .banner .b-next { margin-left: 0; }
+  .banner.open .b-next { margin-left: auto; }
+  /* the pad is one line until you tap it */
+  .app.pad-idle .pad { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+  .app.pad-idle .pad > .box-head { grid-column: 1 / -1; }
+  .app.pad-idle:not(.tag-on) .pad > .box-head { display: none; }
+  .app.pad-idle .pad textarea { height: 46px; min-height: 46px; overflow: hidden; white-space: nowrap; padding: 12px 4px 12px 12px; background-image: none; }
+  .app.pad-idle .pad textarea::placeholder { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .app.pad-idle .pad-bar { border-top: 0; padding: 0 5px 0 0; gap: 4px; }
+  .app.pad-idle .pad .route, .app.pad-idle #btn-save, .app.pad-idle #btn-pick { display: none; }
+  .app.pad-idle .pad .icon-btn { border-color: transparent; background: transparent; }
+  /* the week strip: the weekday sits beside the date */
+  .cal-head { padding: 2px 6px 2px 10px; }
+  .cal.week .cal-wd { display: none; }
+  .cal.week .cal-grid { grid-auto-rows: 40px; padding: 4px 6px 6px; }
+  .cal.week .cal-day { flex-direction: row; flex-wrap: wrap; justify-content: center; align-content: flex-start; column-gap: 3px; row-gap: 1px; padding: 3px 0 2px; }
+  .cal.week .cal-day::before { content: attr(data-wd); font-size: 11px; line-height: 20px; color: var(--ink-2); }
+  .cal.week .cal-m { flex-basis: 100%; }
+  .tab { padding: 6px 4px; }
+}
+
+/* ---------- v24: easier to read ---------- */
+.lbl { letter-spacing: 0.12em; }
+.list .meta { flex-wrap: wrap; row-gap: 2px; }
+@media (min-width: 720px) and (max-width: 959px) { .w-actions .vl { display: none; } }
+.li.has-act .meta { padding-right: 92px; }
+
+/* ---------- v24: bigger targets for fingers ---------- */
+@media (pointer: coarse) {
+  .ghost { height: 40px; min-width: 40px; }
+  .w-top { min-height: 40px; }
+  .w-actions { gap: 0; }
+  .w-actions .ghost { min-width: 38px; }
+  .gt-stat { min-height: 36px; }
+  .icon-btn { height: 40px; min-width: 40px; }
+  .chip { min-height: 36px; padding-inline: 10px; }
+  .save { min-height: 40px; }
+  .sym { height: 34px; min-width: 34px; }
+  .banner button { min-height: 40px; padding: 0 8px; }
+  .tab { min-height: 40px; }
+  .to-today { padding: 7px 11px; bottom: 4px; }
+  .link-btn { min-height: 36px; }
+  .cal-nav { height: 36px; min-width: 40px; }
+  .dayseg button { padding: 7px 9px; }
+  .check { position: relative; }
+  .check::after { content: ""; position: absolute; inset: -11px; }
+  .cal.week .cal-grid { grid-auto-rows: 42px; }
+}
+@media (pointer: coarse) and (max-width: 469px) { #streak { display: none; } }
+@media (pointer: coarse) and (max-width: 379px) {
+  .w-top { gap: 8px; }
+  .w-actions .ghost { min-width: 34px; }
+}
 </style>
 </head>
 <body>
@@ -1152,7 +1221,7 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
 (() => {
 'use strict';
 
-const APP_VERSION = 'v23';
+const APP_VERSION = 'v24';
 /* ---------- helpers ---------- */
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -2004,6 +2073,7 @@ function render() {
   if (dsl) dsl.replaceChildren(daySeg());
   drawCal();
   pruneRows();
+  syncPadIdle();
 }
 
 function drawField() {
@@ -2157,7 +2227,7 @@ async function loadObs() {
 }
 
 /* ---------- Google Tasks (two-way, through a small Apps Script in your own account) ---------- */
-const BRIDGE = "/* Kura <-> Google Tasks bridge v3. Setup steps are in Kura: Settings > Google Tasks. */\nvar SECRET = '__SECRET__';\nvar VERSION = 3;\n\nfunction doPost(e) {\n  return respond_(e && e.postData ? e.postData.contents : '');\n}\n\nfunction doGet(e) {\n  // Kura falls back to GET (?p=...) when Google turns its POST into a page visit.\n  if (e && e.parameter && e.parameter.p) return respond_(e.parameter.p);\n  return ContentService.createTextOutput('Kura bridge v' + VERSION + ' is running.');\n}\n\nfunction respond_(raw) {\n  var out;\n  try {\n    var req = JSON.parse(raw);\n    if (req.secret !== SECRET) throw new Error('bad_secret');\n    out = handle_(req);\n  } catch (err) {\n    out = { ok: false, version: VERSION, error: String((err && err.message) || err) };\n  }\n  return ContentService.createTextOutput(JSON.stringify(out)).setMimeType(ContentService.MimeType.JSON);\n}\n\nfunction listId_(name) {\n  var lists = Tasks.Tasklists.list({ maxResults: 100 }).items || [];\n  for (var i = 0; i < lists.length; i++) if (lists[i].title === name) return lists[i].id;\n  return Tasks.Tasklists.insert({ title: name }).id;\n}\n\nfunction allTasks_(list) {\n  var seen = {};\n  var token = null;\n  do {\n    var opts = { showCompleted: true, showHidden: true, showDeleted: true, maxResults: 100 };\n    if (token) opts.pageToken = token;\n    var page = Tasks.Tasks.list(list, opts);\n    (page.items || []).forEach(function (t) { seen[t.id] = t; });\n    token = page.nextPageToken;\n  } while (token);\n  return seen;\n}\n\nfunction kuraIdOf_(notes) {\n  var m = /kura:([A-Za-z0-9_-]+)/.exec(notes || '');\n  return m ? m[1] : null;\n}\n\nfunction handle_(req) {\n  var list = listId_(req.list || 'Kura');\n  var seen = allTasks_(list);\n  var byKura = {};\n  Object.keys(seen).forEach(function (id) {\n    var k = kuraIdOf_(seen[id].notes);\n    if (k && !seen[id].deleted) byKura[k] = id;\n  });\n  var created = {};\n  (req.upserts || []).forEach(function (u) {\n    var gid = u.gid || byKura[u.kuraId] || null;\n    var live = gid && seen[gid] && !seen[gid].deleted;\n    var body = { title: u.title, notes: u.notes || '', status: u.completed ? 'completed' : 'needsAction' };\n    if (u.due) body.due = u.due + 'T00:00:00.000Z';\n    try {\n      if (live) {\n        if (!u.due) body.due = null;\n        if (!u.completed) body.completed = null;\n        seen[gid] = Tasks.Tasks.patch(body, list, gid);\n        created[u.kuraId] = { gid: gid };\n      } else if (u.gid) {\n        created[u.kuraId] = { gone: true };\n      } else {\n        var t = Tasks.Tasks.insert(body, list);\n        seen[t.id] = t;\n        created[u.kuraId] = { gid: t.id };\n      }\n    } catch (err) {\n      created[u.kuraId] = { error: String((err && err.message) || err) };\n    }\n  });\n  (req.deletes || []).forEach(function (gid) {\n    try { Tasks.Tasks.remove(list, gid); } catch (err) {}\n    if (seen[gid]) seen[gid].deleted = true;\n  });\n  var tasks = Object.keys(seen).map(function (id) {\n    var t = seen[id];\n    return {\n      id: t.id, title: t.title || '', notes: t.notes || '', due: t.due ? String(t.due).slice(0, 10) : null,\n      completed: t.status === 'completed', deleted: !!t.deleted, parent: t.parent || null,\n    };\n  });\n  var state = {};\n  (req.watch || []).forEach(function (gid) {\n    var t = seen[gid];\n    state[gid] = t && !t.deleted ? { completed: t.status === 'completed' } : { deleted: true };\n  });\n  return { ok: true, version: VERSION, created: created, state: state, tasks: tasks };\n}\n";
+const BRIDGE = "/* Kura <-> Google bridge v4: Google Tasks sync and backups to Google Drive. Setup steps are in Kura: Settings > Google Tasks. */\nvar SECRET = '__SECRET__';\nvar VERSION = 4;\n\nfunction doPost(e) {\n  return respond_(e && e.postData ? e.postData.contents : '');\n}\n\nfunction doGet(e) {\n  // Kura falls back to GET (?p=...) when Google turns its POST into a page visit.\n  if (e && e.parameter && e.parameter.p) return respond_(e.parameter.p);\n  return ContentService.createTextOutput('Kura bridge v' + VERSION + ' is running.');\n}\n\nfunction respond_(raw) {\n  var out;\n  try {\n    var req = JSON.parse(raw);\n    if (req.secret !== SECRET) throw new Error('bad_secret');\n    out = handle_(req);\n  } catch (err) {\n    out = { ok: false, version: VERSION, error: String((err && err.message) || err) };\n  }\n  return ContentService.createTextOutput(JSON.stringify(out)).setMimeType(ContentService.MimeType.JSON);\n}\n\nfunction listId_(name) {\n  var lists = Tasks.Tasklists.list({ maxResults: 100 }).items || [];\n  for (var i = 0; i < lists.length; i++) if (lists[i].title === name) return lists[i].id;\n  return Tasks.Tasklists.insert({ title: name }).id;\n}\n\nfunction allTasks_(list) {\n  var seen = {};\n  var token = null;\n  do {\n    var opts = { showCompleted: true, showHidden: true, showDeleted: true, maxResults: 100 };\n    if (token) opts.pageToken = token;\n    var page = Tasks.Tasks.list(list, opts);\n    (page.items || []).forEach(function (t) { seen[t.id] = t; });\n    token = page.nextPageToken;\n  } while (token);\n  return seen;\n}\n\nfunction kuraIdOf_(notes) {\n  var m = /kura:([A-Za-z0-9_-]+)/.exec(notes || '');\n  return m ? m[1] : null;\n}\n\nfunction handle_(req) {\n  if (req.op) return ops_(req);\n  var list = listId_(req.list || 'Kura');\n  var seen = allTasks_(list);\n  var byKura = {};\n  Object.keys(seen).forEach(function (id) {\n    var k = kuraIdOf_(seen[id].notes);\n    if (k && !seen[id].deleted) byKura[k] = id;\n  });\n  var created = {};\n  (req.upserts || []).forEach(function (u) {\n    var gid = u.gid || byKura[u.kuraId] || null;\n    var live = gid && seen[gid] && !seen[gid].deleted;\n    var body = { title: u.title, notes: u.notes || '', status: u.completed ? 'completed' : 'needsAction' };\n    if (u.due) body.due = u.due + 'T00:00:00.000Z';\n    try {\n      if (live) {\n        if (!u.due) body.due = null;\n        if (!u.completed) body.completed = null;\n        seen[gid] = Tasks.Tasks.patch(body, list, gid);\n        created[u.kuraId] = { gid: gid };\n      } else if (u.gid) {\n        created[u.kuraId] = { gone: true };\n      } else {\n        var t = Tasks.Tasks.insert(body, list);\n        seen[t.id] = t;\n        created[u.kuraId] = { gid: t.id };\n      }\n    } catch (err) {\n      created[u.kuraId] = { error: String((err && err.message) || err) };\n    }\n  });\n  (req.deletes || []).forEach(function (gid) {\n    try { Tasks.Tasks.remove(list, gid); } catch (err) {}\n    if (seen[gid]) seen[gid].deleted = true;\n  });\n  var tasks = Object.keys(seen).map(function (id) {\n    var t = seen[id];\n    return {\n      id: t.id, title: t.title || '', notes: t.notes || '', due: t.due ? String(t.due).slice(0, 10) : null,\n      completed: t.status === 'completed', deleted: !!t.deleted, parent: t.parent || null,\n    };\n  });\n  var state = {};\n  (req.watch || []).forEach(function (gid) {\n    var t = seen[gid];\n    state[gid] = t && !t.deleted ? { completed: t.status === 'completed' } : { deleted: true };\n  });\n  return { ok: true, version: VERSION, created: created, state: state, tasks: tasks };\n}\n\n// ---------- v4: a copy of Kura in your Google Drive (\"Kura backups\" folder) ----------\nvar ROOT_NAME = 'Kura backups';\n\n// Run this once from the editor (pick setupDrive, press Run) so Google asks to allow Drive.\nfunction setupDrive() {\n  var root = root_();\n  Logger.log('Kura can now keep backups in the folder \"' + root.getName() + '\" in your Google Drive.');\n}\n\nfunction root_() {\n  var props = PropertiesService.getScriptProperties();\n  var id = props.getProperty('kuraFolder');\n  if (id) {\n    try { var f = DriveApp.getFolderById(id); if (!f.isTrashed()) return f; } catch (err) {}\n  }\n  var root = folder_(ROOT_NAME, null);\n  props.setProperty('kuraFolder', root.getId());\n  return root;\n}\n\nfunction folder_(name, parent) {\n  var it = parent ? parent.getFoldersByName(name) : DriveApp.getRootFolder().getFoldersByName(name);\n  if (it.hasNext()) return it.next();\n  return parent ? parent.createFolder(name) : DriveApp.createFolder(name);\n}\n\nfunction isBackup_(name) {\n  return /^kura-backup-[\\w-]+\\.json$/.test(name);\n}\n\nfunction ops_(req) {\n  if (req.op === 'hello') return { ok: true, version: VERSION };\n  var root = root_();\n  if (req.op === 'put') return put_(req, root);\n  if (req.op === 'have') {\n    var names = [];\n    var pf = folder_('photos', root).getFiles();\n    while (pf.hasNext()) names.push(pf.next().getName());\n    return { ok: true, version: VERSION, have: names };\n  }\n  if (req.op === 'list') {\n    var out = [];\n    var files = root.getFiles();\n    while (files.hasNext()) {\n      var f = files.next();\n      if (isBackup_(f.getName())) out.push({ id: f.getId(), name: f.getName(), size: f.getSize(), at: f.getLastUpdated().getTime() });\n    }\n    out.sort(function (a, b) { return b.at - a.at; });\n    return { ok: true, version: VERSION, backups: out };\n  }\n  if (req.op === 'get') {\n    var file = DriveApp.getFileById(req.id);\n    var parents = file.getParents();\n    var mine = false;\n    while (parents.hasNext()) if (parents.next().getId() === root.getId()) mine = true;\n    if (!mine || !isBackup_(file.getName())) throw new Error('not_a_kura_backup');\n    return { ok: true, version: VERSION, data: Utilities.base64Encode(Utilities.gzip(file.getBlob()).getBytes()) };\n  }\n  if (req.op === 'photo') {\n    var photos = folder_('photos', root);\n    var exts = ['jpg', 'png', 'webp', 'jpeg'];\n    for (var i = 0; i < exts.length; i++) {\n      var hits = photos.getFilesByName(String(req.name) + '.' + exts[i]);\n      if (hits.hasNext()) {\n        var blob = hits.next().getBlob();\n        return { ok: true, version: VERSION, mime: blob.getContentType(), data: Utilities.base64Encode(blob.getBytes()) };\n      }\n    }\n    throw new Error('photo_not_found');\n  }\n  throw new Error('unknown_op');\n}\n\nfunction put_(req, root) {\n  var data = req.data || '';\n  if (req.parts > 1) {\n    // pieces sent by GET: keep each one for an hour and join them when all have arrived\n    var cache = CacheService.getScriptCache();\n    var pre = 'kp_' + String(req.uid).replace(/[^\\w-]/g, '') + '_';\n    var lock = LockService.getScriptLock();\n    lock.waitLock(30000);\n    try {\n      if (cache.get(pre + 'done')) return { ok: true, version: VERSION, done: false };\n      cache.put(pre + req.part, data, 3600);\n      var keys = [];\n      for (var i = 0; i < req.parts; i++) keys.push(pre + i);\n      var got = cache.getAll(keys);\n      var n = Object.keys(got).length;\n      if (n < req.parts) return { ok: true, version: VERSION, done: false, have: n };\n      data = '';\n      for (var k = 0; k < req.parts; k++) data += got[pre + k];\n      cache.put(pre + 'done', '1', 3600);\n      cache.removeAll(keys);\n    } finally {\n      lock.releaseLock();\n    }\n  }\n  var bytes = Utilities.base64Decode(data);\n  var name = String(req.name || '').replace(/[^\\w.-]/g, '');\n  if (req.kind === 'backup') {\n    if (!isBackup_(name)) throw new Error('bad_name');\n    var json = Utilities.ungzip(Utilities.newBlob(bytes, 'application/x-gzip')).getDataAsString();\n    var old = root.getFilesByName(name);\n    while (old.hasNext()) old.next().setTrashed(true);\n    root.createFile(name, json, 'application/json');\n    prune_(root, Math.max(3, Number(req.keep) || 30));\n    return { ok: true, version: VERSION, done: true };\n  }\n  if (req.kind === 'photo') {\n    var photos = folder_('photos', root);\n    if (!photos.getFilesByName(name).hasNext()) photos.createFile(Utilities.newBlob(bytes, req.mime || 'image/jpeg', name));\n    return { ok: true, version: VERSION, done: true };\n  }\n  throw new Error('unknown_kind');\n}\n\nfunction prune_(root, keep) {\n  var all = [];\n  var files = root.getFiles();\n  while (files.hasNext()) {\n    var f = files.next();\n    if (isBackup_(f.getName())) all.push(f);\n  }\n  all.sort(function (a, b) { return b.getLastUpdated().getTime() - a.getLastUpdated().getTime(); });\n  for (var i = keep; i < all.length; i++) all[i].setTrashed(true);\n}\n";
 let gtSyncing = false, gtAgain = false, gtTimer = null, gtLastPull = 0, gtErrShown = false;
 const gtEligible = it => !!state.gt && !it.example && !it.gtaskGone
   && (!!it.today || !!it.fromGoogle || (!!state.gt.includeMake && it.bucket === 'make'));
@@ -6204,6 +6274,11 @@ function drawNlm() {
 // Block types: p (paragraph), h (small heading), steps (numbered), list (bullets), table ([left, right] rows), note (aside), try ([label, action] buttons)
 const GUIDE = [
   { id: 'new', icon: 'trophy', title: "What's new", blocks: [
+    { h: 'v24' }, { list: [
+      '**A copy in your Google Drive**: once a day Kura saves everything, photos included, to a "Kura backups" folder in your Google Drive through the Google bridge, and keeps the last 30 days. Settings → Backup → **Restore from Drive** brings it back on a new phone. The bridge needs a one-time update: see Settings → Backup.',
+      '**More room for your lists on the cover screen**: the writing box is one line until you tap it (the symbol filters and Save appear then), the banner is one line (tap it to read all of it, ✕ for later), and the week strip is shorter. TODAY now starts about 200 px higher.',
+      '**Easier to read and tap**: small labels are bigger, grey text and red are darker, and buttons, ticks and tabs are bigger targets.',
+    ] },
     { h: 'v23' }, { list: [
       '**Times and reminders**: "go for a run at 6:00pm", "6pm", "18:30" or "at noon" give a task a time. TODAY sorts by time, the calendar and week show it, and you get a reminder (in the app, an Android notification). Settings → Basics → **Task reminders** sets how early.',
       '**The glossary everywhere**: your terms are underlined in lists, the day view, the journal and meetings. Tap one to see its definition and every note that uses it.',
@@ -6603,7 +6678,7 @@ const GUIDE = [
       '⋯ More → Settings → **Google Tasks** tab → **Copy bridge script**.',
       'On a computer, go to script.google.com while signed in to your **personal** Google account → **New project**. Paste the script over everything.',
       'Under **Services**, add **Tasks** (Google Tasks API).',
-      '**Deploy → New deployment → Web app**. Set Execute as: **Me**, Who has access: **Anyone**. Authorise it.',
+      '**Deploy → New deployment → Web app**. Set Execute as: **Me**, Who has access: **Anyone**. Authorise it: Google asks for Google Tasks and Google Drive (Drive holds your daily backups).',
       'Copy the **Web app URL** that ends in **/exec**, paste it into Kura and tap **Save and test**.',
     ] },
     { note: 'If testing fails with 404, the deployment isn\'t open to "Anyone", or it was made with a school or work account that doesn\'t allow that. Edit the deployment (✎ → New version), or make it with your personal Gmail. **Check connections** (Settings → Basics) explains what\'s wrong.' },
@@ -6690,6 +6765,15 @@ const GUIDE = [
   { id: 'backup', icon: 'list', title: 'Backup, updates and installing', blocks: [
     { h: 'Your data' },
     { p: 'In the **Kura Android app**, notes, the notebook, the glossary, projects, experiments, photos and settings are stored inside the app on this phone. In the web version they are stored in Chrome\'s storage for the Kura site. Either way nothing goes to a Kura server; there isn\'t one.' },
+    { h: 'Google Drive copy' },
+    { p: 'Kura can keep a daily copy of everything, photos included, in a **Kura backups** folder in your Google Drive. It goes through the same Google bridge as Google Tasks, so nothing new to sign up for, and it keeps the last 30 days.' },
+    { steps: [
+      'Set up the Google bridge if you haven\'t (see the Google Tasks chapter).',
+      'If your bridge is older than v4: Settings → Google Tasks → **Copy bridge script**, paste it over the old code in Apps Script and save. Pick **setupDrive** in the function menu, press **Run** and allow Google Drive. Then Deploy → Manage deployments → ✎ → Version: **New version** → Deploy. The URL stays the same.',
+      'Settings → Backup → **Back up now** to check it works. After that it runs by itself once a day when you open Kura.',
+      'On a new phone or a fresh install: Settings → Google Tasks → **Copy bridge script**, paste it over the code in your existing Apps Script project and deploy a new version (each install has its own key), then paste the same URL and tap **Save and test**. Then Settings → Backup → **Restore from Drive…** → pick a day → **Import**. Photos follow by themselves.',
+    ] },
+    { h: 'Backup files' },
     { list: ['Settings → Backup → **Export backup** saves one .json file with everything, including photos and settings (not your AI key). **Import backup** adds it back on any phone or in the app.', 'The app also keeps its own saved copy, updated after every change, and a daily copy of your notes in **Documents/Kura** that stays even if the app is removed: after a reinstall, import the newest one. Photos are only in exported backups, so export one now and then too.', 'Web version only: clearing Chrome\'s data for the Kura site can erase your notes. Export first.'] },
     { h: 'Updating' },
     { steps: ['Upload the new index.html and sw.js (and manifest.webmanifest when included) to your GitHub Pages repository.', 'Web version: open Kura, close it, and open it again. Settings shows the new version number.', 'Android app: it picks the new version up from the same website and offers **Update** (see Kura as an Android app).'] },
@@ -6706,7 +6790,8 @@ const GUIDE = [
       ['Kura is missing from the share sheet', 'Chrome refreshes the installed app within about a day. Reinstalling makes it immediate, but export a backup first.'],
       ['The camera photo won\'t open', 'Turn off High efficiency pictures in the Samsung camera settings.'],
       ['The top bar is white', 'Reinstall Kura from Chrome (export a backup first).'],
-      ['Notes vanished after reinstalling', 'Import your latest backup: Settings → Backup → Import backup.'],
+      ['Notes vanished after reinstalling', 'Import your latest backup: Settings → Backup → Import backup, or **Restore from Drive…** if the Drive copy is on.'],
+      ['Drive backup: "needs updating" or "permission"', 'Copy the bridge script again, paste it over the old code, run **setupDrive** once and allow Drive, then deploy a new version (Settings → Backup shows the steps).'],
       ['"The AI service had a problem" or "overloaded"', 'Google\'s servers were busy. Kura already retried and tried other models, so wait a minute and try again. If it keeps happening, Settings → AI → **Save and test** picks and tests current models.'],
       ['Focus timer finished while away', 'It catches up when you open Kura: the minutes are logged and the break starts then.'],
     ] },
@@ -7002,9 +7087,11 @@ function drawCritters() {
 const capPrefs = { preview: true, ai: true };
 async function saveCapPrefs() { if (store.kvSet) await store.kvSet('capture', { ...capPrefs }).catch(() => {}); }
 function syncCapUI() {
-  els.input.placeholder = capPrefs.preview
+  padPhFull = capPrefs.preview
     ? 'Jot it short: "go for a run at 6:00pm", "email Pierre fri". Enter to preview, Enter again to save.'
     : 'Write anything. Enter saves. Start with ! ? [] -> to tag it.';
+  els.input.placeholder = padPhFull;
+  if (typeof syncPadIdle === 'function' && els.app) syncPadIdle();
 }
 const SHORTHAND = [
   [/\bw\/o\b/gi, 'without'],
@@ -7463,12 +7550,12 @@ function bannerMsgs() {
     out.push({ id: 'restore', text: `Kura found its saved copy from ${new Date(d.exportedAt || Date.now()).toLocaleDateString('en-AU', { day: 'numeric', month: 'short' })} with ${(n => n + (n === 1 ? ' note' : ' notes'))(d.items.filter(i => i && !i.example).length)}. Restore it?`,
       act: ['Restore', async () => { state.restoreOffer = null; drawBanner(); const ex = state.items.filter(i => i.example).map(i => i.id); for (const id of ex) await store.remove(id).catch(() => {}); await doImport({ ...d, items: d.items.filter(i => i && !i.example) }); toast('Restored from the saved copy'); }], later: () => { state.restoreOffer = null; }, laterLabel: 'No' });
   }
-  out.push(...v22Msgs());
+  out.push(...v22Msgs(), ...v24Msgs());
   if (bannerMsg) out.push({ id: 'msg', text: bannerMsg });
   if (reviewDue() && !state.reviewDismissed) out.push({ id: 'review', text: 'Weekly review time: tidy loose ends and plan next week.', act: ['Start review', () => openReview()], later: () => { state.reviewDismissed = true; } });
   if (state.seenVersion !== undefined && state.seenVersion !== APP_VERSION) {
     const fresh = !state.seenVersion && !state.items.some(i => !i.example);
-    out.push({ id: 'ver', text: fresh ? 'New to Kura? The user guide shows how everything works.' : `Updated to ${APP_VERSION}: tasks can have a time and a reminder ("go for a run at 6pm"), and your glossary is underlined and used everywhere.`,
+    out.push({ id: 'ver', text: fresh ? 'New to Kura? The user guide shows how everything works.' : `Updated to ${APP_VERSION}: daily backups to Google Drive, more room for your lists, bigger text and buttons.`,
       act: [fresh ? 'Open the guide' : "What's new", () => openGuide(fresh ? 'start' : 'new'), 'banner-guide'], later: () => markSeen(), laterLabel: 'Got it' });
   }
   const missing = [!state.sample && 'a free AI key', !state.obs && 'your Obsidian vault'].filter(Boolean);
@@ -7484,11 +7571,12 @@ function drawBanner() {
   const m = msgs[i];
   els.banner.dataset.msg = m.id;
   els.banner.replaceChildren(...[
-    h('span', { class: 'b-msg', text: m.text }),
+    h('span', { class: 'b-msg', text: m.text, title: m.text, onclick: () => { state.bannerOpen = !state.bannerOpen; els.banner.classList.toggle('open', state.bannerOpen); } }),
     m.act ? h('button', { type: 'button', class: 'b-act', id: m.act[2] || null, onclick: () => m.act[1]() }, m.act[0]) : null,
-    m.later ? h('button', { type: 'button', class: 'b-later', onclick: () => { m.later(); drawBanner(); } }, m.laterLabel || 'Later') : null,
-    msgs.length > 1 ? h('button', { type: 'button', class: 'b-next', id: 'banner-next', 'aria-label': `Next message (${i + 1} of ${msgs.length})`, onclick: () => { state.bannerIdx = i + 1; drawBanner(); } }, `${i + 1}/${msgs.length} ›`) : null,
+    m.later ? h('button', { type: 'button', class: 'b-later', 'aria-label': m.laterLabel || 'Later', onclick: () => { m.later(); state.bannerOpen = false; drawBanner(); } }, m.laterLabel || 'Later') : null,
+    msgs.length > 1 ? h('button', { type: 'button', class: 'b-next', id: 'banner-next', 'aria-label': `Next message (${i + 1} of ${msgs.length})`, onclick: () => { state.bannerIdx = i + 1; state.bannerOpen = false; drawBanner(); } }, `${i + 1}/${msgs.length} ›`) : null,
   ].filter(Boolean));
+  els.banner.classList.toggle('open', !!state.bannerOpen);
   els.banner.hidden = false;
 }
 
@@ -8365,7 +8453,7 @@ function drawCal() {
     const label = parseDay(d).toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long' }) + (d === TODAY ? ', today' : '') + (bits.length ? ': ' + bits.join(', ') : '');
     return h('button', {
       class: 'cal-day' + (!weekMode && monthKey(d) !== mk ? ' other' : '') + (d === TODAY ? ' is-today' : '') + (d < TODAY ? ' past' : '') + (i % 7 >= 5 ? ' we' : ''),
-      type: 'button', 'data-day': d, 'aria-label': label, onclick: () => openDay(d),
+      type: 'button', 'data-day': d, 'data-wd': 'MTWTFSS'[i % 7], 'aria-label': label, onclick: () => openDay(d),
     },
       h('span', { class: 'cal-n', text: String(parseDay(d).getDate()) }),
       h('span', { class: 'cal-m', 'aria-hidden': 'true' },
@@ -9847,6 +9935,211 @@ function remindPicker() {
     h('span', { class: 'muted', text: NATIVE ? 'For tasks with a time, like "go for a run at 6pm". Android shows a notification.' : 'For tasks with a time, like "go for a run at 6pm". Shown while Kura is open.' }));
 }
 
+/* ---------- v24: a compact cover screen — the pad is one line until you tap it ---------- */
+var PAD_PH_SHORT = 'Jot: go for a run at 6:00pm';
+var padPhFull = '';
+function syncPadIdle() {
+  if (!els.app || !els.pad) return;
+  const ae = document.activeElement;
+  const wasIdle = els.app.classList.contains('pad-idle');
+  // only the writing box itself wakes the pad (so a tap on the mic doesn't move it); once awake, anything in it keeps it open
+  const focused = wasIdle ? ae === els.input : !!(ae && ae !== document.body && els.pad.contains(ae));
+  const idle = !isWide() && !focused && !els.input.value.trim() && !state.cap;
+  els.app.classList.toggle('pad-idle', idle);
+  els.app.classList.toggle('tag-on', !!state.tag);
+  const ph = idle ? (PAD_PH_SHORT || padPhFull) : (padPhFull || els.input.placeholder);
+  if (els.input.placeholder !== ph) els.input.placeholder = ph;
+}
+els.pad.addEventListener('focusin', () => syncPadIdle());
+els.pad.addEventListener('focusout', () => setTimeout(syncPadIdle, 120));
+els.input.addEventListener('input', () => { if (els.app.classList.contains('pad-idle')) syncPadIdle(); });
+addEventListener('resize', () => syncPadIdle());
+
+/* ---------- v24: a copy of everything in your Google Drive (through the Google bridge) ---------- */
+const driveCfg = () => ({ on: true, keep: 30, ...(state.drive || {}) });
+async function saveDriveCfg() { if (store.kvSet) await store.kvSet('drive', { ...driveCfg() }).catch(() => {}); }
+const driveMeta = () => state.driveMeta || {};
+async function saveDriveMeta(p) { state.driveMeta = { ...driveMeta(), ...p }; if (store.kvSet) await store.kvSet('driveMeta', state.driveMeta).catch(() => {}); }
+function u8ToB64(u8) { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s); }
+function b64ToU8(b64) { const s = atob(b64); const u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; }
+async function gzipB64(str) {
+  if (typeof CompressionStream === 'undefined') throw { code: 'no_gzip' };
+  const buf = await new Response(new Blob([str]).stream().pipeThrough(new CompressionStream('gzip'))).arrayBuffer();
+  return u8ToB64(new Uint8Array(buf));
+}
+async function gunzipB64(b64) {
+  const buf = await new Response(new Blob([b64ToU8(b64)]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();
+  return new TextDecoder().decode(buf);
+}
+const hasBridge = () => !!(state.gt && state.gt.url);
+function bridgeSeen(j) {
+  const v = (j && j.version) || 0;
+  if (v && v !== (state.gtMeta || {}).bridgeVersion) saveGtMeta({ bridgeVersion: v }).catch(() => {});
+  if (!(v >= 4)) throw { code: 'old_bridge' };
+  return j;
+}
+async function bridgeOp(payload) {
+  if (!hasBridge()) throw { code: 'no_bridge' };
+  return bridgeSeen(await gtCall(state.gt, payload));
+}
+// One POST when Google allows it. When Google only lets Kura in through short GET requests,
+// the file goes up in small pieces, a few at a time, and the bridge joins them.
+async function bridgePut(kind, name, b64, extra = {}) {
+  const cfg = state.gt;
+  const up = uid('u');
+  const one = (c, part, parts, size) => gtCall(c, { op: 'put', kind, name, uid: up, part, parts, data: b64.slice(part * size, (part + 1) * size), ...extra }).then(bridgeSeen);
+  if (!cfg.useGet) {
+    try { return await one(cfg, 0, 1, Math.max(1, b64.length)); }
+    catch (e) { if (!e || (e.code !== 'too_big' && e.code !== 'old_bridge_get')) throw e; }
+  }
+  const size = 4000, parts = Math.max(1, Math.ceil(b64.length / size)), c = { ...cfg, useGet: true };
+  let next = 0, done = null;
+  const worker = async () => { while (next < parts) { const j = await one(c, next++, parts, size); if (j.done) done = j; } };
+  await Promise.all(Array.from({ length: Math.min(4, parts) }, worker));
+  if (!done) throw { code: 'bridge', message: "the upload didn't finish; Kura will try again" };
+  return done;
+}
+function photoIds(d = state) {
+  const ids = new Set();
+  for (const it of d.items || []) if (it && it.photo) ids.add(it.photo);
+  for (const x of d.exps || d.experiments || []) for (const o of (x && x.obs) || []) if (o && o.photo) ids.add(o.photo);
+  return [...ids];
+}
+function driveMsg(e) {
+  if (e && e.code === 'old_bridge') return 'the Google bridge script needs updating for Drive (see Settings → Backup)';
+  if (e && e.code === 'no_bridge') return 'the Google bridge is not set up yet';
+  if (e && e.code === 'no_gzip') return 'this browser is too old for Drive backups';
+  if (e && e.code === 'bridge' && /drive|permission|authori[sz]|access/i.test(e.message || '')) return 'the bridge needs permission for Google Drive: in Apps Script pick setupDrive, press Run and allow Drive';
+  return gtMsg(e);
+}
+let driveBusy = false;
+async function driveBackup(manual) {
+  if (driveBusy) return false;
+  if (!hasBridge()) { if (manual) toast('Set up the Google bridge first: Settings → Google Tasks.'); return false; }
+  driveBusy = true;
+  drawBackupTab();
+  try {
+    await bridgeOp({ op: 'hello' });
+    const data = await backupData(false);
+    data.photosIn = 'drive';
+    const json = JSON.stringify(data);
+    await bridgePut('backup', `kura-backup-${TODAY}.json`, await gzipB64(json), { keep: driveCfg().keep });
+    // photos go up one at a time, once each
+    let sent = 0, left = 0;
+    const ids = photoIds();
+    if (ids.length) {
+      const have = new Set(((await bridgeOp({ op: 'have' })).have || []).map(n => String(n).replace(/\.[a-z0-9]+$/i, '')));
+      const missing = ids.filter(id => !have.has(id));
+      // one request per photo by POST; dozens of small ones by GET, so fewer per run
+      const budget = state.gt.useGet ? (manual ? 8 : 2) : (manual ? 40 : 12);
+      for (const id of missing.slice(0, budget)) {
+        const b = await loadPhoto(id).catch(() => null);
+        if (!b) continue;
+        const ext = /png/.test(b.type) ? 'png' : /webp/.test(b.type) ? 'webp' : 'jpg';
+        await bridgePut('photo', `${id}.${ext}`, u8ToB64(new Uint8Array(await b.arrayBuffer())), { mime: b.type || 'image/jpeg' });
+        sent++;
+      }
+      left = Math.max(0, missing.length - budget);
+    }
+    await saveDriveMeta({ at: Date.now(), day: TODAY, size: json.length, photos: ids.length - left, left, err: '', errAt: 0 });
+    if (manual) toast(`Backed up to Google Drive${sent ? ` with ${sent} new photo${sent === 1 ? '' : 's'}` : ''}${left ? ` · ${left} more photos next time` : ''}`);
+    return true;
+  } catch (e) {
+    const msg = driveMsg(e);
+    await saveDriveMeta({ err: msg, errAt: Date.now() });
+    if (manual) toast("Couldn't back up to Drive: " + msg);
+    return false;
+  } finally {
+    driveBusy = false;
+    drawBackupTab();
+    drawBanner();
+  }
+}
+function driveAuto() {
+  const c = driveCfg(), m = driveMeta();
+  if (!c.on || !hasBridge() || m.day === TODAY || driveBusy || !state.items || !state.items.some(i => !i.example)) return;
+  if (m.errAt && Date.now() - m.errAt < 3 * 3600000) return;
+  clearTimeout(driveAuto.t);
+  driveAuto.t = setTimeout(() => driveBackup(false), 20000);
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && !state.booting) driveAuto(); });
+async function driveRestore(id) {
+  const j = await bridgeOp({ op: 'get', id });
+  const data = JSON.parse(await gunzipB64(j.data));
+  if (!data || !['kura', 'keitan'].includes(data.app) || !Array.isArray(data.items)) throw { code: 'bridge', message: "that file isn't a Kura backup" };
+  return data;
+}
+// after restoring: bring back the photos this phone doesn't have
+async function drivePhotosBack(data) {
+  let got = 0;
+  for (const id of photoIds(data || state)) {
+    if (await loadPhoto(id).catch(() => null)) continue;
+    try {
+      const j = await bridgeOp({ op: 'photo', name: id });
+      const blob = new Blob([b64ToU8(j.data)], { type: j.mime || 'image/jpeg' });
+      if (store.putPhotoAs) await store.putPhotoAs(id, blob); else memPhotos.set(id, blob);
+      got++;
+    } catch (e) {}
+  }
+  if (got) { toast(`${got} photo${got === 1 ? '' : 's'} brought back from Google Drive`); render(); }
+}
+function drawBackupTab() { if (state.sheet && state.sheet.kind === 'settings' && state.sheet.tab === 'backup') drawSettings(); }
+function driveSection() {
+  const s = state.sheet, c = driveCfg(), m = driveMeta(), has = hasBridge();
+  const bv = (state.gtMeta || {}).bridgeVersion || 0;
+  const oldBridge = has && bv > 0 && bv < 4;
+  const on = h('input', { type: 'checkbox', id: 'drive-on' });
+  on.checked = c.on !== false;
+  on.addEventListener('change', async () => { state.drive = { ...driveCfg(), on: on.checked }; await saveDriveCfg(); if (on.checked) driveAuto(); });
+  const failed = m.err && (!m.at || m.errAt > m.at);
+  const status = driveBusy ? 'Backing up to Google Drive…'
+    : failed ? 'Last try failed: ' + m.err
+    : m.at ? `Last copy ${m.day === TODAY ? 'today' : dayName(m.day)} at ${hhmm(m.at)} · ${Math.max(1, Math.round((m.size || 0) / 1024))} KB${m.photos ? ` · ${m.photos} photo${m.photos === 1 ? '' : 's'}` : ''}${m.left ? ` (${m.left} more to go)` : ''}`
+    : 'No copy in Google Drive yet.';
+  const list = s.driveList;
+  return [
+    h('span', { class: 'lbl', text: 'Google Drive copy' }),
+    h('p', { class: 'muted', text: 'Keeps a copy of everything, photos included, in a "Kura backups" folder in your Google Drive, so a lost or broken phone doesn\'t lose your notes. It uses the same Google bridge as Google Tasks, and keeps the last 30 days.' }),
+    !has ? h('div', { class: 'row' },
+      h('button', { class: 'btn primary', type: 'button', id: 'drive-setup', onclick: () => { s.tab = 'tasks'; drawSettings(); } }, 'Set up the Google bridge'),
+      h('span', { class: 'muted', text: 'About 5 minutes, once. The same bridge syncs Google Tasks.' })) : null,
+    has ? h('p', { class: 'muted ' + (failed ? 'err' : 'ok'), id: 'drive-status', text: status }) : null,
+    oldBridge || (failed && /updating|permission/.test(m.err)) ? h('p', { class: 'muted', id: 'drive-update', text: 'Update the bridge once: Settings → Google Tasks → Copy bridge script. In Apps Script, paste it over the old code and save. Pick setupDrive in the function menu, press Run and allow Google Drive (Advanced → Go to project if Google warns you). Then Deploy → Manage deployments → ✎ → Version: New version → Deploy. The URL stays the same.' }) : null,
+    has ? h('label', { class: 'keep', for: 'drive-on' }, on, 'Back up to Drive once a day, when Kura opens') : null,
+    has ? h('div', { class: 'row' },
+      h('button', { class: 'btn primary', type: 'button', id: 'drive-now', disabled: driveBusy, onclick: () => driveBackup(true) }, driveBusy ? 'Backing up…' : 'Back up now'),
+      h('button', { class: 'btn', type: 'button', id: 'drive-restore', onclick: async () => {
+        s.driveList = 'loading';
+        drawSettings();
+        try { s.driveList = await (async () => { const j = await bridgeOp({ op: 'list' }); return j.backups || []; })(); }
+        catch (e) { s.driveList = null; toast("Couldn't list your Drive backups: " + driveMsg(e)); }
+        drawBackupTab();
+      } }, 'Restore from Drive…')) : null,
+    list === 'loading' ? h('p', { class: 'muted', text: 'Looking in Google Drive…' }) : null,
+    Array.isArray(list) ? (list.length ? h('div', { class: 'day-list', id: 'drive-list' }, list.slice(0, 14).map(f => h('div', { class: 'day-row' },
+      h('span', { class: 'day-txt' }, h('span', { text: f.name.replace(/^kura-backup-|\.json$/g, '') }), h('span', { class: 'meta' }, h('span', { class: 'tg', text: `${Math.max(1, Math.round(f.size / 1024))} KB · saved ${hhmm(f.at)}` }))),
+      h('button', { class: 'btn', type: 'button', onclick: async () => {
+        toast('Fetching the backup from Drive…');
+        try { const data = await driveRestore(f.id); s.driveList = null; s.confirmImport = data; drawSettings(); }
+        catch (e) { toast("Couldn't read that backup: " + driveMsg(e)); }
+      } }, 'Restore')))) : h('p', { class: 'muted', text: 'No backups in Google Drive yet.' })) : null,
+    h('hr', { class: 'rule' }),
+  ];
+}
+function v24Msgs() {
+  const out = [];
+  const skip = k => { try { return !!localStorage.getItem(k); } catch (e) { return false; } };
+  const later = k => () => { try { localStorage.setItem(k, TODAY); } catch (e) {} };
+  const real = (state.items || []).filter(i => !i.example).length;
+  const m = driveMeta();
+  if (!hasBridge() && real >= 5 && !skip('kura.driveAsk')) {
+    out.push({ id: 'drive', text: 'Your notes are only on this phone. Keep a daily copy in Google Drive?', act: ['Set up', () => openSettings('backup'), 'banner-drive'], later: later('kura.driveAsk') });
+  } else if (hasBridge() && driveCfg().on && m.err && m.errAt > (m.at || 0) && Date.now() - (m.at || 0) > 3 * 86400000 && !skip('kura.driveErr' + TODAY)) {
+    out.push({ id: 'drive', text: `The Google Drive copy isn't working: ${m.err}.`, act: ['Fix', () => openSettings('backup'), 'banner-drive'], later: () => { try { localStorage.setItem('kura.driveErr' + TODAY, '1'); } catch (e) {} } });
+  }
+  return out;
+}
+
 // v14 wiring
 $('#friends').addEventListener('click', () => openCritters());
 $('#btn-more').addEventListener('click', () => openMore());
@@ -10091,7 +10384,7 @@ function drawSettings() {
           h('li', {}, 'Tap Copy bridge script (or Share it to your Mac).'),
           h('li', {}, 'Go to script.google.com, start a New project, delete what is there and paste the script.'),
           h('li', {}, 'Next to Services, tap +, choose Google Tasks API and Add.'),
-          h('li', {}, 'Deploy → New deployment → type Web app. Execute as: Me. Who has access: Anyone. Deploy, then allow access (choose Advanced → Go to project if Google warns you).'),
+          h('li', {}, 'Deploy → New deployment → type Web app. Execute as: Me. Who has access: Anyone. Deploy, then allow access, including Google Drive for backups (choose Advanced → Go to project if Google warns you).'),
           h('li', {}, 'Copy the Web app URL, paste it below and tap Save and test.')),
     h('div', { class: 'row' },
       h('button', { class: 'btn', id: 'gt-copy', type: 'button', onclick: copyBridge }, 'Copy bridge script'),
@@ -10184,6 +10477,7 @@ function drawSettings() {
     h('hr', { class: 'rule' }),
   ];
   const backupSection = [
+    ...driveSection(),
     h('span', { class: 'lbl', text: 'Backup' }),
     h('p', { class: 'muted', id: 'storage-where', text: NATIVE
       ? `Your ${state.items.length} notes are stored inside the Kura app on this phone, not in Chrome. Kura also keeps its own saved copy, updated a few seconds after every change, and a daily copy in Documents/Kura that stays even if the app is removed.`
@@ -10194,7 +10488,7 @@ function drawSettings() {
       h('button', { class: 'btn', type: 'button', onclick: exportBackup }, 'Export backup'),
       h('button', { class: 'btn', type: 'button', onclick: () => $('#file-import').click() }, 'Import backup')),
     s.confirmImport ? h('div', { class: 'stack' },
-      h('p', { class: 'muted ok', text: `Import ${s.confirmImport.items.length} notes${Object.keys(s.confirmImport.photos || {}).length ? ` and ${Object.keys(s.confirmImport.photos).length} photos` : ''}? Notes with the same ID are replaced; others are kept.` }),
+      h('p', { class: 'muted ok', text: `Import ${s.confirmImport.items.length} notes${Object.keys(s.confirmImport.photos || {}).length ? ` and ${Object.keys(s.confirmImport.photos).length} photos` : ''}? Notes with the same ID are replaced; others are kept.${s.confirmImport.photosIn === 'drive' ? ' Photos follow from Google Drive.' : ''}` }),
       h('div', { class: 'row' },
         h('button', { class: 'btn primary', type: 'button', onclick: () => doImport(s.confirmImport) }, 'Import'),
         h('button', { class: 'btn', type: 'button', onclick: () => { s.confirmImport = null; drawSettings(); } }, 'Cancel'))) : null,
@@ -10309,6 +10603,7 @@ async function doImport(data) {
   if (Array.isArray(data.glossary) && store.putTerm) { for (const g of data.glossary) if (g && typeof g.id === 'string' && g.term && Array.isArray(g.noteIds)) await store.putTerm(g).catch(() => {}); state.glossary = await store.listTerms(); await markGloss(); }
   if (!state.obs && data.obsidian && data.obsidian.vault && store.kvSet) { await store.kvSet('obsidian', { ...DEFAULT_OBS, ...data.obsidian }).catch(() => {}); await loadObs(); }
   if (state.sheet && state.sheet.kind === 'settings') { state.sheet.confirmImport = null; state.sheet.importMsg = `Imported ${n} notes${photosIn ? ` and ${photosIn} photo${photosIn === 1 ? '' : 's'}` : ''}.`; drawSettings(); }
+  if (data.photosIn === 'drive') drivePhotosBack(data);
 }
 
 async function boot() {
@@ -10409,6 +10704,8 @@ async function boot() {
     }
   }
   await loadApi();
+  state.drive = store.kvGet ? ((await store.kvGet('drive').catch(() => null)) || {}) : {};
+  state.driveMeta = store.kvGet ? ((await store.kvGet('driveMeta').catch(() => null)) || {}) : {};
   state.petEpoch = store.kvGet ? ((await store.kvGet('petEpoch').catch(() => '')) || '') : '';
   if (!state.petEpoch) { state.petEpoch = TODAY; if (store.kvSet) store.kvSet('petEpoch', TODAY).catch(() => {}); }
   state.petEpoch2 = store.kvGet ? ((await store.kvGet('petEpoch2').catch(() => '')) || '') : '';
@@ -10421,11 +10718,12 @@ async function boot() {
   state.booting = false;
   render();
   scheduleGtSync(1500);
+  driveAuto();
   drawStreak();
   checkTrophies();
   handleLaunch();
   flushShare();
-  requestAnimationFrame(() => setTimeout(() => { try { if (!state.sheet) els.input.focus({ preventScroll: true }); } catch (e) {} }, 0));
+  requestAnimationFrame(() => setTimeout(() => { try { if (!state.sheet && isWide()) els.input.focus({ preventScroll: true }); } catch (e) {} syncPadIdle(); }, 0));
   if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
   if ('serviceWorker' in navigator && location.protocol !== 'file:' && !NATIVE) {
     const hadController = !!navigator.serviceWorker.controller;
