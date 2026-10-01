@@ -1079,6 +1079,81 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
   .w-top { gap: 8px; }
   .w-actions .ghost { min-width: 34px; }
 }
+
+/* ---------- v25: weekly report ---------- */
+.cal-report { margin-left: 6px; flex: none; }
+.rp { gap: 14px; }
+.rp-totals { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: baseline; }
+.rp-stat { display: inline-flex; align-items: baseline; gap: 6px; }
+.rp-stat b { font-family: var(--f-mono); font-weight: 500; font-size: 22px; color: var(--ink); font-variant-numeric: tabular-nums; }
+.rp-chart { display: flex; flex-direction: column; gap: 6px; }
+.rp-bars { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.rp-bar { display: grid; grid-template-rows: 16px 64px 18px; justify-items: center; align-items: end; gap: 3px; border: 0; background: none; padding: 0; border-radius: 6px; cursor: pointer; color: var(--ink); }
+.rp-bar.on, .rp-bar:focus-visible { background: var(--paper); }
+.rp-n { align-self: end; font-family: var(--f-mono); font-size: 11px; line-height: 1; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.rp-bar.is-today .rp-n, .rp-bar.is-today .rp-wd { color: var(--ink); font-weight: 500; }
+.rp-stack { align-self: end; width: min(26px, 70%); display: flex; flex-direction: column-reverse; gap: 2px; }
+.rp-stack i { display: block; min-height: 3px; background: var(--cc); flex-basis: 0; }
+.rp-stack i:last-child { border-radius: 4px 4px 0 0; }
+.rp-wd { font-family: var(--f-mono); font-size: 11px; line-height: 18px; color: var(--ink-2); border-top: 1px solid var(--rule); width: 100%; text-align: center; }
+.rp-bar.future .rp-wd { opacity: 0.55; }
+.rp-legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-2); }
+.rp-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.rp-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--cc); flex: none; }
+.rp-tip { margin: 0; min-height: 16px; text-transform: none; letter-spacing: 0.04em; }
+.rp-sum { border: 1px solid var(--rule); border-radius: 8px; padding: 10px 12px 12px; background: var(--paper); display: flex; flex-direction: column; gap: 6px; }
+.rp-sum .row { gap: 8px; align-items: center; }
+.rp-sum-txt { margin: 0; font-size: 15px; line-height: 1.55; color: var(--ink); }
+.rp-sum-txt.stale { opacity: 0.55; }
+.rp-sec { display: flex; flex-direction: column; gap: 4px; border-top: 1px solid var(--rule); padding-top: 10px; }
+.rp-sec-head { display: flex; align-items: center; gap: 8px; }
+.rp-sec-head h3 { margin: 0; font-family: var(--f-mono); font-weight: 500; font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink); }
+.rp-sec-head .lbl { margin-left: auto; }
+.rp-day { display: flex; flex-direction: column; gap: 2px; margin-top: 4px; }
+.rp-day > .lbl { margin: 2px 0 0; }
+.rp-row { display: flex; align-items: baseline; gap: 8px; margin: 0; padding: 3px 0; font-size: 14.5px; line-height: 1.45; }
+.rp-tick { color: var(--cc); font-weight: 600; flex: none; width: 12px; }
+.rp-txt { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.rp-proj { flex: none; max-width: 40%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--f-mono); font-size: 11px; letter-spacing: 0.04em; color: var(--ink-2); }
+.rp-meet { margin: 6px 0 0; font-size: 14px; line-height: 1.45; color: var(--ink); }
+.rp-meet .lbl { margin-right: 4px; }
+@media (max-width: 719px) {
+  .cal-head { gap: 4px; }
+  .cal-head .name { letter-spacing: 0.06em; }
+  .cal-toggle, .cal-report { letter-spacing: 0.06em; }
+  .cal-report { margin-left: 2px; }
+}
+@media (pointer: coarse) and (max-width: 719px) { .cal-nav { min-width: 34px; } }
+@media (min-width: 720px) and (max-width: 959px) {
+  .cal-head { gap: 4px; }
+  .cal-head .name { font-size: 0; letter-spacing: 0; }
+  .cal-head .name::after { content: attr(data-short); font-size: 11.5px; letter-spacing: 0.06em; }
+  .cal-report { margin-left: 2px; letter-spacing: 0.06em; }
+  .cal-nav { min-width: 30px; padding: 0 2px; }
+}
+
+/* ---------- v25.1: a roomier calendar on the cover screen ---------- */
+@media (max-width: 719px) {
+  .cal-head { gap: 6px; padding: 2px 6px 2px 4px; }
+  .cal-head .name { letter-spacing: 0.1em; }
+  .cal-title-btn { display: inline-flex; align-items: center; gap: 7px; min-height: 36px; padding: 0 6px; border: 0; border-radius: 6px; background: none; color: var(--ink); cursor: pointer; min-width: 0; }
+  .cal-title-btn:active, .cal-title-btn:focus-visible { background: var(--paper); }
+  .cal-chev { font-size: 10px; line-height: 1; color: var(--ink-2); }
+  .cal-report { margin-left: 0; padding-inline: 6px; letter-spacing: 0.08em; }
+  .cal.week .cal-grid { grid-auto-rows: 50px; padding: 4px 6px 8px; }
+  .cal.week .cal-day { align-content: center; row-gap: 5px; padding: 3px 0; }
+  .cal.week .cal-day::before { margin-right: 1px; }
+  .cal:not(.week) .cal-grid { grid-auto-rows: 48px; }
+  .cal:not(.week) .cal-day { gap: 4px; padding-top: 5px; }
+}
+@media (pointer: coarse) and (max-width: 719px) {
+  .cal.week .cal-grid { grid-auto-rows: 50px; }
+  .cal-nav { min-width: 36px; }
+}
+@media (max-width: 379px) {
+  .cal-head .name { letter-spacing: 0.06em; }
+  .cal-title-btn { gap: 5px; padding: 0 4px; }
+}
 </style>
 </head>
 <body>
@@ -1223,7 +1298,7 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
 (() => {
 'use strict';
 
-const APP_VERSION = 'v24.2';
+const APP_VERSION = 'v25.1';
 /* ---------- helpers ---------- */
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -1901,6 +1976,7 @@ function onItems(list) {
   syncTaskAlarms();
   scheduleGtSync();
   if (state.sheet && state.sheet.kind === 'log') drawLog();
+  if (state.sheet && state.sheet.kind === 'report') drawReport();
   refreshBank();
 }
 function onSettings(d) {
@@ -5147,6 +5223,7 @@ function drawMore() {
     tile('focus', 'timer', 'Focus', f ? fmtClock(focusLeft()) + ' left' : '25 min timer', () => (f ? openFocusView() : openFocusPicker())),
     tile('plan', 'plan', 'Plan my day', state.sample ? 'AI or rules' : 'suggestions', () => openPlan()),
     tile('stats', 'stats', 'Stats', `streak ${streakNow()}`, () => openStats()),
+    tile('report', 'list', 'Report', 'this week so far', () => openReport()),
     tile('trophies', 'trophy', 'Trophies', `${won}/${TROPHIES.length}`, () => openTrophies()),
     tile('journal', 'pen', 'Journal', jrHas(TODAY) ? 'today written ✓' : 'wins · blockers · tomorrow', () => openDesk('journal')),
     tile('meet', 'plan', 'Meetings', nextSeries() ? 'next ' + meetWhen(nextSeries()) : 'agenda · notes · actions', () => openDesk('meet')),
@@ -6276,6 +6353,12 @@ function drawNlm() {
 // Block types: p (paragraph), h (small heading), steps (numbered), list (bullets), table ([left, right] rows), note (aside), try ([label, action] buttons)
 const GUIDE = [
   { id: 'new', icon: 'trophy', title: "What's new", blocks: [
+    { h: 'v25.1' }, { list: [
+      '**A roomier calendar on the cover screen**: more space in the week strip and the month, the dates keep their spacing, and REPORT sits with the arrows. Tap the dates (▾) to open the whole month, and again (▴) to go back to the week.',
+    ] },
+    { h: 'v25' }, { list: [
+      '**Weekly report**: tap **Report** in the calendar\'s header (or ⋯ More → Report) for what you finished so far this week, split into Work, Personal and Fun, with focus time, meetings, a bar per day and a short AI summary. **Share** or **Copy** sends it as text.',
+    ] },
     { h: 'v24.2' }, { list: [
       '**The K U R A logo is back** on the cover screen as a thin line under the critters, so nothing covers it. Tap it to open the Notebook, as before.',
       '**The photo button** (scan a saved photo from your gallery) shows in the folded writing box again, next to the camera and the mic.',
@@ -6354,7 +6437,7 @@ const GUIDE = [
       ['STREAK', 'How many days in a row you have finished at least one task. Tap it for Stats.'],
       ['AI ! · TASKS !', 'Only appear when AI or Google Tasks has a problem. Tap one to see what to fix.'],
       ['Search', 'Filters every list as you type. On the cover screen, tap the magnifier first.'],
-      ['Calendar', 'The month beside TODAY (unfolded), or this week under the pad on the cover screen (**Month ▾** opens the month). Tap a day to open it.'],
+      ['Calendar', 'The month beside TODAY (unfolded), or this week under the pad on the cover screen (tap the dates ▾ to open the month). Tap a day to open it.'],
       ['Notebook', 'Opens the Notebook (Bank, Projects, Glossary, Ask). The K U R A → wordmark does the same.'],
       ['Journal', 'Your daily journal, meetings and timers, in three tabs.'],
       ['Vault + number', 'Appears when notes are waiting to go to Obsidian. Tap it to send them.'],
@@ -6437,7 +6520,7 @@ const GUIDE = [
     { try: [['Done log', 'log']] },
   ] },
   { id: 'calendar', icon: 'cal', title: 'The calendar', blocks: [
-    { p: 'Unfolded, the month sits between the pad and TODAY. On the cover screen, this week sits under the pad; tap **Month ▾** to open the whole month and **Week ▴** to fold it back. Swipe the calendar sideways, or use ‹ ›, to move; **Today** jumps back. It hides while the keyboard is up.' },
+    { p: 'Unfolded, the month sits between the pad and TODAY. On the cover screen, this week sits under the pad; tap the dates (**▾**) to open the whole month and tap them again (**▴**) to fold it back. **Report** shows this week\'s report. Swipe the calendar sideways, or use ‹ ›, to move; **Today** jumps back. It hides while the keyboard is up.' },
     { table: [
       ['Black number', 'Tasks planned for that day'],
       ['Red number', 'Planned tasks that are now overdue'],
@@ -6620,6 +6703,17 @@ const GUIDE = [
     { p: '⋯ More → **Weekly review**. From Friday to Sunday a reminder also appears on the home screen until you finish one.' },
     { steps: ['See the week: tasks done, notebook notes, notes captured and open loops.', '**Overdue**: Today, Next Mon, No date, Done or Drop.', '**Open questions**: Answered, Make a task, or Keep open.', '**Untouched for a month**: Keep, Make a task or Drop. Old DROP notes can all be let go.', '**Next 7 days**: what is coming.', 'Optional: **Summarise my week** (AI) writes wins, open loops and a focus for next week, from your data only.', '**Send to Obsidian** saves it as Kura/Reviews/2026-W40. Tap **Finish review**.'] },
     { try: [['Weekly review', 'review']] },
+  ] },
+  { id: 'report', icon: 'list', title: 'Weekly report', blocks: [
+    { p: 'A quick look at what you finished so far this week (Monday to today), split into **Work**, **Personal** and **Fun**. Tap **Report** in the calendar\'s header on the home screen, or ⋯ More → **Report**.' },
+    { list: [
+      'At the top: tasks done, focus time and meetings this week, with a small bar per day. Tap a bar to see that day\'s split.',
+      'With an AI key, a two or three sentence **summary** written from your finished tasks. It only uses what you ticked off, and updates when you finish more. **Rewrite** asks for a new one.',
+      'Then a section each for Work, Personal and Fun: what you finished, day by day, with the focus time on those tasks. Meetings you held are listed under Work.',
+      'A task\'s category is the one set on the task (or its project). Change it in the task sheet if a task lands in the wrong section.',
+      '**Share** or **Copy** sends the whole report as text, ready for an email or a message to your supervisor.',
+    ] },
+    { try: [['Report', 'report']] },
   ] },
   { id: 'stats', icon: 'stats', title: 'Score, streaks, stats and trophies', blocks: [
     { table: [['Score', '10 points per finished task'], ['Streak', 'Days in a row with at least one finished task. Today counts once you finish something; until then yesterday keeps it alive.'], ['Best streak', 'Your longest run']] },
@@ -6827,6 +6921,7 @@ const GUIDE_ACTIONS = {
   plan: () => openPlan(),
   focus: () => (state.focus ? openFocusView() : openFocusPicker()),
   review: () => openReview(),
+  report: () => openReport(),
   stats: () => openStats(),
   trophies: () => openTrophies(),
   tools: () => openTools(),
@@ -7561,7 +7656,7 @@ function bannerMsgs() {
   if (reviewDue() && !state.reviewDismissed) out.push({ id: 'review', text: 'Weekly review time: tidy loose ends and plan next week.', act: ['Start review', () => openReview()], later: () => { state.reviewDismissed = true; } });
   if (state.seenVersion !== undefined && state.seenVersion !== APP_VERSION) {
     const fresh = !state.seenVersion && !state.items.some(i => !i.example);
-    out.push({ id: 'ver', text: fresh ? 'New to Kura? The user guide shows how everything works.' : `Updated to ${APP_VERSION}: daily backups to Google Drive, more room for your lists, bigger text and buttons.`,
+    out.push({ id: 'ver', text: fresh ? 'New to Kura? The user guide shows how everything works.' : `Updated to ${APP_VERSION}: a weekly report of what you finished, split into Work, Personal and Fun (Report, in the calendar's header).`,
       act: [fresh ? 'Open the guide' : "What's new", () => openGuide(fresh ? 'start' : 'new'), 'banner-guide'], later: () => markSeen(), laterLabel: 'Got it' });
   }
   const missing = [!state.sample && 'a free AI key', !state.obs && 'your Obsidian vault'].filter(Boolean);
@@ -8441,12 +8536,15 @@ function drawCal() {
   el.classList.toggle('week', weekMode);
   const atHome = weekMode ? calWeekStart() === mondayOf(TODAY) : mk === monthKey(TODAY);
   const head = h('div', { class: 'box-head cal-head' },
-    h('span', { class: 'name', id: 'cal-title', text: title.toUpperCase() }),
+    !wide ? h('button', { class: 'cal-title-btn', type: 'button', id: 'cal-toggle', 'aria-expanded': String(!weekMode), 'aria-label': (weekMode ? 'Show the whole month. ' : 'Back to the week strip. ') + title, onclick: () => setCalOpen(weekMode) },
+      h('span', { class: 'name', id: 'cal-title', text: title.toUpperCase() }), h('span', { class: 'cal-chev', 'aria-hidden': 'true', text: weekMode ? '▾' : '▴' })) :
+    h('span', { class: 'name', id: 'cal-title', text: title.toUpperCase(), 'data-short': (weekMode ? title : new Date(+mk.slice(0, 4), +mk.slice(5, 7) - 1, 1).toLocaleDateString('en-AU', { month: 'short', year: 'numeric' })).toUpperCase() }),
     atHome ? null : h('button', { class: 'link-btn', type: 'button', id: 'cal-today', onclick: () => { state.calWeek = null; state.calMonth = null; drawCal(); } }, 'Today'),
     h('span', { class: 'grow' }),
+    atHome || wide ? h('button', { class: 'link-btn cal-report', type: 'button', id: 'cal-report', 'aria-label': "This week's report: what you finished, by Work, Personal and Fun", onclick: () => openReport() }, 'Report') : null,
     h('button', { class: 'ghost cal-nav', type: 'button', id: 'cal-prev', 'aria-label': weekMode ? 'Previous week' : 'Previous month', onclick: () => calShift(-1) }, '‹'),
     h('button', { class: 'ghost cal-nav', type: 'button', id: 'cal-next', 'aria-label': weekMode ? 'Next week' : 'Next month', onclick: () => calShift(1) }, '›'),
-    wide ? null : h('button', { class: 'link-btn plain cal-toggle', type: 'button', id: 'cal-toggle', 'aria-expanded': String(!weekMode), onclick: () => setCalOpen(weekMode) }, weekMode ? 'Month ▾' : 'Week ▴'));
+  );
   const wd = h('div', { class: 'cal-wd', 'aria-hidden': 'true' }, ['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(x => h('span', { text: x })));
   const grid = h('div', { class: 'cal-grid', 'aria-label': title + '. Tap a day to see and plan it.' }, days.map((d, i) => {
     const v = data.get(d);
@@ -10156,6 +10254,176 @@ function v24Msgs() {
     out.push({ id: 'drive', text: `The Google Drive copy isn't working: ${m.err}.`, act: ['Fix', () => openSettings('backup'), 'banner-drive'], later: () => { try { localStorage.setItem('kura.driveErr' + TODAY, '1'); } catch (e) {} } });
   }
   return out;
+}
+
+/* ---------- v25: weekly report — what you finished so far this week, by Work / Personal / Fun ---------- */
+const RP_CATS = ['work', 'personal', 'fun'];
+const rpDay = ds => { const d = parseDay(ds); return `${d.toLocaleDateString('en-AU', { weekday: 'short' })} ${d.getDate()} ${d.toLocaleDateString('en-AU', { month: 'short' })}`; };
+const rpWd = ds => parseDay(ds).toLocaleDateString('en-AU', { weekday: 'short' });
+function focusCat(s) {
+  const it = s.item ? byId(s.item) : null;
+  if (it) return catOf(it);
+  const p = s.proj ? projById(s.proj) : null;
+  return p && CATS.includes(p.cat) ? p.cat : null;
+}
+function reportData() {
+  const wkStart = mondayOf(TODAY), startMs = parseDay(wkStart).getTime();
+  const week = [];
+  for (let i = 0; i < 7; i++) week.push(addDays(wkStart, i));
+  const done = state.items.filter(i => !i.example && i.done && (i.doneAt || 0) >= startMs).sort((a, b) => (a.doneAt || 0) - (b.doneAt || 0));
+  const sec = Object.fromEntries(RP_CATS.map(c => [c, { items: [], focus: 0, byDay: {} }]));
+  for (const it of done) {
+    const x = sec[catOf(it)] || sec.work;
+    const d = dayStr(new Date(it.doneAt));
+    x.items.push(it);
+    (x.byDay[d] = x.byDay[d] || []).push(it);
+  }
+  let focusOther = 0;
+  for (const s of state.focusSessions || []) {
+    if (!s || !s.d || s.d < wkStart || s.d > TODAY) continue;
+    const c = focusCat(s);
+    if (c && sec[c]) sec[c].focus += s.m || 0; else focusOther += s.m || 0;
+  }
+  const meetings = meetData().notes.filter(n => n && n.day >= wkStart && n.day <= TODAY).sort((a, b) => (a.day < b.day ? -1 : a.day > b.day ? 1 : 0));
+  const focus = RP_CATS.reduce((a, c) => a + sec[c].focus, focusOther);
+  return { week: isoWeek(TODAY), wkStart, days: week.filter(d => d <= TODAY), weekDays: week, done, sec, focusOther, focus, meetings };
+}
+const rpRange = d => (d.days.length > 1 ? `${rpDay(d.wkStart)} – ${rpDay(TODAY)}` : `${rpDay(TODAY)}, the first day`);
+const rpSig = d => [d.week, d.done.map(i => i.id + ':' + String(i.text || '').length + ':' + catOf(i)).join(','), d.focus, d.meetings.map(n => n.id).join(',')].join('|');
+const rpMeet = n => `${n.title || 'Meeting'} (${rpWd(n.day)})`;
+function reportPrompt(d) {
+  const field = state.field ? ` The user's field: ${String(state.field).slice(0, 200)}.` : '';
+  const gl = glossFor(d.done.map(i => i.text).join('\n'), 15);
+  const part = c => {
+    const x = d.sec[c];
+    const head = `${CAT_NAME[c].toUpperCase()}: ${x.items.length} done${x.focus ? `, ${fmtMin(x.focus)} of focus` : ''}${c === 'work' && d.meetings.length ? `, meetings: ${d.meetings.map(rpMeet).join(', ')}` : ''}`;
+    const rows = x.items.slice(0, 40).map(i => `- ${rpWd(dayStr(new Date(i.doneAt)))}: ${firstLine(i.text).slice(0, 160)}${projOf(i) ? ' (#' + projOf(i).name + ')' : ''}`);
+    return [head, ...(rows.length ? rows : ['(nothing)'])].join('\n');
+  };
+  return `Write a short summary of what the user has finished so far this week, for their own weekly report.${field}
+Use only the data below. Never invent tasks, results, people or numbers. Write 2 or 3 plain sentences in the past tense: no greeting, headings, lists or emoji. Cover Work first, then Personal and Fun if they have anything. Name the most important things specifically. Keep the user's abbreviations and spellings exactly as written.${gl.length ? "\nThe user's glossary (their own terms):\n" + glossLines(gl) : ''}
+
+Week ${d.week}: ${rpRange(d)}.
+${RP_CATS.map(part).join('\n\n')}
+
+Reply with only JSON: {"summary": "..."}`;
+}
+async function reportSummary(s, force) {
+  if (!state.sample || !s || s.busy) return;
+  const d = reportData();
+  if (!d.done.length && !d.meetings.length) return;
+  const sig = rpSig(d);
+  if (!state.reportAi && store.kvGet) state.reportAi = (await store.kvGet('reportAi').catch(() => null)) || {};
+  const c = state.reportAi || {};
+  if (c.week === d.week && c.text) s.summary = c.text;
+  if (!force && c.sig === sig && c.text) { if (state.sheet === s) drawReport(); return; }
+  s.busy = true;
+  s.err = '';
+  if (state.sheet === s) drawReport();
+  try {
+    const r = await state.sample.json(reportPrompt(d), { modelTier: 'quick' });
+    const text = String((r && r.summary) || '').replace(/\s+/g, ' ').trim().slice(0, 900);
+    if (!text) throw { code: 'empty' };
+    state.reportAi = { week: d.week, sig, text, at: Date.now() };
+    if (store.kvSet) store.kvSet('reportAi', state.reportAi).catch(() => {});
+    s.summary = text;
+    setAiStatus(null);
+  } catch (e) {
+    s.err = e && e.code === 'empty' ? 'The AI sent back nothing. Try again.' : sampleMsg(e);
+  }
+  s.busy = false;
+  if (state.sheet === s) drawReport();
+}
+function openReport() {
+  state.sheet = { kind: 'report', summary: '', busy: false, err: '', tip: null };
+  drawReport();
+  reportSummary(state.sheet);
+}
+// a small stacked bar per weekday: Work at the bottom, then Personal, then Fun
+function reportBars(d, s) {
+  const per = d.weekDays.map(day => {
+    const n = Object.fromEntries(RP_CATS.map(c => [c, (d.sec[c].byDay[day] || []).length]));
+    return { day, n, total: RP_CATS.reduce((a, c) => a + n[c], 0) };
+  });
+  const max = Math.max(1, ...per.map(p => p.total));
+  const say = p => `${rpDay(p.day)}${p.day === TODAY ? ' (today)' : ''}: ${p.total ? RP_CATS.filter(c => p.n[c]).map(c => `${p.n[c]} ${CAT_NAME[c].toLowerCase()}`).join(' · ') : p.day > TODAY ? 'still to come' : 'nothing finished'}`;
+  const tip = h('p', { class: 'rp-tip lbl', id: 'rp-tip', 'aria-live': 'polite', text: s.tip ? say(per.find(p => p.day === s.tip) || per[0]) : 'Tap a day to see its split' });
+  const pick = p => { s.tip = p.day; tip.textContent = say(p); for (const b of bars.children) b.classList.toggle('on', b.dataset.day === p.day); };
+  const bars = h('div', { class: 'rp-bars' }, per.map(p => {
+    const b = h('button', { type: 'button', class: 'rp-bar' + (p.day > TODAY ? ' future' : '') + (p.day === TODAY ? ' is-today' : '') + (s.tip === p.day ? ' on' : ''), 'data-day': p.day, 'aria-label': say(p), onclick: () => pick(p), onmouseenter: () => pick(p), onfocus: () => pick(p) },
+      h('span', { class: 'rp-n', text: p.day > TODAY ? '' : String(p.total) }),
+      h('span', { class: 'rp-stack', 'aria-hidden': 'true' }, RP_CATS.map(c => (p.n[c] ? h('i', { 'data-cat': c, style: `flex-grow:${p.n[c]}` }) : null))),
+      h('span', { class: 'rp-wd', text: rpWd(p.day).slice(0, 1) }));
+    const st = b.querySelector('.rp-stack');
+    st.style.height = (p.total ? Math.max(6, Math.round((64 * p.total) / max)) : 0) + 'px';
+    return b;
+  }));
+  const legend = h('div', { class: 'rp-legend', 'aria-hidden': 'true' }, RP_CATS.map(c => h('span', { 'data-cat': c }, h('i', { class: 'rp-dot' }), CAT_NAME[c])));
+  return h('div', { class: 'rp-chart' }, bars, legend, tip);
+}
+function reportText(s) {
+  const d = reportData();
+  const L = [`Kura weekly report · ${d.week}`, rpRange(d), '',
+    [`${d.done.length} task${d.done.length === 1 ? '' : 's'} done`, d.focus ? `${fmtMin(d.focus)} focus` : '', d.meetings.length ? `${d.meetings.length} meeting${d.meetings.length === 1 ? '' : 's'}` : ''].filter(Boolean).join(' · ')];
+  if (s && s.summary) L.push('', s.summary);
+  for (const c of RP_CATS) {
+    const x = d.sec[c];
+    L.push('', `${CAT_NAME[c].toUpperCase()} · ${x.items.length} done${x.focus ? ` · ${fmtMin(x.focus)} focus` : ''}`);
+    if (!x.items.length) L.push('Nothing finished yet.');
+    for (const day of d.days) if (x.byDay[day]) L.push(day === TODAY ? 'Today' : rpDay(day), ...x.byDay[day].map(i => `✓ ${firstLine(i.text)}`));
+    if (c === 'work' && d.meetings.length) L.push('Meetings: ' + d.meetings.map(rpMeet).join(', '));
+  }
+  if (d.focusOther) L.push('', `Plus ${fmtMin(d.focusOther)} of focus not linked to a task.`);
+  return L.join('\n');
+}
+function drawReport() {
+  const s = state.sheet;
+  if (!s || s.kind !== 'report') return;
+  const d = reportData();
+  const any = d.done.length || d.meetings.length;
+  const stat = (v, l) => h('span', { class: 'rp-stat' }, h('b', { text: String(v) }), h('span', { class: 'lbl', text: l }));
+  const summary = !any ? null
+    : !state.sample ? h('p', { class: 'muted', id: 'rp-noai', text: 'Add an AI key in Settings → AI and a short written summary appears here.' })
+    : h('div', { class: 'rp-sum', id: 'rp-sum' },
+      h('div', { class: 'row' }, h('span', { class: 'lbl', text: 'Summary · written by AI' }), h('span', { class: 'grow' }),
+        s.busy ? h('span', { class: 'lbl', text: s.summary ? 'Updating…' : 'Writing…' })
+          : h('button', { class: 'link-btn plain', type: 'button', id: 'rp-redo', onclick: () => reportSummary(s, true) }, s.summary ? 'Rewrite' : 'Try again')),
+      s.summary ? h('p', { class: 'rp-sum-txt' + (s.busy ? ' stale' : ''), text: s.summary })
+        : s.busy ? h('p', { class: 'muted', text: 'Writing a short summary of your week…' }) : null,
+      s.err ? h('p', { class: 'err', text: "Couldn't write the summary: " + s.err }) : null);
+  const section = c => {
+    const x = d.sec[c];
+    return h('section', { class: 'rp-sec', 'data-cat': c, id: 'rp-' + c },
+      h('div', { class: 'rp-sec-head' }, h('i', { class: 'rp-dot' }), h('h3', { text: CAT_NAME[c] }),
+        h('span', { class: 'lbl', text: `${x.items.length} done${x.focus ? ' · ' + fmtMin(x.focus) + ' focus' : ''}` })),
+      x.items.length ? d.days.filter(day => x.byDay[day]).map(day => h('div', { class: 'rp-day' },
+        h('p', { class: 'lbl', text: day === TODAY ? 'Today' : rpDay(day) }),
+        x.byDay[day].map(it => h('p', { class: 'rp-row' }, h('span', { class: 'rp-tick', 'aria-hidden': 'true', text: '✓' }),
+          h('span', { class: 'rp-txt', text: firstLine(it.text) }),
+          projOf(it) ? h('span', { class: 'rp-proj', text: '#' + projOf(it).name }) : null))))
+        : h('p', { class: 'muted', text: 'Nothing finished yet.' }),
+      c === 'work' && d.meetings.length ? h('p', { class: 'rp-meet' }, h('span', { class: 'lbl', text: 'Meetings' }), ' ' + d.meetings.map(rpMeet).join(', ')) : null);
+  };
+  const body = h('div', { class: 'sheet-body rp' },
+    h('div', { class: 'rp-totals' },
+      stat(d.done.length, d.done.length === 1 ? 'task done' : 'tasks done'),
+      d.focus ? stat(fmtMin(d.focus), 'focus') : null,
+      d.meetings.length ? stat(d.meetings.length, d.meetings.length === 1 ? 'meeting' : 'meetings') : null),
+    reportBars(d, s),
+    !any ? h('p', { class: 'muted', id: 'rp-empty', text: 'Nothing ticked off yet this week. Tasks you tick off show up here, split into Work, Personal and Fun.' }) : null,
+    summary,
+    RP_CATS.map(section),
+    d.focusOther ? h('p', { class: 'muted', text: `Plus ${fmtMin(d.focusOther)} of focus not linked to a task.` }) : null);
+  const foot = h('div', { class: 'sheet-foot' },
+    h('button', { class: 'btn primary', type: 'button', id: 'rp-share', onclick: () => shareOut(`Kura weekly report ${d.week}`, reportText(s)) }, navigator.share ? 'Share' : 'Copy'),
+    navigator.share ? h('button', { class: 'btn', type: 'button', id: 'rp-copy', onclick: async () => { try { await navigator.clipboard.writeText(reportText(s)); toast('Report copied'); } catch (e) { toast("Couldn't copy on this device."); } } }, 'Copy') : null,
+    h('span', { class: 'grow' }),
+    h('button', { class: 'btn', type: 'button', onclick: closeSheet }, 'Done'));
+  const prev = $('.sheet-body', els.sheet);
+  const scroll = prev && prev.classList.contains('rp') ? prev.scrollTop : 0;
+  showSheet(h('div', { class: 'sheet', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Weekly report' },
+    head('REPORT', `${shortDay(d.wkStart)}${d.days.length > 1 ? '–' + shortDay(TODAY) : ''}`.toUpperCase(), 'report'), body, foot));
+  body.scrollTop = scroll;
 }
 
 // v14 wiring
