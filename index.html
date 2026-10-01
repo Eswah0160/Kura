@@ -1077,6 +1077,18 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
   .w-top { gap: 8px; }
   .w-actions .ghost { min-width: 34px; }
 }
+
+/* ---------- v24.1: the K U R A mark, faint behind the critters on the cover screen ---------- */
+.field-mark { display: none; }
+@media (max-width: 719px) {
+  .field { min-height: 38px; }
+  .field-mark {
+    display: flex; justify-content: space-between; align-items: center; position: absolute; inset: 0 2px 4px; z-index: 0; pointer-events: none;
+    font-family: var(--f-mono); font-weight: 300; font-size: 32px; line-height: 1; color: var(--ink); opacity: 0.09; user-select: none;
+  }
+  .field > .inv-grid { position: relative; z-index: 1; }
+  body[data-skin="pets"] .field-mark { color: var(--lcd-ink); opacity: 0.12; }
+}
 </style>
 </head>
 <body>
@@ -1127,6 +1139,7 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
       </div>
     </div>
     <div class="field" id="field">
+      <div class="field-mark" aria-hidden="true"><span>K</span><span>U</span><span>R</span><span>A</span></div>
       <div class="inv-grid" id="inv-grid"></div>
       <span class="cannon" id="cannon" aria-hidden="true"></span>
       <button class="friends" id="friends" type="button" hidden aria-label="Critter Log"></button>
@@ -1221,7 +1234,7 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
 (() => {
 'use strict';
 
-const APP_VERSION = 'v24';
+const APP_VERSION = 'v24.1';
 /* ---------- helpers ---------- */
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -6274,6 +6287,9 @@ function drawNlm() {
 // Block types: p (paragraph), h (small heading), steps (numbered), list (bullets), table ([left, right] rows), note (aside), try ([label, action] buttons)
 const GUIDE = [
   { id: 'new', icon: 'trophy', title: "What's new", blocks: [
+    { h: 'v24.1' }, { list: [
+      '**The K U R A logo is back** on the cover screen, faintly behind the critters, without taking any room from your lists.',
+    ] },
     { h: 'v24' }, { list: [
       '**A copy in your Google Drive**: once a day Kura saves everything, photos included, to a "Kura backups" folder in your Google Drive through the Google bridge, and keeps the last 30 days. Settings → Backup → **Restore from Drive** brings it back on a new phone. The bridge needs a one-time update: see Settings → Backup.',
       '**More room for your lists on the cover screen**: the writing box is one line until you tap it (the symbol filters and Save appear then), the banner is one line (tap it to read all of it, ✕ for later), and the week strip is shorter. TODAY now starts about 200 px higher.',
