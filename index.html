@@ -1012,8 +1012,10 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
 @media (max-width: 719px) {
   .app { gap: 8px; padding-top: 8px; }
   .widget { padding: 4px 10px 2px; gap: 0; }
-  .widget .wordmark { display: none; }
-  .field { padding: 2px 0 13px; }
+  /* the K U R A wordmark: a thin line under the critters, nothing on top of it */
+  .widget .wordmark { font-size: 13px; font-weight: 400; line-height: 1; padding: 4px 2px 2px; opacity: 0.8; }
+  .widget .wordmark .arr { font-size: 1em; }
+  .field { padding: 2px 0 12px; }
   .inv-grid { max-height: 44px; }
   body .work { gap: 8px; }
   /* the banner is one line; tap its text to read all of it */
@@ -1032,9 +1034,9 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
   .app.pad-idle:not(.tag-on) .pad > .box-head { display: none; }
   .app.pad-idle .pad textarea { height: 46px; min-height: 46px; overflow: hidden; white-space: nowrap; padding: 12px 4px 12px 12px; background-image: none; }
   .app.pad-idle .pad textarea::placeholder { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .app.pad-idle .pad-bar { border-top: 0; padding: 0 5px 0 0; gap: 4px; }
-  .app.pad-idle .pad .route, .app.pad-idle #btn-save, .app.pad-idle #btn-pick { display: none; }
-  .app.pad-idle .pad .icon-btn { border-color: transparent; background: transparent; }
+  .app.pad-idle .pad-bar { border-top: 0; padding: 0 4px 0 0; gap: 0; }
+  .app.pad-idle .pad .route, .app.pad-idle #btn-save { display: none; }
+  .app.pad-idle .pad .icon-btn { border-color: transparent; background: transparent; min-width: 38px; padding: 0 5px; }
   /* the week strip: the weekday sits beside the date */
   .cal-head { padding: 2px 6px 2px 10px; }
   .cal.week .cal-wd { display: none; }
@@ -1076,18 +1078,6 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
 @media (pointer: coarse) and (max-width: 379px) {
   .w-top { gap: 8px; }
   .w-actions .ghost { min-width: 34px; }
-}
-
-/* ---------- v24.1: the K U R A mark, faint behind the critters on the cover screen ---------- */
-.field-mark { display: none; }
-@media (max-width: 719px) {
-  .field { min-height: 38px; }
-  .field-mark {
-    display: flex; justify-content: space-between; align-items: center; position: absolute; inset: 0 2px 4px; z-index: 0; pointer-events: none;
-    font-family: var(--f-mono); font-weight: 300; font-size: 32px; line-height: 1; color: var(--ink); opacity: 0.09; user-select: none;
-  }
-  .field > .inv-grid { position: relative; z-index: 1; }
-  body[data-skin="pets"] .field-mark { color: var(--lcd-ink); opacity: 0.12; }
 }
 </style>
 </head>
@@ -1139,7 +1129,6 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
       </div>
     </div>
     <div class="field" id="field">
-      <div class="field-mark" aria-hidden="true"><span>K</span><span>U</span><span>R</span><span>A</span></div>
       <div class="inv-grid" id="inv-grid"></div>
       <span class="cannon" id="cannon" aria-hidden="true"></span>
       <button class="friends" id="friends" type="button" hidden aria-label="Critter Log"></button>
@@ -1234,7 +1223,7 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
 (() => {
 'use strict';
 
-const APP_VERSION = 'v24.1';
+const APP_VERSION = 'v24.2';
 /* ---------- helpers ---------- */
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -6287,8 +6276,9 @@ function drawNlm() {
 // Block types: p (paragraph), h (small heading), steps (numbered), list (bullets), table ([left, right] rows), note (aside), try ([label, action] buttons)
 const GUIDE = [
   { id: 'new', icon: 'trophy', title: "What's new", blocks: [
-    { h: 'v24.1' }, { list: [
-      '**The K U R A logo is back** on the cover screen, faintly behind the critters, without taking any room from your lists.',
+    { h: 'v24.2' }, { list: [
+      '**The K U R A logo is back** on the cover screen as a thin line under the critters, so nothing covers it. Tap it to open the Notebook, as before.',
+      '**The photo button** (scan a saved photo from your gallery) shows in the folded writing box again, next to the camera and the mic.',
     ] },
     { h: 'v24' }, { list: [
       '**A copy in your Google Drive**: once a day Kura saves everything, photos included, to a "Kura backups" folder in your Google Drive through the Google bridge, and keeps the last 30 days. Settings → Backup → **Restore from Drive** brings it back on a new phone. The bridge needs a one-time update: see Settings → Backup.',
@@ -9952,8 +9942,19 @@ function remindPicker() {
 }
 
 /* ---------- v24: a compact cover screen — the pad is one line until you tap it ---------- */
-var PAD_PH_SHORT = 'Jot: go for a run at 6:00pm';
-var padPhFull = '';
+// the folded pad shows the longest tip that fits beside its buttons
+var PAD_PH_SHORTS = ['Jot: go for a run at 6:00pm', 'go for a run at 6:00pm', 'Jot: run at 6:00pm', 'Jot a note'];
+var padPhFull = '', phCtx = null;
+function padPhShort() {
+  const ta = els.input, cs = getComputedStyle(ta);
+  const avail = ta.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 2;
+  if (!(avail > 0)) return PAD_PH_SHORTS[0];
+  try {
+    phCtx = phCtx || document.createElement('canvas').getContext('2d');
+    phCtx.font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+    return PAD_PH_SHORTS.find(t => phCtx.measureText(t).width <= avail) || PAD_PH_SHORTS[PAD_PH_SHORTS.length - 1];
+  } catch (e) { return PAD_PH_SHORTS[0]; }
+}
 function syncPadIdle() {
   if (!els.app || !els.pad) return;
   const ae = document.activeElement;
@@ -9963,13 +9964,14 @@ function syncPadIdle() {
   const idle = !isWide() && !focused && !els.input.value.trim() && !state.cap;
   els.app.classList.toggle('pad-idle', idle);
   els.app.classList.toggle('tag-on', !!state.tag);
-  const ph = idle ? (PAD_PH_SHORT || padPhFull) : (padPhFull || els.input.placeholder);
+  const ph = idle ? padPhShort() : (padPhFull || els.input.placeholder);
   if (els.input.placeholder !== ph) els.input.placeholder = ph;
 }
 els.pad.addEventListener('focusin', () => syncPadIdle());
 els.pad.addEventListener('focusout', () => setTimeout(syncPadIdle, 120));
 els.input.addEventListener('input', () => { if (els.app.classList.contains('pad-idle')) syncPadIdle(); });
 addEventListener('resize', () => syncPadIdle());
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => syncPadIdle()).catch(() => {});
 
 /* ---------- v24: a copy of everything in your Google Drive (through the Google bridge) ---------- */
 const driveCfg = () => ({ on: true, keep: 30, ...(state.drive || {}) });
