@@ -1154,6 +1154,61 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
   .cal-head .name { letter-spacing: 0.06em; }
   .cal-title-btn { gap: 5px; padding: 0 4px; }
 }
+
+/* ---------- v25.2: the unfolded Fold — a roomy month beside TODAY ---------- */
+@media (min-width: 720px) and (max-width: 1099px) {
+  .app { padding-inline: 10px; gap: 8px; }
+  .widget { padding-bottom: 4px; }
+  .widget .wordmark { font-size: 18px; font-weight: 400; padding: 5px 4px 2px; }
+  .field { padding-bottom: 14px; }
+  .inv-grid { max-height: 48px; }
+  .work, .app.capturing .work, body.short .work {
+    gap: 8px;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-rows: auto minmax(0, 1fr) minmax(0, 0.72fr);
+    grid-template-areas: "pad pad pad today today today" "cal cal cal today today today" "drop drop stock stock make make";
+  }
+  /* writing, or the keyboard is up: the pad takes the calendar's place */
+  .app.capturing .work, body.short .work { grid-template-areas: "pad pad pad today today today" "pad pad pad today today today" "drop drop stock stock make make"; grid-template-rows: auto minmax(0, 1fr) minmax(0, 0.72fr); }
+  body.short .work > .cal { display: none; }
+  .app:not(.pad-idle) .work { grid-template-areas: "pad pad pad today today today" "pad pad pad today today today" "drop drop stock stock make make"; }
+  .app:not(.pad-idle) .work > .cal { display: none; }
+  .pad textarea { flex: 1 1 auto; min-height: 66px; }
+  /* the pad, folded to one line until you tap it (as on the cover screen) */
+  .app.pad-idle .pad { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
+  .app.pad-idle .pad > .box-head { grid-column: 1 / -1; }
+  .app.pad-idle:not(.tag-on) .pad > .box-head { display: none; }
+  .app.pad-idle .pad textarea { flex: none; height: 46px; min-height: 46px; overflow: hidden; white-space: nowrap; padding: 12px 4px 12px 12px; background-image: none; }
+  .app.pad-idle .pad-bar { border-top: 0; padding: 0 5px 0 0; gap: 2px; }
+  .app.pad-idle .pad .route, .app.pad-idle #btn-save { display: none; }
+  .app.pad-idle .pad .icon-btn { border-color: transparent; background: transparent; }
+  /* the month: full title, room for each day's markers */
+  .cal-head { gap: 6px; }
+  .cal-head .name { font-size: 11.5px; letter-spacing: 0.1em; }
+  .cal-head .name::after { content: none; }
+  .cal-report { margin-left: 0; letter-spacing: 0.08em; }
+  .cal-nav { min-width: 40px; padding: 0 4px; }
+  .cal-wd { padding: 6px 10px 0; font-size: 11px; }
+  .cal-grid { gap: 3px; padding: 4px 10px 10px; }
+  .cal-day { gap: 2px; padding-top: 3px; }
+  .cal-n { font-size: 14px; line-height: 19px; min-width: 22px; }
+  .m-open { font-size: 10px; line-height: 14px; padding: 0 5px; }
+}
+/* the unfolded Fold held sideways (short screen): less chrome, more month */
+@media (min-width: 720px) and (max-width: 1099px) and (max-height: 800px) {
+  .app { padding-top: 6px; padding-bottom: 8px; gap: 6px; }
+  .widget { padding-top: 4px; gap: 0; }
+  .field { padding: 2px 0 12px; }
+  .inv-grid { gap: 4px 16px; max-height: 40px; }
+  .widget .wordmark { font-size: 15px; padding: 3px 4px 1px; }
+  .banner { padding-block: 3px; min-height: 38px; }
+  .work, .app.capturing .work, body.short .work { grid-template-rows: auto minmax(0, 1fr) minmax(0, 0.6fr); gap: 6px; }
+  .cal-head { padding-block: 0; }
+  .cal-wd { padding-top: 3px; }
+  .cal-grid { gap: 2px; padding: 2px 10px 6px; }
+  .cal-day { gap: 2px; padding-top: 2px; }
+  .cal-n { line-height: 18px; }
+}
 </style>
 </head>
 <body>
@@ -1298,7 +1353,7 @@ hr.rule { border: 0; border-top: 1px solid var(--rule); margin: 4px 0; width: 10
 (() => {
 'use strict';
 
-const APP_VERSION = 'v25.1';
+const APP_VERSION = 'v25.2';
 /* ---------- helpers ---------- */
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -6353,6 +6408,9 @@ function drawNlm() {
 // Block types: p (paragraph), h (small heading), steps (numbered), list (bullets), table ([left, right] rows), note (aside), try ([label, action] buttons)
 const GUIDE = [
   { id: 'new', icon: 'trophy', title: "What's new", blocks: [
+    { h: 'v25.2' }, { list: [
+      '**A roomy calendar on the unfolded screen**: the writing box is one line across the top until you tap it, and the month and TODAY share the space below it half and half, with DROP, STOCK and MAKE underneath. While you write, the box takes the calendar\'s place.',
+    ] },
     { h: 'v25.1' }, { list: [
       '**A roomier calendar on the cover screen**: more space in the week strip and the month, the dates keep their spacing, and REPORT sits with the arrows. Tap the dates (▾) to open the whole month, and again (▴) to go back to the week.',
     ] },
@@ -6520,7 +6578,7 @@ const GUIDE = [
     { try: [['Done log', 'log']] },
   ] },
   { id: 'calendar', icon: 'cal', title: 'The calendar', blocks: [
-    { p: 'Unfolded, the month sits between the pad and TODAY. On the cover screen, this week sits under the pad; tap the dates (**▾**) to open the whole month and tap them again (**▴**) to fold it back. **Report** shows this week\'s report. Swipe the calendar sideways, or use ‹ ›, to move; **Today** jumps back. It hides while the keyboard is up.' },
+    { p: 'Unfolded, the month sits under the writing box, beside TODAY. On the cover screen, this week sits under the pad; tap the dates (**▾**) to open the whole month and tap them again (**▴**) to fold it back. **Report** shows this week\'s report. Swipe the calendar sideways, or use ‹ ›, to move; **Today** jumps back. It hides while the keyboard is up.' },
     { table: [
       ['Black number', 'Tasks planned for that day'],
       ['Red number', 'Planned tasks that are now overdue'],
@@ -10041,7 +10099,7 @@ function remindPicker() {
 
 /* ---------- v24: a compact cover screen — the pad is one line until you tap it ---------- */
 // the folded pad shows the longest tip that fits beside its buttons
-var PAD_PH_SHORTS = ['Jot: go for a run at 6:00pm', 'go for a run at 6:00pm', 'Jot: run at 6:00pm', 'Jot a note'];
+var PAD_PH_SHORTS = ['Jot it short: "go for a run at 6:00pm", "email Pierre fri". Enter to preview.', 'Jot it short: "go for a run at 6:00pm", "email Pierre fri"', 'Jot: go for a run at 6:00pm', 'go for a run at 6:00pm', 'Jot: run at 6:00pm', 'Jot a note'];
 var padPhFull = '', phCtx = null;
 function padPhShort() {
   const ta = els.input, cs = getComputedStyle(ta);
@@ -10059,7 +10117,7 @@ function syncPadIdle() {
   const wasIdle = els.app.classList.contains('pad-idle');
   // only the writing box itself wakes the pad (so a tap on the mic doesn't move it); once awake, anything in it keeps it open
   const focused = wasIdle ? ae === els.input : !!(ae && ae !== document.body && els.pad.contains(ae));
-  const idle = !isWide() && !focused && !els.input.value.trim() && !state.cap;
+  const idle = innerWidth < 1100 && !focused && !els.input.value.trim() && !state.cap;
   els.app.classList.toggle('pad-idle', idle);
   els.app.classList.toggle('tag-on', !!state.tag);
   const ph = idle ? padPhShort() : (padPhFull || els.input.placeholder);
@@ -11009,7 +11067,7 @@ async function boot() {
   checkTrophies();
   handleLaunch();
   flushShare();
-  requestAnimationFrame(() => setTimeout(() => { try { if (!state.sheet && isWide()) els.input.focus({ preventScroll: true }); } catch (e) {} syncPadIdle(); }, 0));
+  requestAnimationFrame(() => setTimeout(() => { try { if (!state.sheet && innerWidth >= 1100) els.input.focus({ preventScroll: true }); } catch (e) {} syncPadIdle(); }, 0));
   if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
   if ('serviceWorker' in navigator && location.protocol !== 'file:' && !NATIVE) {
     const hadController = !!navigator.serviceWorker.controller;

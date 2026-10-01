@@ -1,5 +1,5 @@
 /* Kura service worker: keeps the app working offline. Never touches api.anthropic.com. */
-const CACHE = 'kura-v25.1';
+const CACHE = 'kura-v25.2';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'];
 
 self.addEventListener('install', e => {
